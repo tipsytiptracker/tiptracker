@@ -20,8 +20,17 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="register">Register</string>
+    <string name="login_failed">Login Failed</string>
 
     <!-- Strings related to registration -->
     <string name="register_failed">Registration was unsuccessful.</string>
     <string name="register_success">Registration was successful.</string>
+
+
+    <!-- Strings related to Home -->
+    <string name="current_budget">Current Budget: </string>
+    <string name="manage_budget">Manage Budget</string>
+    <string name="manage_paystubs">Manage Paystubs</string>
+    <string name="manage_goal">Manage Budget Goal</string>
+    <string name="logout">Logout</string>
 </resources>
