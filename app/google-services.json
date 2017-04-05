@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "324564773792",
+    "firebase_url": "https://tiptracker-c5b39.firebaseio.com",
+    "project_id": "tiptracker-c5b39",
+    "storage_bucket": "tiptracker-c5b39.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:324564773792:android:226c59716c6c2ee9",
+        "android_client_info": {
+          "package_name": "com.example.ronjc.tiptracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "324564773792-kvb3kcsd09t6adpthigmnaog3lam9pui.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ronjc.tiptracker",
+            "certificate_hash": "89790de36a007ad6e422e12c2c4413ce09a7ea0a"
+          }
+        },
+        {
+          "client_id": "324564773792-92dncenkbrusdj1u9don48q6tq4amn0m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMCLtMwckdVX0IWiXNUMEZHK3Tc-DGD8U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "324564773792-92dncenkbrusdj1u9don48q6tq4amn0m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
