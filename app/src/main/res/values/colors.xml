@@ -6,6 +6,9 @@
     <color name="colorBackground">#e2e2d8</color>
     <color name="colorButton">#8c9c6d</color>
     <color name="colorBlack">#000000</color>
+    <color name="colorButtonPressed">#cac9c9</color>
     <color name="metroTileColor">#20ae13</color>
+    <color name="metroTileColorPressed">#0c3c08</color>
+    <color name="metroTileColorFocused">#60ab59</color>
     <color name="colorWhite">#ffffff</color>
 </resources>
