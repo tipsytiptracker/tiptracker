@@ -4,12 +4,15 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.android.gms.auth.api.Auth;
@@ -22,11 +25,24 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.w3c.dom.Text;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class HomeActivity extends AppCompatActivity {
 
+
+    @BindView(R.id.mtile_text1)
+    TextView mTileText1;
+    @BindView(R.id.mtile_text2)
+    TextView mTileText2;
+    @BindView(R.id.mtile_text3)
+    TextView mTileText3;
+    @BindView(R.id.mtile_text4)
+    TextView mTileText4;
+    @BindView(R.id.current_budget)
+    TextView mCurrentBudget;
     private RelativeLayout mLogoutTile, mStubTile, mBudgetGoalTile, mManageBudgetTile;
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
@@ -39,8 +55,21 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        ButterKnife.bind(this);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
+        getSupportActionBar().setTitle("");
+
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.FONTAWESOME);
         FontManager.markAsIconContainer(findViewById(R.id.metro_tiles), iconFont);
+
+        String customFont = "fonts/bitter.ttf";
+        Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
+        mTileText1.setTypeface(typeface);
+        mTileText2.setTypeface(typeface);
+        mTileText3.setTypeface(typeface);
+        mTileText4.setTypeface(typeface);
+        mCurrentBudget.setTypeface(typeface);
 
         ButterKnife.bind(this);
 

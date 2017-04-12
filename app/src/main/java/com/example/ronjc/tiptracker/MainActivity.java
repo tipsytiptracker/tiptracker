@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     private ProgressDialog mProgressDialog;
 
-
     //Set references to UI Elements
     @BindView(R.id.ma_email_pass_sign_in_button)
     Button mEmailPasswordSignInButton;
@@ -121,12 +120,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.ma_google_sign_in_button: {
-                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                startActivityForResult(signInIntent, RC_SIGN_IN);
-
+                Intent intent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                startActivityForResult(intent, RC_SIGN_IN);
                 break;
             }
             case R.id.ma_register_button: {
+                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+                startActivity(intent);
                 break;
             }
             case R.id.ma_forgot_password_button: {
@@ -149,9 +149,6 @@ public class MainActivity extends AppCompatActivity {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount account = result.getSignInAccount();
             firebaseAuthWithGoogle(account);
-        } else {
-            // Signed out, show unauthenticated UI.
-
         }
     }
 
@@ -182,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showProgress(final boolean show) {
+    private void showProgress(boolean show) {
         if(show) {
             mProgressDialog.show();
         } else {

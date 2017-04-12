@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
-        android:drawable="@color/metroTileColorPressed"/> <!-- pressed -->
+        android:drawable="@drawable/tiledefault" /> <!-- pressed -->
     <item android:state_focused="true"
-        android:drawable="@color/metroTileColorFocused"/> <!-- focused -->
-    <item android:drawable="@color/metroTileColor"/> <!-- default -->
+        android:drawable="@drawable/tiledefault" /> <!-- focused -->
+    <item android:drawable="@drawable/tiledefault"/> <!-- default -->
 </selector>

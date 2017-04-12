@@ -1,16 +1,13 @@
 package com.example.ronjc.tiptracker;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -22,31 +19,43 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.utils.Validator;
-import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
- * A login screen that offers login via email/password.
+ * Custom login screen that offers login via email/password.
  *
- * @author Ronald Mangiliman
  */
 public class LoginActivity extends AppCompatActivity {
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
+
+    @BindView(R.id.text_input_layout_email)
+    TextInputLayout mTextInputLayoutEmail;
+    @BindView(R.id.text_input_layout_password)
+    TextInputLayout mTextInputLayoutPassword;
+    @BindView(R.id.login_email)
+    AutoCompleteTextView mEmailView;
+    @BindView(R.id.login_password)
+    EditText mPasswordView;
+    @BindView(R.id.login_button)
+    Button mEmailSignInButton;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private Button mRegisterButton, mEmailSignInButton;
     private ProgressDialog mProgressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        ButterKnife.bind(this);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -59,9 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         };
-        // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.login_email);
-        mPasswordView = (EditText) findViewById(R.id.login_password);
+        // Allows login via key event
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -75,31 +82,22 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        mEmailSignInButton = (Button) findViewById(R.id.login_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 String email = mEmailView.getText().toString();
                 String password = mPasswordView.getText().toString();
                 login(email, password);
-//                startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-//                        .setTosUrl(PATH_TOS)
-//                        .build(), RC_SIGN_IN);
             }
         });
-
-        mRegisterButton = (Button) findViewById(R.id.login_register_button);
-        mRegisterButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
-            }
-        });
-
+        //Sets the Font of floating text to Bitter
         String customFont = "fonts/bitter.ttf";
         Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
-        mEmailSignInButton.setTypeface(typeface);
+        mTextInputLayoutEmail.setTypeface(typeface);
+        mTextInputLayoutPassword.setTypeface(typeface);
+        //Sets the Font of everything else to Bitter
+        Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
+        FontManager.markAsIconContainer(findViewById(R.id.login_activity), iconFont);
 
         /*
             Create progress dialog
@@ -125,6 +123,13 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Method that attempts to log user in with account they had previously made through application.
+     * Validates user input, if all checks are passed, logs user in.
+     * Otherwise, displays Snackbar error message.
+     * @param email
+     * @param password
+     */
     private void login(String email, String password) {
         Validator validator = new Validator();
 
@@ -152,8 +157,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
             focusView.requestFocus();
         } else {
 
@@ -174,7 +177,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void showProgress(final boolean show) {
+    private void showProgress(boolean show) {
         if(show) {
             mProgressDialog.show();
         } else {
