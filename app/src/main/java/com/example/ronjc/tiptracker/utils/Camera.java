@@ -14,7 +14,27 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by Alex on 4/11/2017.
+ * Created by Alex on 4/10/2017.
+ * Camera Utility for creating intents to take pictures.
+ * Create an object by calling the constructor and passing
+ * the context.
+ *
+ * Call the takePicture() method to start a camera intent.
+ * Getter methods getUri and getPath can return the Uri
+ * or file path for the most recently created intent.
+ *
+ * In the calling activity create an onActivityResult() method
+ * to get the Uri after the intent is finished, like so:
+ *
+ * @Override
+ * protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+ * super.onActivityResult(requestCode, resultCode, data);
+ * if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+ *       Uri uri = cam.getUri();
+ *       //do whatever you want with uri
+ *   }
+ * }
+ *
  */
 
 public class Camera {
