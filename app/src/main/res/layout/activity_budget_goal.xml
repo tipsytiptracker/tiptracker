@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/metroTileColorPressed"
+    android:id="@+id/budget_goal_activity"
+    android:orientation="vertical"
+    tools:context="com.example.ronjc.tiptracker.BudgetGoalActivity">
+
+
+
+        <TextView
+            android:id="@+id/set_goal_tv"
+            android:textAlignment="center"
+            android:layout_width="match_parent"
+            android:paddingTop="30dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:textSize="25dp"
+            android:text="@string/set_budget"/>
+        <EditText
+            android:id="@+id/set_budget_et"
+            android:paddingTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            />
+        <Button
+            android:id="@+id/change_budget_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/change_budget"/>
+
+
+
+</LinearLayout>

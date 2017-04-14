@@ -43,6 +43,10 @@
     <string name="manage_goal">Manage Budget Goal</string>
     <string name="logout">Logout</string>
 
+    <!-- Strings related to managing budget-->
+    <string name="set_budget">Current Budget</string>
+    <string name="change_budget">Change Budget</string>
+
     <!-- Strings related to Paystubs -->
     <string name="paystubs">Paystubs</string>
     <string name="add_paystub">Add a PayStub Manually</string>

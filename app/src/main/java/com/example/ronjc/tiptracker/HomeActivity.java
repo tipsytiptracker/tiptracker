@@ -21,6 +21,7 @@ import com.example.ronjc.tiptracker.model.PayStub;
 import com.example.ronjc.tiptracker.model.Period;
 import com.example.ronjc.tiptracker.model.User;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.example.ronjc.tiptracker.utils.Utils;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -209,6 +210,8 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 case R.id.metro_tile_3: {
                     mManageBudgetTile.requestFocus();
+                    Intent intent = new Intent(HomeActivity.this,BudgetGoalActivity.class);
+                    startActivity(intent);
                     break;
                 }
                 case R.id.metro_tile_4: {
