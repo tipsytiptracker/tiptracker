@@ -53,7 +53,7 @@
             android:layout_height="0dip"
             android:orientation="horizontal"
             android:layout_weight="1"
-            android:focusableInTouchMode="true">
+            android:focusable="true">
 
             <RelativeLayout
                 android:id="@+id/metro_tile_1"
@@ -65,7 +65,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/metrotile"
-                android:focusableInTouchMode="true">
+                android:focusable="true">
 
                 <TextView
                     android:id="@+id/metro_tile_icon_1"
@@ -99,7 +99,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/metrotile"
-                android:focusableInTouchMode="true">
+                android:focusable="true">
 
                 <TextView
                     android:id="@+id/metro_tile_icon_2"
@@ -139,7 +139,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/metrotile"
-                android:focusableInTouchMode="true">
+                android:focusable="true">
 
                 <TextView
                     android:id="@+id/metro_tile_icon_3"
@@ -173,7 +173,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/metrotile"
-                android:focusableInTouchMode="true">
+                android:focusable="true">
 
                 <TextView
                     android:id="@+id/metro_tile_icon_4"
