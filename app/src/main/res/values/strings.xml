@@ -53,4 +53,7 @@
 
     <!-- Web Client ID for Google Sign In-->
     <string name="web_client_id">324564773792-92dncenkbrusdj1u9don48q6tq4amn0m.apps.googleusercontent.com</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
