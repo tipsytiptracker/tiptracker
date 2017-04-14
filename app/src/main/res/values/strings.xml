@@ -15,13 +15,34 @@
     </string>
     <string name="title_activity_register">Sign in</string>
 
-    <!-- Strings related to login -->
+    <!-- Strings related to login. &#823; represents an ellipse (...) -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
     <string name="register">Register</string>
+    <string name="login_failed">Login Failed</string>
+    <string name="logging_in">Logging you in&#8230;</string>
+    <string name="please_wait">Please wait&#8230;</string>
+    <string name="email_pass">E-Mail/Password</string>
+    <string name="forgot_pass">Forgot Password?</string>
+    <string name="or">Or</string>
+    <string name="connection_failed">Could not connect.</string>
+    <string name="google_sign_in_failed">Google sign in failed.</string>
+    <string name="connecting">Connecting&#8230;</string>
 
     <!-- Strings related to registration -->
     <string name="register_failed">Registration was unsuccessful.</string>
     <string name="register_success">Registration was successful.</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="error_passwords_dont_match">Passwords do not match.</string>
+    <string name="creating_account">Creating account&#8230;</string>
+
+    <!-- Strings related to Home -->
+    <string name="current_budget">Current Budget: </string>
+    <string name="manage_budget">Manage Budget</string>
+    <string name="manage_paystubs">Manage Paystubs</string>
+    <string name="manage_goal">Manage Budget Goal</string>
+    <string name="logout">Logout</string>
+
+    <!-- Web Client ID for Google Sign In-->
+    <string name="web_client_id">324564773792-92dncenkbrusdj1u9don48q6tq4amn0m.apps.googleusercontent.com</string>
 </resources>

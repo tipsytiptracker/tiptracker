@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/home_activity"
+    android:background="@color/metroTileColorPressed"
+    tools:context="com.example.ronjc.tiptracker.HomeActivity">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/metro_tiles"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:orientation="vertical"
+            android:layout_weight="1" >
+
+            <TextView
+                android:id="@+id/current_budget"
+                android:textAlignment="center"
+                android:layout_width="match_parent"
+                android:paddingTop="30dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/metroTileColorPressed"
+                android:textColor="@color/colorWhite"
+                android:textSize="25sp"
+                android:text="@string/current_budget"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#ffffff"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginEnd="15dp"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:focusable="true">
+
+            <RelativeLayout
+                android:id="@+id/metro_tile_1"
+                android:clickable="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/metrotile"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/metro_tile_icon_1"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fa_folder_o"
+                    android:textColor="@drawable/tiletext"
+                    android:textSize="75sp"/>
+                <TextView
+                    android:id="@+id/mtile_text1"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/manage_paystubs"
+                    android:layout_below="@+id/metro_tile_icon_1"
+                    android:textColor="@drawable/tiletext"
+                    />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/metro_tile_2"
+                android:clickable="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="10dp"
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/metrotile"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/metro_tile_icon_2"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fa_calculator"
+                    android:textColor="@drawable/tiletext"
+                    android:textSize="75sp"/>
+                <TextView
+                    android:id="@+id/mtile_text2"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/manage_budget"
+                    android:layout_below="@+id/metro_tile_icon_2"
+                    android:textColor="@drawable/tiletext"/>
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:orientation="horizontal"
+            android:layout_weight="1" >
+
+            <RelativeLayout
+                android:id="@+id/metro_tile_3"
+                android:clickable="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/metrotile"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/metro_tile_icon_3"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fa_money"
+                    android:textColor="@drawable/tiletext"
+                    android:textSize="75sp"/>
+                <TextView
+                    android:id="@+id/mtile_text3"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/manage_goal"
+                    android:layout_below="@+id/metro_tile_icon_3"
+                    android:textColor="@drawable/tiletext"
+                    />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/metro_tile_4"
+                android:clickable="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="10dp"
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/metrotile"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/metro_tile_icon_4"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fa_sign_out"
+                    android:textColor="@drawable/tiletext"
+                    android:textSize="75sp"/>
+                <TextView
+                    android:id="@+id/mtile_text4"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/logout"
+                    android:layout_below="@+id/metro_tile_icon_4"
+                    android:textColor="@drawable/tiletext"
+                    />
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
