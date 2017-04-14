@@ -4,5 +4,7 @@
     <string name="fa_calculator">&#xf1ec;</string>
     <string name="fa_sign_out">&#xf08b;</string>
     <string name="fa_folder_o">&#xf114;</string>
+    <string name="fa_arrow_left">&#xf060;</string>
+    <string name="fa_arrow_right">&#xf061;</string>
     <string name="fa_camera">&#xf030;</string>
 </resources>

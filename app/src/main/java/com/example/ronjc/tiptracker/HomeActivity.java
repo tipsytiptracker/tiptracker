@@ -147,6 +147,8 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 case R.id.metro_tile_2: {
                     mBudgetGoalTile.requestFocus();
+                    Intent intent = new Intent(HomeActivity.this, BudgetManagement.class);
+                    startActivity(intent);
                     break;
                 }
                 case R.id.metro_tile_3: {
