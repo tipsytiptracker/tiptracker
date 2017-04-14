@@ -78,8 +78,7 @@ public class HomeActivity extends AppCompatActivity {
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.FONTAWESOME);
         FontManager.markAsIconContainer(findViewById(R.id.metro_tiles), iconFont);
 
-        String customFont = "fonts/bitter.ttf";
-        Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
+        Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.BITTER);
         mTileText1.setTypeface(typeface);
         mTileText2.setTypeface(typeface);
         mTileText3.setTypeface(typeface);
@@ -142,6 +141,8 @@ public class HomeActivity extends AppCompatActivity {
             switch (view.getId()) {
                 case R.id.metro_tile_1: {
                     mStubTile.requestFocus();
+                    Intent intent = new Intent(HomeActivity.this, PayStubsActivity.class);
+                    startActivity(intent);
                     break;
                 }
                 case R.id.metro_tile_2: {
