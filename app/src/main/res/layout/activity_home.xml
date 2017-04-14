@@ -53,7 +53,7 @@
             android:layout_height="0dip"
             android:orientation="horizontal"
             android:layout_weight="1"
-            android:focusableInTouchMode="true">
+            android:focusable="true">
 
             <RelativeLayout
                 android:id="@+id/metro_tile_1"

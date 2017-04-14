@@ -24,6 +24,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.w3c.dom.Text;
 
@@ -45,6 +46,7 @@ public class HomeActivity extends AppCompatActivity {
     TextView mCurrentBudget;
     private RelativeLayout mLogoutTile, mStubTile, mBudgetGoalTile, mManageBudgetTile;
     private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private GoogleApiClient mGoogleApiClient;
 
     @BindView(R.id.home_activity)
@@ -56,6 +58,19 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         ButterKnife.bind(this);
+
+        //Create Firebase Auth State listener
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser mFirebaseUser = firebaseAuth.getCurrentUser();
+                if(mFirebaseUser == null) {
+                    Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
+            }
+        };
+
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
         getSupportActionBar().setTitle("");
@@ -93,6 +108,20 @@ public class HomeActivity extends AppCompatActivity {
         mManageBudgetTile.setOnClickListener(mTileListener);
         mLogoutTile.setOnClickListener(mTileListener);
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 
     private void logout() {
