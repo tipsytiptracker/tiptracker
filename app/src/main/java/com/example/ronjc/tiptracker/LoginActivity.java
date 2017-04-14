@@ -34,6 +34,7 @@ import butterknife.ButterKnife;
  * Custom login screen that offers login via email/password.
  *
  */
+//Test comments
 public class LoginActivity extends AppCompatActivity {
 
     @BindView(R.id.text_input_layout_email)
