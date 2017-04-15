@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:background="@color/metroTileColorPressed"
+    android:layout_height="match_parent">
+    
+    <TextView
+        android:text="@string/add_paystub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:textColor="@color/colorWhite"
+        android:layout_gravity="center"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:id="@+id/paystub_amount"
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorWhite"
+        android:hint="@string/paystub_amount"
+        android:backgroundTint="@color/colorWhite"
+        android:textCursorDrawable="@drawable/edittextfocus"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/paystub_desc"
+        android:textColorHint="@color/colorWhite"
+        android:textColor="@color/colorWhite"
+        android:hint="@string/paystub_desc"
+        android:textCursorDrawable="@drawable/edittextfocus"
+        android:backgroundTint="@color/colorWhite"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/paystub_submit"
+            android:background="@drawable/button_bg"
+            android:id="@+id/paystub_submit"
+            />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="100dp"
+            android:textColor="@color/colorWhite"
+            android:id="@+id/paystub_addtoIncome"
+            android:buttonTint="@color/colorWhite"
+            android:text="@string/paystub_addtoIncome" />
+    </RelativeLayout>
+</LinearLayout>
