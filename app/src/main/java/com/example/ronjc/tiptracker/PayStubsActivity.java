@@ -1,8 +1,6 @@
 package com.example.ronjc.tiptracker;
 
 import android.graphics.Typeface;
-import android.icu.text.DecimalFormat;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,7 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.ronjc.tiptracker.Model.PayStubFb;
+import com.example.ronjc.tiptracker.model.PayStubFb;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,6 +35,7 @@ public class PayStubsActivity extends AppCompatActivity {
     DatabaseReference myRef;
     FirebaseAuth firebaseAuth;
     FirebaseAuth.AuthStateListener mAuthListener;
+    FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +43,10 @@ public class PayStubsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pay_stubs);
 
         ButterKnife.bind(this);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        myRef = FirebaseDatabase.getInstance().getReference();
+        user  = firebaseAuth.getCurrentUser();
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
@@ -54,6 +57,8 @@ public class PayStubsActivity extends AppCompatActivity {
 
         Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.FONTAWESOME);
         mPictureTile.setTypeface(typeface);
+
+
 
 
 
@@ -90,11 +95,12 @@ public class PayStubsActivity extends AppCompatActivity {
                             final String descrip = desc.getText().toString();
                             Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
 
-                            firebaseAuth = FirebaseAuth.getInstance();
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
-                                    .child(user.getUid()).child("Paystubs");
-                            myRef.setValue(new PayStubFb(value,descrip));
+//                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
+//                                    .child(user.getUid()).child("Paystubs");
+                            PayStubFb payStubFb = new PayStubFb(value, descrip);
+                            myRef.child("users").child(user.getUid()).child("paystubs").setValue(payStubFb);
+//                            Toast.makeText(getApplicationContext(), "" + user.getUid(), Toast.LENGTH_LONG).show();
+//                            myRef.setValue(new PayStubFb(value,descrip));
 
                             dialog.dismiss();
                         }//end else

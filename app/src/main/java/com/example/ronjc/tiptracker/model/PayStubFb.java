@@ -1,4 +1,4 @@
-package com.example.ronjc.tiptracker.Model;
+package com.example.ronjc.tiptracker.model;
 
 /**
  * Created by Arthur on 4/14/2017.
