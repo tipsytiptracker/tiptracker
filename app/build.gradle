@@ -35,16 +35,20 @@ dependencies {
     // FirebaseUI Database only
     compile 'com.firebaseui:firebase-ui-database:1.2.0'
 
-
     compile 'com.google.android.gms:play-services-auth:10.2.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.jakewharton:butterknife:8.5.1'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    compile 'com.github.BlacKCaT27:CurrencyEditText:v1.4.4' //special editText for currency
 }
 
 allprojects {
     repositories {
+
+        maven { url "https://jitpack.io" } //special editText for currency
+
         maven { url 'https://maven.fabric.io/public' }
     }
 }

@@ -35,8 +35,8 @@ public class PayStubsActivity extends AppCompatActivity {
     TextView mPictureTile;
 
     DatabaseReference myRef;
-    FirebaseUser user;
-    FirebaseAuth.AuthStateListener mAuthStateListener;
+    FirebaseAuth firebaseAuth;
+    FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +55,18 @@ public class PayStubsActivity extends AppCompatActivity {
         Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.FONTAWESOME);
         mPictureTile.setTypeface(typeface);
 
-        user =FirebaseAuth.getInstance().getCurrentUser();
-        myRef = FirebaseDatabase.getInstance().getReference(user.toString());
+
 
         mPaystubButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final AlertDialog.Builder mBuilder = new AlertDialog.Builder(PayStubsActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.add_manual_paystub, null);
+
+                Typeface iconFont2 = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
+                FontManager.markAsIconContainer(mView.findViewById(R.id.paystub_amount), iconFont2);
+                FontManager.markAsIconContainer(mView.findViewById(R.id.paystub_desc), iconFont2);
+                FontManager.markAsIconContainer(mView.findViewById(R.id.paystub_title), iconFont2);
 
                 final EditText amount = (EditText)mView.findViewById(R.id.paystub_amount);
                 final EditText desc = (EditText)mView.findViewById(R.id.paystub_desc);
@@ -77,19 +81,23 @@ public class PayStubsActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         if(amount.getText().toString().trim().length() == 0 || desc.getText().toString().trim().length() == 0){
                             //checks if the 2 fields do not have any white space
-                            amount.setError("This Field must not be empty");
+                            amount.setError("You must enter a value!");
                             desc.setError("This Field must not be empty");
                         }
 
                         else{
-                            float val = Float.parseFloat(amount.getText().toString());
-                            DecimalFormat f = new DecimalFormat("##.00"); //round 2 decimal places
-                            final String value = f.format(val);
+                            final String value = amount.getText().toString();
                             final String descrip = desc.getText().toString();
                             Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
-                            myRef.push().setValue(new PayStubFb(value,descrip));
+
+                            firebaseAuth = FirebaseAuth.getInstance();
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
+                                    .child(user.getUid()).child("Paystubs");
+                            myRef.setValue(new PayStubFb(value,descrip));
+
                             dialog.dismiss();
-                        }
+                        }//end else
                     }
                 });
 

@@ -7,6 +7,7 @@
     android:layout_height="match_parent">
     
     <TextView
+        android:id="@+id/paystub_title"
         android:text="@string/add_paystub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,7 +15,8 @@
         android:textColor="@color/colorWhite"
         android:layout_gravity="center"/>
 
-    <EditText
+    <com.blackcat.currencyedittext.CurrencyEditText
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="numberDecimal"
@@ -27,6 +29,7 @@
         />
 
     <EditText
+        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/paystub_desc"
@@ -38,7 +41,8 @@
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp">
 
         <Button
             android:layout_width="wrap_content"
