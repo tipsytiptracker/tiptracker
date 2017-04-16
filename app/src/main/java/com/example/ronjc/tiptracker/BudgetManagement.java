@@ -167,7 +167,6 @@ public class BudgetManagement extends AppCompatActivity {
         sEndDate = simpleDateFormat.format(endDate);
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
     }
-    //TODO: Work with Arthur to get User model up.
     private void writeNewPeriod(long start, long end, ArrayList<Income> income, ArrayList<Expense> expense, double currentBudget, double allIncome, double allExpense) {
         Period mPeriod = new Period(start, end, income, expense, currentBudget, allIncome, allExpense);
         mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").setValue(mPeriod);
