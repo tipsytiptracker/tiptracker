@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.ronjc.tiptracker.model.PayStubFb;
+import com.example.ronjc.tiptracker.model.PayStub;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -91,16 +91,17 @@ public class PayStubsActivity extends AppCompatActivity {
                         }
 
                         else{
-                            final String value = amount.getText().toString();
+                            //excludes the dollar sign from the string
+                            final double value = Double.parseDouble(amount.getText().toString().substring(1));
                             final String descrip = desc.getText().toString();
                             Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
 
 //                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
 //                                    .child(user.getUid()).child("Paystubs");
-                            PayStubFb payStubFb = new PayStubFb(value, descrip);
-                            myRef.child("users").child(user.getUid()).child("paystubs").setValue(payStubFb);
+                            PayStub payStub = new PayStub(value, descrip);
+                            myRef.child("users").child(user.getUid()).child("paystubs").push().setValue(payStub);
 //                            Toast.makeText(getApplicationContext(), "" + user.getUid(), Toast.LENGTH_LONG).show();
-//                            myRef.setValue(new PayStubFb(value,descrip));
+//                            myRef.setValue(new PayStub(value,descrip));
 
                             dialog.dismiss();
                         }//end else
