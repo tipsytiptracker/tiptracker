@@ -31,8 +31,8 @@ public class BudgetPageAdapter extends FragmentPagerAdapter{
     public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period) {
         super(fragmentManager);
         this.context = context;
-        this.startDate = period.getStartDate();
-        this.endDate = period.getEndDate();
+        this.startDate = new Date(period.getStartDate());
+        this.endDate = new Date(period.getEndDate());
         this.expenses = period.getExpenses();
         this.incomes = period.getIncomes();
     }

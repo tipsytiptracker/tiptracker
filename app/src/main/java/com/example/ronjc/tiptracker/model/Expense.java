@@ -11,15 +11,18 @@ import java.util.Date;
 public class Expense implements Serializable{
     private String id;
     private String name;
-    private BigDecimal amount;
-    private Date date;
+    private double amount;
+    private long date;
     private String category;
 
     public Expense() {}
 
-    public Expense(String id, String name, BigDecimal amount, Date date, String category) {
+    public Expense(String id, String name, double amount, long date, String category) {
         this.id = id;
         this.name = name;
+        BigDecimal bigDecimal = new BigDecimal(amount);
+        bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
+        amount = bigDecimal.doubleValue();
         this.amount = amount;
         this.date = date;
         this.category = category;
@@ -33,11 +36,11 @@ public class Expense implements Serializable{
         return name;
     }
 
-    public BigDecimal getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public Date getDate() {
+    public long getDate() {
         return date;
     }
 

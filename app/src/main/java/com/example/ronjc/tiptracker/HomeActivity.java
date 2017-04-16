@@ -13,7 +13,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.ronjc.tiptracker.model.Expense;
+import com.example.ronjc.tiptracker.model.Income;
+import com.example.ronjc.tiptracker.model.PayStub;
+import com.example.ronjc.tiptracker.model.Period;
+import com.example.ronjc.tiptracker.model.User;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -25,8 +31,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,6 +61,8 @@ public class HomeActivity extends AppCompatActivity {
     private RelativeLayout mLogoutTile, mStubTile, mBudgetGoalTile, mManageBudgetTile;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseUser mFirebaseUser;
+    private DatabaseReference mDatabaseReference;
     private GoogleApiClient mGoogleApiClient;
 
     @BindView(R.id.home_activity)
@@ -58,15 +74,34 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         ButterKnife.bind(this);
-
         //Create Firebase Auth State listener
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser mFirebaseUser = firebaseAuth.getCurrentUser();
+                mFirebaseUser = firebaseAuth.getCurrentUser();
                 if(mFirebaseUser == null) {
                     Intent intent = new Intent(HomeActivity.this, MainActivity.class);
                     startActivity(intent);
+                } else {
+                    Toast.makeText(getApplicationContext(), "" + mFirebaseUser.getEmail(), Toast.LENGTH_LONG).show();
+                    mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    mDatabaseReference.child("users").child(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(!dataSnapshot.exists()) {
+                                User user = new User(mFirebaseUser.getEmail(), new ArrayList<PayStub>(), new ArrayList<Period>(),
+                                        new ArrayList<Income>(), new ArrayList<Expense>(), new ArrayList<Income>(), new ArrayList<Expense>(),
+                                        0.00);
+                                mDatabaseReference.child("users").child(mFirebaseUser.getUid()).setValue(user);
+
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             }
         };

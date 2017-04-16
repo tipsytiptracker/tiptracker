@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
@@ -25,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -70,26 +72,28 @@ public class BudgetManagement extends AppCompatActivity {
          */
 
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
-        Income income1 = new Income("01", "Paycheck", new BigDecimal(2000.00), new Date(1492299999123L), "Salary");
-        Income income2 = new Income("02", "Money from Mom", new BigDecimal(50.00), new Date(1492295342323L), "Gifts");
-        Income income3 = new Income("03", "Money found on sidewalk", new BigDecimal(20.00), new Date(1492295342123L), "Misc.");
+        Income income1 = new Income("01", "Paycheck", 2000.00, 1492299999123L, "Salary");
+        Income income2 = new Income("02", "Money from Mom", 50.00, 1492295342323L, "Gifts");
+        Income income3 = new Income("03", "Money found on sidewalk", 20.00, 1492295342123L, "Misc.");
         ArrayList<Income> incomeList = new ArrayList<Income>();
         incomeList.add(income1);
         incomeList.add(income2);
         incomeList.add(income3);
-        Expense expense1 = new Expense("01", "Rent", new BigDecimal(850.00), new Date(1492299999123L), "Rent");
-        Expense expense2 = new Expense("02", "Bagels", new BigDecimal(5.00), new Date(1492299999123L), "Grocery");
-        Expense expense3 = new Expense("03", "Eggs", new BigDecimal(2.99), new Date(1492299999123L), "Grocery");
-        Expense expense4 = new Expense("04", "Cheese", new BigDecimal(1.99), new Date(1492299999123L), "Grocery");
-        Expense expense5 = new Expense("05", "Coffee", new BigDecimal(1.99), new Date(1492299999123L), "Coffee");
+        Expense expense1 = new Expense("01", "Rent", 850.00, 1492299999123L, "Rent");
+        Expense expense2 = new Expense("02", "Bagels", 5.00, 1492299999123L, "Grocery");
+        Expense expense3 = new Expense("03", "Eggs", 2.99, 1492299999123L, "Grocery");
+        Expense expense4 = new Expense("04", "Cheese", 1.99, 1492299999123L, "Grocery");
+        Expense expense5 = new Expense("05", "Coffee", 1.99, 1492299999123L, "Coffee");
         ArrayList<Expense> expenseList = new ArrayList<Expense>();
         expenseList.add(expense1);
         expenseList.add(expense2);
         expenseList.add(expense3);
         expenseList.add(expense4);
         expenseList.add(expense5);
+        double totalIncome = calculateTotalIncome(incomeList);
+        double totalExpense = calculateTotalExpense(expenseList);
 
-        Period period = new Period(startDate, endDate, incomeList, expenseList, new BigDecimal(500.00));
+        Period period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
         mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period));
         mTabLayout.setupWithViewPager(mViewPager);
 
@@ -113,6 +117,8 @@ public class BudgetManagement extends AppCompatActivity {
                 goToLastWeek();
             }
         });
+
+        Toast.makeText(this, "Total Income: " + totalIncome + "Total Expenses: " + totalExpense, Toast.LENGTH_LONG).show();
     }
 
     private void calculateStartAndEndDate() {
@@ -162,8 +168,32 @@ public class BudgetManagement extends AppCompatActivity {
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
     }
     //TODO: Work with Arthur to get User model up.
-    private void writeNewPeriod(Date start, Date end, ArrayList<Income> income, ArrayList<Expense> expense, BigDecimal currentBudget) {
-        Period mPeriod = new Period(start, end, income, expense, currentBudget);
+    private void writeNewPeriod(long start, long end, ArrayList<Income> income, ArrayList<Expense> expense, double currentBudget, double allIncome, double allExpense) {
+        Period mPeriod = new Period(start, end, income, expense, currentBudget, allIncome, allExpense);
         mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").setValue(mPeriod);
+    }
+
+    private double calculateTotalIncome(List<Income> incomes) {
+        BigDecimal total = new BigDecimal(0.00);
+        total = total.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal;
+        for (Income income : incomes) {
+            bigDecimal = new BigDecimal(income.getAmount());
+            bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
+            total = total.add(bigDecimal);
+        }
+        return total.doubleValue();
+    }
+
+    private double calculateTotalExpense(List<Expense> expenses) {
+        BigDecimal total = new BigDecimal(0.00);
+        total = total.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal;
+        for (Expense expense : expenses) {
+            bigDecimal = new BigDecimal(expense.getAmount());
+            bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
+            total = total.add(bigDecimal);
+        }
+        return total.doubleValue();
     }
 }

@@ -19,6 +19,7 @@ import com.example.ronjc.tiptracker.utils.FontManager;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,6 +113,7 @@ public class BudgetFragment extends Fragment {
         headerList = new ArrayList<String>();
         childList = new HashMap<String, List<String>>();
         ArrayList<ArrayList<String>> listOfLists = new ArrayList<ArrayList<String>>();
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
         if (list.size() != 0) {
             if(list.get(0) instanceof Income) {
@@ -121,12 +123,12 @@ public class BudgetFragment extends Fragment {
                     if(!headerList.contains(income.getCategory())) {
                         headerList.add(income.getCategory());
                         ArrayList<String> incomeList = new ArrayList<String>();
-                        stringToAdd = income.getName() + ": $" + income.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
+                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
                         incomeList.add(stringToAdd);
                         listOfLists.add(incomeList);
                     } else {
                         int index = headerList.indexOf(income.getCategory());
-                        stringToAdd = income.getName() + ": $" + income.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
+                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
                         listOfLists.get(index).add(stringToAdd);
                     }
                 }
@@ -137,12 +139,12 @@ public class BudgetFragment extends Fragment {
                     if(!headerList.contains(expense.getCategory())) {
                         headerList.add(expense.getCategory());
                         ArrayList<String> expenseList = new ArrayList<String>();
-                        stringToAdd = expense.getName() + ": $" + expense.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
+                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
                         expenseList.add(stringToAdd);
                         listOfLists.add(expenseList);
                     } else {
                         int index = headerList.indexOf(expense.getCategory());
-                        stringToAdd = expense.getName() + ": $" + expense.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
+                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
                         listOfLists.get(index).add(stringToAdd);
                     }
                 }
