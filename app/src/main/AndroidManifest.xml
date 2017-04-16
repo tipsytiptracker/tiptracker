@@ -3,8 +3,10 @@
     package="com.example.ronjc.tiptracker">
 
     <!-- To access camera hardware and external storage -->
-    <uses-feature android:name="android.hardware.camera"
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="false" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -16,10 +18,10 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:logo="@drawable/tiptrackerlogo3"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme.NoActionBar"
-        android:logo="@drawable/tiptrackerlogo3">
+        android:theme="@style/AppTheme.NoActionBar">
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.android.fileprovider"
@@ -27,9 +29,9 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths">
-            </meta-data>
+                android:resource="@xml/file_paths"></meta-data>
         </provider>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -42,9 +44,12 @@
         <activity
             android:name=".RegisterActivity"
             android:label="@string/title_activity_register" />
-        <activity android:name=".HomeActivity"
-            android:theme="@style/AppTheme"/>
-        <activity android:name=".LoginActivity"></activity>
+        <activity
+            android:name=".HomeActivity"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".PayStubsActivity"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

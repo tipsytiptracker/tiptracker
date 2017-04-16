@@ -68,8 +68,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        String customFont = "fonts/bitter.ttf";
-        Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
+        Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.BITTER);
 
         mTextInputLayoutEmail.setTypeface(typeface);
         mTextInputLayoutPassword.setTypeface(typeface);
@@ -137,9 +136,9 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     /**
-     * Account that attempts to create user account.
+     * Method that attempts to create user account.
      * Validates input and checks if passwords match, if true, attempts user account creation.
-     * Otherwise, sets error is a validation check failed, or Snackbar if Firebase Account creation fails
+     * Otherwise, sets error if a validation check failed, or Snackbar if Firebase Account creation fails
      *
      * @param email Email entered by user
      * @param password Password entered by user

@@ -43,6 +43,14 @@
     <string name="manage_goal">Manage Budget Goal</string>
     <string name="logout">Logout</string>
 
+    <!-- Strings related to Paystubs -->
+    <string name="paystubs">Paystubs</string>
+    <string name="add_paystub">Add a PayStub Manually</string>
+    <string name="paystub_amount">Enter an Amount</string>
+    <string name="paystub_submit">Submit</string>
+    <string name = "paystub_desc">Enter a description</string>
+    <string name = "paystub_addtoIncome">Add to Income</string>
+
     <!-- Web Client ID for Google Sign In-->
     <string name="web_client_id">324564773792-92dncenkbrusdj1u9don48q6tq4amn0m.apps.googleusercontent.com</string>
 </resources>

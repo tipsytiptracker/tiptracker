@@ -92,8 +92,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
         //Sets the Font of floating text to Bitter
-        String customFont = "fonts/bitter.ttf";
-        Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
+        Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.BITTER);
         mTextInputLayoutEmail.setTypeface(typeface);
         mTextInputLayoutPassword.setTypeface(typeface);
         //Sets the Font of everything else to Bitter
