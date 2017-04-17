@@ -49,8 +49,6 @@ public class MainActivity extends AppCompatActivity {
     SignInButton mGoogleSignInButton;
     @BindView(R.id.ma_register_button)
     Button mRegisterButton;
-    @BindView(R.id.ma_forgot_password_button)
-    Button mForgotPasswordButton;
     @BindView(R.id.main_activity)
     LinearLayout mLinearLayout;
 
@@ -111,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.ma_email_pass_sign_in_button, R.id.ma_google_sign_in_button, R.id.ma_register_button, R.id.ma_forgot_password_button})
+    @OnClick({R.id.ma_email_pass_sign_in_button, R.id.ma_google_sign_in_button, R.id.ma_register_button})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ma_email_pass_sign_in_button: {
@@ -127,9 +125,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.ma_register_button: {
                 Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
                 startActivity(intent);
-                break;
-            }
-            case R.id.ma_forgot_password_button: {
                 break;
             }
         }

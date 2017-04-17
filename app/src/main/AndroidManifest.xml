@@ -29,7 +29,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
         <activity
@@ -48,8 +48,9 @@
             android:name=".HomeActivity"
             android:theme="@style/AppTheme" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".PayStubsActivity"
-            android:theme="@style/AppTheme"></activity>
+        <activity
+            android:name=".PayStubsActivity"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

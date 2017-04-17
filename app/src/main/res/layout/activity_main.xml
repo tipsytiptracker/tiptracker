@@ -136,25 +136,7 @@
             android:layout_marginEnd="5dp"
             android:layout_marginLeft="20dp"
             android:layout_marginStart="20dp"/>
-        <Button
-            android:id="@+id/ma_forgot_password_button"
-            android:textAllCaps="false"
-            android:layout_marginTop="5dp"
-            android:paddingRight="20dp"
-            android:paddingLeft="20dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/button_bg"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="50dp"
-            android:text="@string/forgot_pass"
-            android:layout_marginRight="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginStart="5dp"
-            />
+
     </LinearLayout>
 
 
