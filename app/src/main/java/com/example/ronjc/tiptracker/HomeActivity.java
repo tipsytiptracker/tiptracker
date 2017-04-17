@@ -47,7 +47,6 @@ import butterknife.ButterKnife;
 
 public class HomeActivity extends AppCompatActivity {
 
-
     @BindView(R.id.mtile_text1)
     TextView mTileText1;
     @BindView(R.id.mtile_text2)
@@ -83,7 +82,6 @@ public class HomeActivity extends AppCompatActivity {
                     Intent intent = new Intent(HomeActivity.this, MainActivity.class);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(getApplicationContext(), "" + mFirebaseUser.getEmail(), Toast.LENGTH_LONG).show();
                     mDatabaseReference = FirebaseDatabase.getInstance().getReference();
                     mDatabaseReference.child("users").child(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -92,11 +90,9 @@ public class HomeActivity extends AppCompatActivity {
                                 User user = new User(mFirebaseUser.getEmail(), new ArrayList<PayStub>(), new ArrayList<Period>(),
                                         new ArrayList<Income>(), new ArrayList<Expense>(), new ArrayList<Income>(), new ArrayList<Expense>(),
                                         0.00);
-                                mDatabaseReference.child("users").child(mFirebaseUser.getUid()).setValue(user);
-
+                                mDatabaseReference.child("users").child(mFirebaseUser.getUid()).setValue(user.toMap());
                             }
                         }
-
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
 

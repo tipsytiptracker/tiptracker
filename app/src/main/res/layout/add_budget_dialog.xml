@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/metroTileColorPressed"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/budget_dialog_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/add_item"
+        android:textColor="@color/colorWhite"
+        android:textSize="25sp" />
+
+    <RelativeLayout
+        android:id="@+id/use_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/metrotile"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/camera_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:clickable="true"
+            android:text="@string/fa_camera"
+            android:textColor="@drawable/tiletext"
+            android:textSize="75sp" />
+
+        <TextView
+            android:clickable="true"
+            android:id="@+id/camera_icon_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/camera_icon"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="Use Camera"
+            android:textColor="@drawable/tiletext" />
+
+        <View
+            android:layout_below="@id/camera_icon_text"
+            android:id="@+id/white_line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#ffffff"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginEnd="15dp"
+            />
+
+
+        <TextView
+            android:id="@+id/pencil_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/white_line"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:paddingLeft="10dp"
+            android:clickable="true"
+            android:text="@string/fa_pencil"
+            android:textColor="@drawable/tiletext"
+            android:textSize="75sp" />
+
+        <TextView
+            android:clickable="true"
+            android:id="@+id/pencil_icon_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/pencil_icon"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="30dp"
+            android:text="Enter Manually"
+            android:textColor="@drawable/tiletext" />
+    </RelativeLayout>
+
+
+</LinearLayout>

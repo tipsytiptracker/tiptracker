@@ -44,6 +44,7 @@ public class BudgetManagement extends AppCompatActivity {
     TabLayout mTabLayout;
     @BindView(R.id.date_tv)
     TextView mDateTextView;
+
     private Date startDate, endDate;
     private String sStartDate, sEndDate;
     private SimpleDateFormat simpleDateFormat;
@@ -103,6 +104,7 @@ public class BudgetManagement extends AppCompatActivity {
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.FONTAWESOME);
         mLeftArrowIcon.setTypeface(iconFont);
         mRightArrowIcon.setTypeface(iconFont);
+
 
         mRightArrowIcon.setOnClickListener(new View.OnClickListener() {
             @Override

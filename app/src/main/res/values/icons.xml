@@ -7,4 +7,6 @@
     <string name="fa_arrow_left">&#xf060;</string>
     <string name="fa_arrow_right">&#xf061;</string>
     <string name="fa_camera">&#xf030;</string>
+    <string name="fa_plus">&#xf067;</string>
+    <string name="fa_pencil">&#xf044;</string>
 </resources>

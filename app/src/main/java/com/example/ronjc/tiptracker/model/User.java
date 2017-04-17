@@ -1,7 +1,12 @@
 package com.example.ronjc.tiptracker.model;
 
+import com.google.firebase.database.Exclude;
+
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by ronjc on 4/16/2017.
@@ -71,5 +76,19 @@ public class User {
 
     public double getCurrentBudget() {
         return currentBudget;
+    }
+
+    @Exclude
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("email", email);
+        result.put("paystubs", payStubs);
+        result.put("periods", periods);
+        result.put("incomes", incomes);
+        result.put("expenses", expenses);
+        result.put("repeated_income", repeatedIncomes);
+        result.put("repeated_expenses", repeatedExpenses);
+        result.put("current_budget", currentBudget);
+        return result;
     }
 }
