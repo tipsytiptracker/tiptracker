@@ -48,6 +48,8 @@ dependencies {
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    compile 'com.github.BlacKCaT27:CurrencyEditText:v1.4.4' //special editText for currency
 }
 
 allprojects {
