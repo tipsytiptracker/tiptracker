@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,10 @@ import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.w3c.dom.Text;
 
@@ -38,11 +43,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     private Context context;
     private List<String> headerList;
     private HashMap<String, List<String>> childList;
+    private String userID;
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList) {
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList, String userID) {
         this.context = context;
         this.headerList = headerList;
         this.childList = chidList;
+        this.userID = userID;
     }
 
     @Override
@@ -106,6 +113,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         plusIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO: Clean this code up
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
                 View mView = mLayoutInflator.inflate(R.layout.add_budget_dialog, null);
                 final Typeface bitter = getTypeface(context, FontManager.BITTER);
@@ -120,6 +128,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 pencilIcon.setTypeface(fontAwesome);
                 mBuilder.setView(mView);
                 final AlertDialog dialog = mBuilder.create();
+
                 //TODO: Set on click listener for camera here
 
                 pencilIcon.setOnClickListener(new View.OnClickListener() {
@@ -162,7 +171,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         //Write new category to Firebase
     }
 
-    private void writeNewIncome(Income income) {
+    private void writeNewIncome(String name, String amount, String category) {
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        double doubleAmount = Double.parseDouble(amount.substring(1));
+        Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        //TODO: Push to database
+//        mDatabase.child("users").child(userID).child()
+
 
     }
 

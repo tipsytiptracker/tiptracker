@@ -41,6 +41,8 @@ public class BudgetFragment extends Fragment {
 
     private static final String PAGE_KEY = "page";
     private static final String LIST_KEY = "list";
+    private static final String USER_ID_KEY = "user";
+    private String userID = "";
     private int page;
     private ExpandableListAdapter listAdapter;
     private ExpandableListView expandableListView;
@@ -53,11 +55,12 @@ public class BudgetFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list, Date startDate) {
+    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list, Date startDate, String userID) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
         args.putSerializable(LIST_KEY, list);
+        args.putString(USER_ID_KEY, userID);
         mBudgetFragment.setArguments(args);
         return mBudgetFragment;
     }
@@ -68,6 +71,7 @@ public class BudgetFragment extends Fragment {
         if (getArguments() != null) {
             page = getArguments().getInt(PAGE_KEY, 0);
             list = (ArrayList<?>) getArguments().getSerializable(LIST_KEY);
+            userID = getArguments().getString(USER_ID_KEY);
         }
     }
 
@@ -79,7 +83,7 @@ public class BudgetFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
         expandableListView = (ExpandableListView) view.findViewById(R.id.budget_list);
         prepareListData();
-        listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList);
+        listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID);
         expandableListView.setAdapter(listAdapter);
         return view;
 

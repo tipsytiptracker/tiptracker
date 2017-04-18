@@ -1,6 +1,8 @@
 package com.example.ronjc.tiptracker;
 
+import android.content.Intent;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -12,13 +14,18 @@ import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
+import com.example.ronjc.tiptracker.model.PayStub;
 import com.example.ronjc.tiptracker.model.Period;
+import com.example.ronjc.tiptracker.model.User;
 import com.example.ronjc.tiptracker.utils.BudgetPageAdapter;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -49,6 +56,7 @@ public class BudgetManagement extends AppCompatActivity {
     private String sStartDate, sEndDate;
     private SimpleDateFormat simpleDateFormat;
     private DatabaseReference mDatabaseReference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser mFirebaseUser;
 
     @Override
@@ -66,6 +74,20 @@ public class BudgetManagement extends AppCompatActivity {
         ButterKnife.bind(this);
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         calculateStartAndEndDate();
+
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").orderByValue().equalTo(startDate.getTime()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()) {
+                    writeNewPeriod(startDate.getTime(), endDate.getTime(), new ArrayList<Income>(), new ArrayList<Expense>(), 500.00, 600.00, 400.00);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         /*
             Bunch of testing down hur
@@ -96,7 +118,7 @@ public class BudgetManagement extends AppCompatActivity {
         double totalExpense = calculateTotalExpense(expenseList);
 
         Period period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
-        mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period));
+        mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid()));
         mTabLayout.setupWithViewPager(mViewPager);
 
         Typeface bitter = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
@@ -171,8 +193,10 @@ public class BudgetManagement extends AppCompatActivity {
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
     }
     private void writeNewPeriod(long start, long end, ArrayList<Income> income, ArrayList<Expense> expense, double currentBudget, double allIncome, double allExpense) {
+        String key = mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").push().getKey();
+        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").child(key).push().setValue(startDate.getTime());
         Period mPeriod = new Period(start, end, income, expense, currentBudget, allIncome, allExpense);
-        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").setValue(mPeriod);
+        mDatabaseReference.child("periods").child(key).setValue(mPeriod);
     }
 
     private double calculateTotalIncome(List<Income> incomes) {

@@ -27,14 +27,16 @@ public class BudgetPageAdapter extends FragmentPagerAdapter{
     private ArrayList<Expense> expenses;
     private ArrayList<Income> incomes;
     private Context context;
+    private String userID;
 
-    public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period) {
+    public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period, String userID) {
         super(fragmentManager);
         this.context = context;
         this.startDate = new Date(period.getStartDate());
         this.endDate = new Date(period.getEndDate());
         this.expenses = period.getExpenses();
         this.incomes = period.getIncomes();
+        this.userID = userID;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class BudgetPageAdapter extends FragmentPagerAdapter{
 
     @Override
     public Fragment getItem(int position) {
-        return position == 0 ? BudgetFragment.newInstance(position + 1, incomes, startDate) : BudgetFragment.newInstance(position + 1, expenses, startDate);
+        return position == 0 ? BudgetFragment.newInstance(position + 1, incomes, startDate, userID) : BudgetFragment.newInstance(position + 1, expenses, startDate, userID);
     }
 
     @Override
