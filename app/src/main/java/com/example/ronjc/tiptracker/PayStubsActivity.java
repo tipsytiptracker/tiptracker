@@ -27,6 +27,8 @@ public class PayStubsActivity extends AppCompatActivity {
     TextView mPaystubTextView;
     @BindView(R.id.paystubs_add_paystub_button)
     Button mPaystubButton;
+    @BindView(R.id.view_paystubs)
+    Button mViewPaystubButton;
     @BindView(R.id.paystubs_picture_tile_text)
     TextView mTileText;
     @BindView(R.id.paystubs_picture_tile)
@@ -91,11 +93,12 @@ public class PayStubsActivity extends AppCompatActivity {
                             //excludes the dollar sign from the string
                             final double value = Double.parseDouble(amount.getText().toString().substring(1));
                             final String descrip = desc.getText().toString();
+                            long dateAdded = System.currentTimeMillis(); //gets the milliseconds of the current time
                             Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
 
 //                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
 //                                    .child(user.getUid()).child("Paystubs");
-                            PayStub payStub = new PayStub(value, descrip, user.getUid());
+                            PayStub payStub = new PayStub(value, descrip, user.getUid(),dateAdded);
                             myRef.child("users").child(user.getUid()).child("paystubs").push().setValue(payStub);
 //                            Toast.makeText(getApplicationContext(), "" + user.getUid(), Toast.LENGTH_LONG).show();
 //                            myRef.setValue(new PayStub(value,descrip));
@@ -104,10 +107,23 @@ public class PayStubsActivity extends AppCompatActivity {
                         }//end else
                     }
                 });
+                dialog.show();
+            }
+        }); //end of add manual paystub button
 
+        mViewPaystubButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder mBuilder2 = new AlertDialog.Builder(PayStubsActivity.this);
+                View mView2 = getLayoutInflater().inflate(R.layout.fragment_view_all_paystubs, null);
+
+                mBuilder2.setView(mView2);
+                final AlertDialog dialog = mBuilder2.create();
 
                 dialog.show();
             }
-        });
+        }); //end of the view all paystubs buttons
+
+
     }
 }
