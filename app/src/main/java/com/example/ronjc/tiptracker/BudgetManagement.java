@@ -72,19 +72,20 @@ public class BudgetManagement extends AppCompatActivity {
             Change to get from Database
          */
 
+        String userID = mFirebaseUser.getUid();
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
-        Income income1 = new Income("01", "Paycheck", 2000.00, 1492299999123L, "Salary");
-        Income income2 = new Income("02", "Money from Mom", 50.00, 1492295342323L, "Gifts");
-        Income income3 = new Income("03", "Money found on sidewalk", 20.00, 1492295342123L, "Misc.");
+        Income income1 = new Income("01", "Paycheck", 2000.00, 1492299999123L, "Salary", userID);
+        Income income2 = new Income("02", "Money from Mom", 50.00, 1492295342323L, "Gifts", userID);
+        Income income3 = new Income("03", "Money found on sidewalk", 20.00, 1492295342123L, "Misc.", userID);
         ArrayList<Income> incomeList = new ArrayList<Income>();
         incomeList.add(income1);
         incomeList.add(income2);
         incomeList.add(income3);
-        Expense expense1 = new Expense("01", "Rent", 850.00, 1492299999123L, "Rent");
-        Expense expense2 = new Expense("02", "Bagels", 5.00, 1492299999123L, "Grocery");
-        Expense expense3 = new Expense("03", "Eggs", 2.99, 1492299999123L, "Grocery");
-        Expense expense4 = new Expense("04", "Cheese", 1.99, 1492299999123L, "Grocery");
-        Expense expense5 = new Expense("05", "Coffee", 1.99, 1492299999123L, "Coffee");
+        Expense expense1 = new Expense("01", "Rent", 850.00, 1492299999123L, "Rent", userID);
+        Expense expense2 = new Expense("02", "Bagels", 5.00, 1492299999123L, "Grocery", userID);
+        Expense expense3 = new Expense("03", "Eggs", 2.99, 1492299999123L, "Grocery", userID);
+        Expense expense4 = new Expense("04", "Cheese", 1.99, 1492299999123L, "Grocery", userID);
+        Expense expense5 = new Expense("05", "Coffee", 1.99, 1492299999123L, "Coffee", userID);
         ArrayList<Expense> expenseList = new ArrayList<Expense>();
         expenseList.add(expense1);
         expenseList.add(expense2);

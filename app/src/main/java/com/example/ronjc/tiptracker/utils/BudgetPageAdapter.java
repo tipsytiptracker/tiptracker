@@ -44,8 +44,7 @@ public class BudgetPageAdapter extends FragmentPagerAdapter{
 
     @Override
     public Fragment getItem(int position) {
-
-        return position == 0 ? BudgetFragment.newInstance(position + 1, incomes) : BudgetFragment.newInstance(position + 1, expenses);
+        return position == 0 ? BudgetFragment.newInstance(position + 1, incomes, startDate) : BudgetFragment.newInstance(position + 1, expenses, startDate);
     }
 
     @Override

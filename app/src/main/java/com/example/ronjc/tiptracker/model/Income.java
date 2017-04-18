@@ -17,10 +17,11 @@ public class Income implements Serializable{
     private double amount;
     private long date;
     private String category;
+    private String userID = "";
 
     public Income() {}
 
-    public Income(String id, String name, double amount, long date, String category) {
+    public Income(String id, String name, double amount, long date, String category, String userID) {
         this.id = id;
         this.name = name;
         BigDecimal bigDecimal = new BigDecimal(amount);
@@ -29,6 +30,7 @@ public class Income implements Serializable{
         this.amount = amount;
         this.date = date;
         this.category = category;
+        this.userID = userID;
     }
 
     public String getId() {
@@ -49,5 +51,9 @@ public class Income implements Serializable{
 
     public String getCategory() {
         return category;
+    }
+
+    public String getUserID() {
+        return userID;
     }
 }

@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -52,7 +53,7 @@ public class BudgetFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list) {
+    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list, Date startDate) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
