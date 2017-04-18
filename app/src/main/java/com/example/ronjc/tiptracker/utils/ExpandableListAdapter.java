@@ -4,11 +4,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.support.design.widget.TextInputLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
+
+import com.example.ronjc.tiptracker.model.Expense;
+import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.R;
 
@@ -85,7 +90,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup viewGroup) {
-        String headerTitle = (String) getGroup(groupPosition);
+        final String headerTitle = (String) getGroup(groupPosition);
         final LayoutInflater mLayoutInflator = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if(convertView == null) {
             convertView = mLayoutInflator.inflate(R.layout.list_group, null);
@@ -103,17 +108,40 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             public void onClick(View view) {
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
                 View mView = mLayoutInflator.inflate(R.layout.add_budget_dialog, null);
-                Typeface bitter = getTypeface(context, FontManager.BITTER);
+                final Typeface bitter = getTypeface(context, FontManager.BITTER);
                 Typeface fontAwesome = getTypeface(context, FontManager.FONTAWESOME);
-                TextView textView = (TextView) mView.findViewById(R.id.budget_dialog_header);
+                TextView cameraIcon = (TextView) mView.findViewById(R.id.camera_icon);
+                TextView pencilIcon = (TextView) mView.findViewById(R.id.pencil_icon);
                 ((TextView) mView.findViewById(R.id.budget_dialog_header)).setTypeface(bitter);
                 ((TextView) mView.findViewById(R.id.camera_icon_text)).setTypeface(bitter);
                 ((TextView) mView.findViewById(R.id.pencil_icon_text)).setTypeface(bitter);
-                ((TextView) mView.findViewById(R.id.camera_icon)).setTypeface(fontAwesome);
-                ((TextView) mView.findViewById(R.id.pencil_icon)).setTypeface(fontAwesome);
 
+                cameraIcon.setTypeface(fontAwesome);
+                pencilIcon.setTypeface(fontAwesome);
                 mBuilder.setView(mView);
-                AlertDialog dialog = mBuilder.create();
+                final AlertDialog dialog = mBuilder.create();
+                //TODO: Set on click listener for camera here
+
+                pencilIcon.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                        AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(context);
+                        View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
+                        ((TextView)pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
+                        TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
+                        pencilHeader.setTypeface(bitter);
+                        pencilHeader.setText(context.getString(R.string.add) + " " + headerTitle);
+                        TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
+                        TextInputLayout itemAmount = (TextInputLayout) pencilView.findViewById(R.id.add_item_amount_text_input);
+                        itemName.setTypeface(bitter);
+                        itemAmount.setTypeface(bitter);
+
+                        pencilBuilder.setView(pencilView);
+                        AlertDialog pencilDialog = pencilBuilder.create();
+                        pencilDialog.show();
+                    }
+                });
                 dialog.show();
             }
         });
@@ -128,6 +156,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     @Override
     public boolean isChildSelectable(int i, int i1) {
         return true;
+    }
+
+    private void writeNewCategory(String catgory) {
+        //Write new category to Firebase
+    }
+
+    private void writeNewIncome(Income income) {
+
+    }
+
+    private void writeNewExpense(Expense expense) {
+
     }
 
 }
