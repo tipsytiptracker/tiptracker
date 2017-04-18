@@ -37,7 +37,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * A registration screen that allows the user to create an account.
+ * Controller for Registration Activity
+ * @author Ronald Mangiliman
  */
 public class RegisterActivity extends AppCompatActivity {
 
@@ -58,6 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
     Button mRegisterButton;
     ProgressDialog mProgressDialog;
 
+    //Firebase references
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -68,8 +70,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        //Font styling
         Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.BITTER);
-
         mTextInputLayoutEmail.setTypeface(typeface);
         mTextInputLayoutPassword.setTypeface(typeface);
         mTextInputLayoutConfirmPassword.setTypeface(typeface);
@@ -93,6 +95,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+        //Sets on click listener for Registration button
         mRegisterButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -103,6 +106,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+        //Creates a Firebase Auth listener
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -115,6 +119,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         };
 
+        //Create Progess dialog
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setTitle(getString(R.string.creating_account));
         mProgressDialog.setMessage(getString(R.string.please_wait));
@@ -211,6 +216,10 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * shows or dismisses progress dialog
+     * @param show show if true, dismiss if false
+     */
     private void showProgress(boolean show) {
         if(show) {
             mProgressDialog.show();

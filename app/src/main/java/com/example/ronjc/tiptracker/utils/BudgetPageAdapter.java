@@ -16,7 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by ronjc on 4/14/2017.
+ * Custom adapter for BudgetManagement Fragment. Creates a tabbed layout that user can slide left and
+ * right to see the incomes/expenses.
+ *
+ * Much of the code was based off/taken from:
+ * https://github.com/codepath/android_guides/wiki/Google-Play-Style-Tabs-using-TabLayout
+ *
+ * @author Ronald Mangiliman
+ * Created on 4/14/2017.
  */
 
 public class BudgetPageAdapter extends FragmentPagerAdapter{
@@ -27,6 +34,8 @@ public class BudgetPageAdapter extends FragmentPagerAdapter{
     private ArrayList<Expense> expenses;
     private ArrayList<Income> incomes;
     private Context context;
+
+    //User ID being passed from BudgetManagement
     private String userID;
 
     public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period, String userID) {

@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Created by ronjc on 4/16/2017.
+ * User data model
+ *
+ * @author Ronald Mangiliman
+ * Created on 4/16/2017.
  */
 
 public class User {
@@ -46,6 +49,7 @@ public class User {
     }
 
 
+    //Accessors
     public String getEmail() {
         return email;
     }
@@ -78,6 +82,11 @@ public class User {
         return currentBudget;
     }
 
+    /**
+     * Method that returns a map of the user's properties
+     *
+     * @return Map the map of the user's properties
+     */
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();

@@ -5,7 +5,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Created by ronjc on 4/15/2017.
+ * Expense Data model
+ *
+ * @author Ronald Mangiliman
+ *
+ * Created on 4/15/2017.
  */
 
 public class Expense implements Serializable{
@@ -30,6 +34,8 @@ public class Expense implements Serializable{
         this.category = category;
         this.userID = userID;
     }
+
+    //Accessors
 
     public String getId() {
         return id;

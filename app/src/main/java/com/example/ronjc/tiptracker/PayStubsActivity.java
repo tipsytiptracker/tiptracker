@@ -59,9 +59,6 @@ public class PayStubsActivity extends AppCompatActivity {
         mPictureTile.setTypeface(typeface);
 
 
-
-
-
         mPaystubButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

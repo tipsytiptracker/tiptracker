@@ -2,40 +2,36 @@ package com.example.ronjc.tiptracker.utils;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Typeface;
-import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
-import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import org.w3c.dom.Text;
-
 import java.util.HashMap;
 import java.util.List;
-
-import static android.R.style.Theme_Material_Light_Dialog_Alert;
-import static android.app.AlertDialog.THEME_HOLO_LIGHT;
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
-import static com.example.ronjc.tiptracker.utils.FontManager.markAsIconContainer;
 
 /**
+ * TODO: This Class needs a lot of clean up!
+ *
+ * Custom adapter to create expandable list view
+ * Categories for incomes and expenses act as the "headers" for list item group.
+ *
+ * Much of the code was based off/taken from:
+ *
  * http://www.androidhive.info/2013/07/android-expandable-list-view-tutorial/
- * Created by ronjc on 4/15/2017.
+ *
+ * @author Ronald Mangiliman
+ * Created on 4/15/2017.
  */
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
@@ -95,6 +91,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return groupPosition;
     }
 
+    //TODO: In particular, this block needs a lot of clean up
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup viewGroup) {
         final String headerTitle = (String) getGroup(groupPosition);

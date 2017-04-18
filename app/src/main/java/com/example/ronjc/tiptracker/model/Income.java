@@ -8,7 +8,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Created by ronjc on 4/15/2017.
+ * Income data model
+ *
+ * @author Ronald Mangiliman
+ * Created on 4/15/2017.
  */
 
 public class Income implements Serializable{
@@ -33,6 +36,7 @@ public class Income implements Serializable{
         this.userID = userID;
     }
 
+    //Accessors
     public String getId() {
         return id;
     }

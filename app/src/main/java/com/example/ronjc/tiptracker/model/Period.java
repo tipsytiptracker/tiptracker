@@ -6,7 +6,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by ronjc on 4/15/2017.
+ * Period data model
+ *
+ * @author Ronald Mangiliman
+ * Created on 4/15/2017.
  */
 
 public class Period {

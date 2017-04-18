@@ -30,24 +30,30 @@ import butterknife.BindView;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link BudgetFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link BudgetFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Budget Fragment that lists out Income/Expenses.
+ *
+ * @author Ronald Mangiliman
  */
 public class BudgetFragment extends Fragment {
 
+    //Keys for storing values in Bundle
     private static final String PAGE_KEY = "page";
     private static final String LIST_KEY = "list";
     private static final String USER_ID_KEY = "user";
+
+    //User ID being passed from ExpandableListAdapter
     private String userID = "";
     private int page;
     private ExpandableListAdapter listAdapter;
     private ExpandableListView expandableListView;
+
+    //List of either Incomes or Expenses to display
     private ArrayList<?> list;
+
+    //List of category "headers"
     private ArrayList<String> headerList;
+
+    //HashMap of children
     private HashMap<String, List<String>> childList;
     private OnFragmentInteractionListener mListener;
 
@@ -79,7 +85,6 @@ public class BudgetFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
         expandableListView = (ExpandableListView) view.findViewById(R.id.budget_list);
         prepareListData();
@@ -96,22 +101,12 @@ public class BudgetFragment extends Fragment {
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
-    //TODO: Replace with real data
+    //TODO: Unfortunately, this will most likely have to be rewritten.
     private void prepareListData() {
         ArrayList<Income> incomes;
         ArrayList<Expense> expenses;

@@ -45,8 +45,14 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * Controller for HomeActvity
+ *
+ * @author Ronald Mangiliman
+ */
 public class HomeActivity extends AppCompatActivity {
 
+    //Bind UI elements to references
     @BindView(R.id.mtile_text1)
     TextView mTileText1;
     @BindView(R.id.mtile_text2)
@@ -57,15 +63,18 @@ public class HomeActivity extends AppCompatActivity {
     TextView mTileText4;
     @BindView(R.id.current_budget)
     TextView mCurrentBudget;
+    @BindView(R.id.home_activity)
+    RelativeLayout mRelativeLayout;
+
+    //TODO: Bind these with ButterKnife
     private RelativeLayout mLogoutTile, mStubTile, mBudgetGoalTile, mManageBudgetTile;
+
+    //Firebase and Google Sign In references
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser mFirebaseUser;
     private DatabaseReference mDatabaseReference;
     private GoogleApiClient mGoogleApiClient;
-
-    @BindView(R.id.home_activity)
-    RelativeLayout mRelativeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +88,11 @@ public class HomeActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 mFirebaseUser = firebaseAuth.getCurrentUser();
                 if(mFirebaseUser == null) {
+                    //If user is not logged in, then redirect to MainActivity
                     Intent intent = new Intent(HomeActivity.this, MainActivity.class);
                     startActivity(intent);
                 } else {
+                    //If user does not exist in database, create element for that user
                     mDatabaseReference = FirebaseDatabase.getInstance().getReference();
                     mDatabaseReference.child("users").child(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -101,14 +112,15 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         };
-
+        //Add logo to ActionBar
+        //TODO: this can go in utils most likely. It is used throughout the app
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
         getSupportActionBar().setTitle("");
 
+        //Set font styling
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.FONTAWESOME);
         FontManager.markAsIconContainer(findViewById(R.id.metro_tiles), iconFont);
-
         Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.BITTER);
         mTileText1.setTypeface(typeface);
         mTileText2.setTypeface(typeface);
@@ -118,6 +130,7 @@ public class HomeActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        //Create google sign in
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.web_client_id))
                 .requestEmail()
@@ -133,6 +146,8 @@ public class HomeActivity extends AppCompatActivity {
         mManageBudgetTile = (RelativeLayout) findViewById(R.id.metro_tile_3);
         mLogoutTile = (RelativeLayout) findViewById(R.id.metro_tile_4);
         TileListener mTileListener = new TileListener();
+
+        //Set on click listeners for home buttons
         mStubTile.setOnClickListener(mTileListener);
         mBudgetGoalTile.setOnClickListener(mTileListener);
         mManageBudgetTile.setOnClickListener(mTileListener);
@@ -154,6 +169,9 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Logs user out of account
+     */
     private void logout() {
         mAuth.signOut();
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
@@ -166,7 +184,14 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    class TileListener implements View.OnClickListener {
+    /**
+     * Tile listener sub class
+     *
+     * OnClick listener for buttons on Home Activity.
+     * Will start activities for their respective button
+     * Logout button calls logout method
+     */
+    private class TileListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
@@ -195,6 +220,12 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Required sub class that implements OnConnectionFailedListener.
+     * Used when creating GoogleApiClient
+     *
+     * Simply displays a Snackbar if connection fails.
+     */
     private class ConnectionFailed implements GoogleApiClient.OnConnectionFailedListener {
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
