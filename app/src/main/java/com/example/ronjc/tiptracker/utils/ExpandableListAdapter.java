@@ -11,6 +11,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
@@ -21,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +53,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     private HashMap<String, List<String>> childList;
     private String userID;
     private String type;
+    private String categoryKey;
+
 
     public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList, String userID, String type) {
         this.context = context;
@@ -106,6 +110,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     //TODO: In particular, this block needs a lot of clean up
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup viewGroup) {
+
         final String headerTitle = (String) getGroup(groupPosition);
         final LayoutInflater mLayoutInflator = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if(convertView == null) {
@@ -151,8 +156,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                         pencilHeader.setTypeface(bitter);
                         pencilHeader.setText(context.getString(R.string.add) + " " + headerTitle);
                         final TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
+                        final EditText itemNameEditText = (EditText) pencilView.findViewById(R.id.add_item_name);
+                        itemNameEditText.setTypeface(bitter);
                         TextInputLayout itemAmount = (TextInputLayout) pencilView.findViewById(R.id.add_item_amount_text_input);
-                        final EditText itemNameEditText = (EditText) pencilView.findViewById(R.id.item_amount);
+                        final EditText itemAmountEditText = (EditText) pencilView.findViewById(R.id.item_amount);
+                        itemAmountEditText.setTypeface(bitter);
                         Button itemButton = (Button) pencilView.findViewById(R.id.add_item_manually_button);
                         itemName.setTypeface(bitter);
                         itemAmount.setTypeface(bitter);
@@ -164,9 +172,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                             @Override
                             public void onClick(View view) {
                                 if(type.equals(INCOME)) {
-                                    writeNewIncome(itemName.getEditText().getText().toString(), itemNameEditText.getText().toString(), headerTitle);
+                                    writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
                                 } else {
-                                    writeNewExpense(itemName.getEditText().getText().toString(), itemNameEditText.getText().toString(), headerTitle);
+                                    writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
                                 }
                                 pencilDialog.dismiss();
                             }
@@ -190,14 +198,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return true;
     }
 
-    private void writeNewCategory(String catgory) {
-        //Write new category to Firebase
-    }
 
-    private void writeNewIncome(String name, String amount, String category) {
+
+    private void writeNewIncome(final String name, String amount, final String category) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        double doubleAmount = Double.parseDouble(amount.substring(1));
-        final Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        //Get rid of dollar sign and any commas
+        final double doubleAmount = Double.parseDouble(amount.substring(1).replace(",", ""));
         //Get last Sunday in milliseconds
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
@@ -220,6 +226,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 }
                 String incomeKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).push().getKey();
                 mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+                Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
                 mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
             }
 

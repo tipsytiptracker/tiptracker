@@ -1,32 +1,48 @@
 package com.example.ronjc.tiptracker;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
+import com.example.ronjc.tiptracker.utils.DBHelper;
+import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.ExpandableListAdapter;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import butterknife.BindView;
+
+import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 
 
 /**
@@ -83,7 +99,7 @@ public class BudgetFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
@@ -91,6 +107,36 @@ public class BudgetFragment extends Fragment {
         prepareListData();
         listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type);
         expandableListView.setAdapter(listAdapter);
+        Button addCategoryButton = (Button)view.findViewById(R.id.add_category_button);
+        final Typeface bitter = FontManager.getTypeface(view.getContext(), BITTER);
+        addCategoryButton.setTypeface(bitter);
+        addCategoryButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                //Clean up!!
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
+                final View mView = inflater.inflate(R.layout.add_category_dialog, null);
+                ((TextView) mView.findViewById(R.id.add_category_header)).setTypeface(bitter);
+                final TextInputLayout categoryName = (TextInputLayout) mView.findViewById(R.id.add_category_text_input);
+                final EditText mEditText = (EditText)mView.findViewById(R.id.add_category_edit_text);
+                mEditText.setTypeface(bitter);
+                categoryName.setTypeface(bitter);
+                mBuilder.setView(mView);
+                final AlertDialog dialog = mBuilder.create();
+                Button mButton = (Button)mView.findViewById(R.id.add_category_dialog_button);
+                mButton.setTypeface(bitter);
+                mButton.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View view) {
+                        String newCategory = mEditText.getText().toString();
+                        writeNewCategory(newCategory);
+                        dialog.dismiss();
+                        Snackbar.make(mView, getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+                dialog.show();
+            }
+        });
         return view;
 
     }
@@ -177,5 +223,39 @@ public class BudgetFragment extends Fragment {
 //        childList.put(headerList.get(0), rent); // Header, Child data
 //        childList.put(headerList.get(1), groceries);
 //        childList.put(headerList.get(2), misc);
+    }
+
+    //TODO: Move to BudgetFragment
+    private void writeNewCategory(final String category) {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        //Get last Sunday in milliseconds
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        final long time = DateManager.trimMilliseconds(startDate.getTime());
+        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                String periodToWrite = "";
+                for(DataSnapshot period : periods) {
+                    if ((long)period.getValue() == time) {
+                        periodToWrite = period.getKey();
+                        break;
+                    }
+                }
+                String categoryKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).push().getKey();
+                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child(categoryKey).setValue(category);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

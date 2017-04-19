@@ -9,4 +9,5 @@ public class DBHelper {
     public final static String INCOMES = "incomes";
     public final static String USERS = "users";
     public final static String EXPENSES = "expenses";
+    public final static String CATEGORIES = "categories";
 }
