@@ -78,6 +78,23 @@
                 android:textCursorDrawable="@drawable/edittextfocus" />
 
         </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:layout_below="@+id/add_item_amount_text_input"
+            android:id="@+id/add_item_manually_button"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"
+            android:paddingRight="20dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/button_bg"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="@string/add_item"
+            android:textAllCaps="false"/>
+
     </RelativeLayout>
 
 

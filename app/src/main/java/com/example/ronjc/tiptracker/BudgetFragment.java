@@ -40,6 +40,7 @@ public class BudgetFragment extends Fragment {
     private static final String PAGE_KEY = "page";
     private static final String LIST_KEY = "list";
     private static final String USER_ID_KEY = "user";
+    private String type = "";
 
     //User ID being passed from ExpandableListAdapter
     private String userID = "";
@@ -88,7 +89,7 @@ public class BudgetFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
         expandableListView = (ExpandableListView) view.findViewById(R.id.budget_list);
         prepareListData();
-        listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID);
+        listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type);
         expandableListView.setAdapter(listAdapter);
         return view;
 
@@ -117,6 +118,7 @@ public class BudgetFragment extends Fragment {
 
         if (list.size() != 0) {
             if(list.get(0) instanceof Income) {
+                type = "income";
                 incomes = (ArrayList<Income>) list;
                 for(Income income : incomes) {
                     String stringToAdd;
@@ -133,6 +135,7 @@ public class BudgetFragment extends Fragment {
                     }
                 }
             } else {
+                type = "expense";
                 expenses = (ArrayList<Expense>) list;
                 for(Expense expense : expenses) {
                     String stringToAdd;

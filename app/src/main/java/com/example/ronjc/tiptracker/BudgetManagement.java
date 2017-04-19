@@ -13,6 +13,8 @@ import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.model.Period;
 import com.example.ronjc.tiptracker.utils.BudgetPageAdapter;
+import com.example.ronjc.tiptracker.utils.DBHelper;
+import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -86,13 +88,16 @@ public class BudgetManagement extends AppCompatActivity {
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         //Checks to see if user has a period associated with them in the database that corresponds to the current period
-        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").orderByValue().equalTo(startDate.getTime()).addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").orderByValue().equalTo(DateManager.trimMilliseconds(startDate.getTime())).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(!dataSnapshot.exists()) {
                     //If not, create period for current week
                     //TODO: Dummy values inserted, replace them when appropriate
-                    writeNewPeriod(startDate.getTime(), endDate.getTime(), new ArrayList<Income>(), new ArrayList<Expense>(), 500.00, 600.00, 400.00);
+                    writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
+                                    DateManager.trimMilliseconds(endDate.getTime()),
+                                    new ArrayList<Income>(), new ArrayList<Expense>(),
+                                    500.00, 600.00, 400.00);
                 }
             }
             @Override
@@ -241,10 +246,10 @@ public class BudgetManagement extends AppCompatActivity {
      * @param allExpense Total amount of all the user's expenses for this period
      */
     private void writeNewPeriod(long start, long end, ArrayList<Income> income, ArrayList<Expense> expense, double currentBudget, double allIncome, double allExpense) {
-        String key = mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").push().getKey();
-        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").child(key).push().setValue(startDate.getTime());
+        String key = mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).push().getKey();
+        mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).child(key).setValue(DateManager.trimMilliseconds(startDate.getTime()));
         Period mPeriod = new Period(start, end, income, expense, currentBudget, allIncome, allExpense);
-        mDatabaseReference.child("periods").child(key).setValue(mPeriod);
+        mDatabaseReference.child(DBHelper.PERIODS).child(key).setValue(mPeriod);
     }
 
     /**

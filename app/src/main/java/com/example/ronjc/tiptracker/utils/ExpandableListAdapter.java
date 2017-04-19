@@ -8,13 +8,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
@@ -36,16 +44,20 @@ import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
+    private final static String INCOME = "income";
+
     private Context context;
     private List<String> headerList;
     private HashMap<String, List<String>> childList;
     private String userID;
+    private String type;
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList, String userID) {
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList, String userID, String type) {
         this.context = context;
         this.headerList = headerList;
         this.childList = chidList;
         this.userID = userID;
+        this.type = type;
     }
 
     @Override
@@ -138,13 +150,27 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                         TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
                         pencilHeader.setTypeface(bitter);
                         pencilHeader.setText(context.getString(R.string.add) + " " + headerTitle);
-                        TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
+                        final TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
                         TextInputLayout itemAmount = (TextInputLayout) pencilView.findViewById(R.id.add_item_amount_text_input);
+                        final EditText itemNameEditText = (EditText) pencilView.findViewById(R.id.item_amount);
+                        Button itemButton = (Button) pencilView.findViewById(R.id.add_item_manually_button);
                         itemName.setTypeface(bitter);
                         itemAmount.setTypeface(bitter);
-
+                        itemButton.setTypeface(bitter);
                         pencilBuilder.setView(pencilView);
-                        AlertDialog pencilDialog = pencilBuilder.create();
+                        final AlertDialog pencilDialog = pencilBuilder.create();
+                        //TRIPLE NESTED ONCLICKLISTENERS?!?!?!
+                        itemButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(type.equals(INCOME)) {
+                                    writeNewIncome(itemName.getEditText().getText().toString(), itemNameEditText.getText().toString(), headerTitle);
+                                } else {
+                                    writeNewExpense(itemName.getEditText().getText().toString(), itemNameEditText.getText().toString(), headerTitle);
+                                }
+                                pencilDialog.dismiss();
+                            }
+                        });
                         pencilDialog.show();
                     }
                 });
@@ -169,17 +195,74 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     }
 
     private void writeNewIncome(String name, String amount, String category) {
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         double doubleAmount = Double.parseDouble(amount.substring(1));
-        Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
-        //TODO: Push to database
-//        mDatabase.child("users").child(userID).child()
+        final Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        //Get last Sunday in milliseconds
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        final long time = DateManager.trimMilliseconds(startDate.getTime());
+        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                String periodToWrite = "";
+                for(DataSnapshot period : periods) {
+                    if ((long)period.getValue() == time) {
+                        periodToWrite = period.getKey();
+                        break;
+                    }
+                }
+                String incomeKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).push().getKey();
+                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+                mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
     }
 
-    private void writeNewExpense(Expense expense) {
+    private void writeNewExpense(String name, String amount, String category) {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        double doubleAmount = Double.parseDouble(amount.substring(1));
+        final Expense expense = new Expense(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        //Get last Sunday in milliseconds
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        final long time = DateManager.trimMilliseconds(startDate.getTime());
+        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                String periodToWrite = "";
+                for(DataSnapshot period : periods) {
+                    if ((long)period.getValue() == time) {
+                        periodToWrite = period.getKey();
+                        break;
+                    }
+                }
+                String expenseKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).push().getKey();
+                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
+                mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
-
 }
