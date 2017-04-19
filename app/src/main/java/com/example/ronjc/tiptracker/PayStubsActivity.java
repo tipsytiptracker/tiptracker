@@ -127,13 +127,11 @@ public class PayStubsActivity extends AppCompatActivity {
                 View mView2 = getLayoutInflater().inflate(R.layout.fragment_view_all_paystubs, null);
 
                 final TextView amount_tv = (TextView)mView2.findViewById(R.id.paystubs_am);
-                final TextView desc_tv = (TextView)mView2.findViewById(R.id.paystubs_desc);
                 final TextView date_tv = (TextView)mView2.findViewById(R.id.paystubs_date);
 
                 Typeface iconFont3 = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
                 FontManager.markAsIconContainer(mView2.findViewById(R.id.paystubs_am), iconFont3);
                 FontManager.markAsIconContainer(mView2.findViewById(R.id.paystubs_title), iconFont3);
-                FontManager.markAsIconContainer(mView2.findViewById(R.id.paystubs_desc), iconFont3);
                 FontManager.markAsIconContainer(mView2.findViewById(R.id.paystubs_date), iconFont3);
 
                 mBuilder2.setView(mView2);
@@ -143,41 +141,35 @@ public class PayStubsActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         //gets all of the paystubs of the user
-                        String amount_tit = "Amount\n";
-                        String desc_tit = "Description\n";
-                        String date_tit = "Date Added\n";
+                        String amount_tit = "Amount\n\n";
+                        String date_tit = "Date Added\n\n";
 
                         ArrayList<String> list1 = new ArrayList<String>();
-                        ArrayList<String> list2 = new ArrayList<String>();
                         ArrayList<String> list3 = new ArrayList<String>();
 
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
 
                             PayStub users = child.getValue(PayStub.class);
 
-                            String get_amount = users.getAmount() + "\n";
-                            String get_desc = users.getDescription() + "\n";
+                            String get_amount = "$" + users.getAmount() + "\n";
+
                             long get_date = users.getDatePosted();
 
                             DateFormat df = new SimpleDateFormat("MM/dd/yy");
                             String gd = df.format(get_date) + "\n";
 
                             list1.add(get_amount);
-                            list2.add(get_desc);
                             list3.add(gd);
 
                         }
 
                         Collections.reverse(list1); //reverses arraylist by date so it prints latest first
-                        Collections.reverse(list2);
                         Collections.reverse(list3);
 
                         String amounts = TextUtils.join("", list1); //transfers arraylist string
-                        String descs = TextUtils.join("", list2);
                         String dates = TextUtils.join("", list3);
 
                         amount_tv.setText(amount_tit + amounts);
-                        desc_tv.setText(desc_tit + descs);
                         date_tv.setText(date_tit + dates);
 
                     }
