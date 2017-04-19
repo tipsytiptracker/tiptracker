@@ -50,6 +50,7 @@
             android:text="@string/paystub_submit"
             android:background="@drawable/button_bg"
             android:id="@+id/paystub_submit"
+            android:layout_marginBottom="15dp"
             />
 
         <CheckBox
