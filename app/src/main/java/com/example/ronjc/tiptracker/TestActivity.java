@@ -1,6 +1,7 @@
 package com.example.ronjc.tiptracker;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,6 +18,7 @@ public class TestActivity extends AppCompatActivity {
     String path;
     TextView textView;
     ImageView imageView;
+    Bitmap bitmap;
 
 
     @Override
@@ -40,14 +42,14 @@ public class TestActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            path = mCam.getPath();
-            imageView.setImageURI(mCam.getUri());
+            bitmap = mCam.getBitmap();
+            imageView.setImageBitmap(bitmap);
 
         }
     }
 
     public void goOCR(View view) {
-        mOCR = new OCR(this, path);
+        mOCR = new OCR(this, bitmap);
         textView.setText(mOCR.getTotal());
     }
 }

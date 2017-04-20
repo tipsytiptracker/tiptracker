@@ -21,13 +21,11 @@ public class OCR {
     private Bitmap bitmap;
     private SparseArray<TextBlock> textBlocks;
 
-    public OCR(Context context, String imagePath) {
+    public OCR(Context context, Bitmap bitmap) {
         textRecognizer = new TextRecognizer.Builder(context).build();
-        bitmap = BitmapFactory.decodeFile(imagePath);
         Frame imageFrame = new Frame.Builder()
                 .setBitmap(bitmap)
                 .build();
-
         textBlocks = textRecognizer.detect(imageFrame);
     }
 
@@ -52,7 +50,6 @@ public class OCR {
                     }
                 }
             }
-
         }
         return total;
     }
