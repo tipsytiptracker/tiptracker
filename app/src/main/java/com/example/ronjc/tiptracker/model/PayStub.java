@@ -8,20 +8,23 @@ public class PayStub {
     private double amount;
     private String description;
     private String url = "";
+    private String userID = "";
 
     public PayStub(){
 
     }
 
-    public PayStub(double amount, String description){
+    public PayStub(double amount, String description, String userID){
         this.amount = amount;
         this.description = description;
+        this.userID = userID;
     }
 
-    public PayStub(double amount, String description, String url){
+    public PayStub(double amount, String description, String url, String userID){
         this.amount = amount;
         this.description = description;
         this.url = url;
+        this.userID = userID;
     }
 
     public double getAmount() {
@@ -46,5 +49,9 @@ public class PayStub {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getUserID() {
+        return userID;
     }
 }

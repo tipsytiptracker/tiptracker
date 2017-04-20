@@ -3,9 +3,13 @@ package com.example.ronjc.tiptracker.model;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
- * Created by ronjc on 4/15/2017.
+ * Period data model
+ *
+ * @author Ronald Mangiliman
+ * Created on 4/15/2017.
  */
 
 public class Period {
@@ -16,7 +20,7 @@ public class Period {
     private double budgetGoal;
     private double totalIncome;
     private double totalExpenses;
-
+    private List<String> categories;
 
     public Period() {}
 

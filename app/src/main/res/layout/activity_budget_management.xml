@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/metroTileColorPressed"
     android:orientation="vertical"
+    android:id="@+id/activity_budget_management"
     tools:context="com.example.ronjc.tiptracker.BudgetManagement">
 
     <LinearLayout

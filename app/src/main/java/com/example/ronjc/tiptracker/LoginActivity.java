@@ -31,12 +31,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Custom login screen that offers login via email/password.
+ * Controller for custom login screen that offers login via email/password.
  *
+ * @author Ronald Mangiliman
  */
 //Test comments
 public class LoginActivity extends AppCompatActivity {
 
+    //Bind UI to references
     @BindView(R.id.text_input_layout_email)
     TextInputLayout mTextInputLayoutEmail;
     @BindView(R.id.text_input_layout_password)
@@ -58,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        //Auth stateListener. Will redirect user to HomeActivity if auth state changes
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -127,8 +130,8 @@ public class LoginActivity extends AppCompatActivity {
      * Method that attempts to log user in with account they had previously made through application.
      * Validates user input, if all checks are passed, logs user in.
      * Otherwise, displays Snackbar error message.
-     * @param email
-     * @param password
+     * @param email email user enters for attempted login
+     * @param password password user enters for attempted login
      */
     private void login(String email, String password) {
         Validator validator = new Validator();
@@ -136,6 +139,7 @@ public class LoginActivity extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
+        //Input validation
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
@@ -156,11 +160,13 @@ public class LoginActivity extends AppCompatActivity {
             cancel = true;
         }
 
+        //If any input validation fails, request focus on last view that failed validation
         if (cancel) {
             focusView.requestFocus();
         } else {
-
+            //Else, show progess dialog
             showProgress(true);
+            //Attempt sign in
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -177,6 +183,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Simple method to show or hide dialog
+     * @param show boolean that determines whether to show or hide dialog
+     */
     private void showProgress(boolean show) {
         if(show) {
             mProgressDialog.show();

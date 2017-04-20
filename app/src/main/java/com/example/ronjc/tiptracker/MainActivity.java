@@ -33,10 +33,17 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+/**
+ * Controller for MainActivity
+ *
+ * @author Ronald Mangiliman
+ */
 public class MainActivity extends AppCompatActivity {
 
+    //Request code for Google Sign In
     private final int RC_SIGN_IN = 1;
 
+    //Google Sign In and Firebase references
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -90,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         mProgressDialog.setCancelable(false);
 
 
-        //Set Font for Activity to Bitter
+        //Set font styling
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
         FontManager.markAsIconContainer(findViewById(R.id.main_activity), iconFont);
     }
@@ -109,19 +116,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * On click method for MainActivity UI buttons
+     * @param view
+     */
     @OnClick({R.id.ma_email_pass_sign_in_button, R.id.ma_google_sign_in_button, R.id.ma_register_button})
     public void onClick(View view) {
         switch (view.getId()) {
+            //Starts activity for custom login
             case R.id.ma_email_pass_sign_in_button: {
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
                 break;
             }
+            //Displays google sign in
             case R.id.ma_google_sign_in_button: {
                 Intent intent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                 startActivityForResult(intent, RC_SIGN_IN);
                 break;
             }
+            //Starts activity for registration
             case R.id.ma_register_button: {
                 Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
                 startActivity(intent);
@@ -139,6 +153,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    /**
+     * Method that handles the sign for google sign in result
+     * If sign in is successful, the user is signed into Firebase with their google account
+     *
+     * @param result google sign in result
+     */
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
@@ -147,6 +168,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Method that attempts to authenticate with google account
+     * @param account google account
+     */
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         showProgress(true);
         AuthCredential mAuthCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
@@ -174,6 +199,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Simple method that shows or dimesses progress dialog
+     * @param show show if true, dismiss if false
+     */
     private void showProgress(boolean show) {
         if(show) {
             mProgressDialog.show();

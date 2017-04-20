@@ -2,42 +2,72 @@ package com.example.ronjc.tiptracker.utils;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.example.ronjc.tiptracker.utils.FontManager;
+import android.widget.Toast;
+
+import com.example.ronjc.tiptracker.model.Expense;
+import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
+import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import static android.R.style.Theme_Material_Light_Dialog_Alert;
-import static android.app.AlertDialog.THEME_HOLO_LIGHT;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
-import static com.example.ronjc.tiptracker.utils.FontManager.markAsIconContainer;
 
 /**
+ * TODO: This Class needs a lot of clean up!
+ *
+ * Custom adapter to create expandable list view
+ * Categories for incomes and expenses act as the "headers" for list item group.
+ *
+ * Much of the code was based off/taken from:
+ *
  * http://www.androidhive.info/2013/07/android-expandable-list-view-tutorial/
- * Created by ronjc on 4/15/2017.
+ *
+ * @author Ronald Mangiliman
+ * Created on 4/15/2017.
  */
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
+    private final static String INCOME = "income";
+
     private Context context;
     private List<String> headerList;
     private HashMap<String, List<String>> childList;
+    private String userID;
+    private String type;
+    private String categoryKey;
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList) {
+
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList, String userID, String type) {
         this.context = context;
         this.headerList = headerList;
         this.childList = chidList;
+        this.userID = userID;
+        this.type = type;
     }
 
     @Override
@@ -83,9 +113,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return groupPosition;
     }
 
+    //TODO: In particular, this block needs a lot of clean up
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup viewGroup) {
-        String headerTitle = (String) getGroup(groupPosition);
+    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, final ViewGroup viewGroup) {
+        ButterKnife.bind(viewGroup);
+        final String headerTitle = (String) getGroup(groupPosition);
         final LayoutInflater mLayoutInflator = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if(convertView == null) {
             convertView = mLayoutInflator.inflate(R.layout.list_group, null);
@@ -101,19 +133,61 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         plusIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO: Clean this code up
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
-                View mView = mLayoutInflator.inflate(R.layout.add_budget_dialog, null);
-                Typeface bitter = getTypeface(context, FontManager.BITTER);
+                final View mView = mLayoutInflator.inflate(R.layout.add_budget_dialog, null);
+                final Typeface bitter = getTypeface(context, FontManager.BITTER);
                 Typeface fontAwesome = getTypeface(context, FontManager.FONTAWESOME);
-                TextView textView = (TextView) mView.findViewById(R.id.budget_dialog_header);
+                TextView cameraIcon = (TextView) mView.findViewById(R.id.camera_icon);
+                TextView pencilIcon = (TextView) mView.findViewById(R.id.pencil_icon);
                 ((TextView) mView.findViewById(R.id.budget_dialog_header)).setTypeface(bitter);
                 ((TextView) mView.findViewById(R.id.camera_icon_text)).setTypeface(bitter);
                 ((TextView) mView.findViewById(R.id.pencil_icon_text)).setTypeface(bitter);
-                ((TextView) mView.findViewById(R.id.camera_icon)).setTypeface(fontAwesome);
-                ((TextView) mView.findViewById(R.id.pencil_icon)).setTypeface(fontAwesome);
 
+                cameraIcon.setTypeface(fontAwesome);
+                pencilIcon.setTypeface(fontAwesome);
                 mBuilder.setView(mView);
-                AlertDialog dialog = mBuilder.create();
+                final AlertDialog dialog = mBuilder.create();
+
+                //TODO: Set on click listener for camera here
+
+                pencilIcon.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                        AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(context);
+                        final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
+                        ((TextView)pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
+                        TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
+                        pencilHeader.setTypeface(bitter);
+                        pencilHeader.setText(context.getString(R.string.add) + " " + headerTitle);
+                        final TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
+                        final EditText itemNameEditText = (EditText) pencilView.findViewById(R.id.add_item_name);
+                        itemNameEditText.setTypeface(bitter);
+                        TextInputLayout itemAmount = (TextInputLayout) pencilView.findViewById(R.id.add_item_amount_text_input);
+                        final EditText itemAmountEditText = (EditText) pencilView.findViewById(R.id.item_amount);
+                        itemAmountEditText.setTypeface(bitter);
+                        Button itemButton = (Button) pencilView.findViewById(R.id.add_item_manually_button);
+                        itemName.setTypeface(bitter);
+                        itemAmount.setTypeface(bitter);
+                        itemButton.setTypeface(bitter);
+                        pencilBuilder.setView(pencilView);
+                        final AlertDialog pencilDialog = pencilBuilder.create();
+                        //TRIPLE NESTED ONCLICKLISTENERS?!?!?!
+                        itemButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(type.equals(DBHelper.INCOMES)) {
+                                    writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                                } else {
+                                    writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                                }
+                                pencilDialog.dismiss();
+                            }
+                        });
+                        pencilDialog.show();
+                    }
+                });
                 dialog.show();
             }
         });
@@ -130,4 +204,80 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return true;
     }
 
+
+
+    private void writeNewIncome(final String name, String amount, final String category) {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        //Get rid of dollar sign and any commas
+        final double doubleAmount = Double.parseDouble(amount.substring(1).replace(",", ""));
+        //Get last Sunday in milliseconds
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        final long time = DateManager.trimMilliseconds(startDate.getTime());
+        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                String periodToWrite = "";
+                for(DataSnapshot period : periods) {
+                    if ((long)period.getValue() == time) {
+                        periodToWrite = period.getKey();
+                        break;
+                    }
+                }
+                String incomeKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).push().getKey();
+                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+                Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+                mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
+                Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void writeNewExpense(String name, String amount, String category) {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        double doubleAmount = Double.parseDouble(amount.substring(1));
+        final Expense expense = new Expense(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        //Get last Sunday in milliseconds
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        final long time = DateManager.trimMilliseconds(startDate.getTime());
+        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                String periodToWrite = "";
+                for(DataSnapshot period : periods) {
+                    if ((long)period.getValue() == time) {
+                        periodToWrite = period.getKey();
+                        break;
+                    }
+                }
+                String expenseKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).push().getKey();
+                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
+                mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
+                Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 }

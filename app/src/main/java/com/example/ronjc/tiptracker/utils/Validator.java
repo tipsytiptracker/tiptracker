@@ -5,7 +5,8 @@ package com.example.ronjc.tiptracker.utils;
  *
  * Validator class that validates user input for registration and login
  *
- * Created by Ronald Mangiliman on 4/4/2017.
+ * @author Ronald Mangiliman
+ * Created on 4/4/2017.
  */
 
 public class Validator {

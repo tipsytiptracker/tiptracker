@@ -5,7 +5,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Created by ronjc on 4/15/2017.
+ * Expense Data model
+ *
+ * @author Ronald Mangiliman
+ *
+ * Created on 4/15/2017.
  */
 
 public class Expense implements Serializable{
@@ -14,10 +18,12 @@ public class Expense implements Serializable{
     private double amount;
     private long date;
     private String category;
+    private String userID = "";
+//    private String location;
 
     public Expense() {}
 
-    public Expense(String id, String name, double amount, long date, String category) {
+    public Expense(String id, String name, double amount, long date, String category, String userID) {
         this.id = id;
         this.name = name;
         BigDecimal bigDecimal = new BigDecimal(amount);
@@ -26,7 +32,10 @@ public class Expense implements Serializable{
         this.amount = amount;
         this.date = date;
         this.category = category;
+        this.userID = userID;
     }
+
+    //Accessors
 
     public String getId() {
         return id;
@@ -46,5 +55,9 @@ public class Expense implements Serializable{
 
     public String getCategory() {
         return category;
+    }
+
+    public String getUserID() {
+        return userID;
     }
 }

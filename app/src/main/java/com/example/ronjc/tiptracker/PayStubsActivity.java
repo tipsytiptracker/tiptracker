@@ -59,9 +59,6 @@ public class PayStubsActivity extends AppCompatActivity {
         mPictureTile.setTypeface(typeface);
 
 
-
-
-
         mPaystubButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,7 +95,7 @@ public class PayStubsActivity extends AppCompatActivity {
 
 //                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
 //                                    .child(user.getUid()).child("Paystubs");
-                            PayStub payStub = new PayStub(value, descrip);
+                            PayStub payStub = new PayStub(value, descrip, user.getUid());
                             myRef.child("users").child(user.getUid()).child("paystubs").push().setValue(payStub);
 //                            Toast.makeText(getApplicationContext(), "" + user.getUid(), Toast.LENGTH_LONG).show();
 //                            myRef.setValue(new PayStub(value,descrip));
