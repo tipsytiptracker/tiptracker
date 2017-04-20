@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 
@@ -129,7 +130,7 @@ public class BudgetFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         String newCategory = mEditText.getText().toString();
-                        writeNewCategory(newCategory);
+                        writeNewCategory(newCategory, mView);
                         dialog.dismiss();
                         Snackbar.make(mView, getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
                     }
@@ -164,7 +165,7 @@ public class BudgetFragment extends Fragment {
 
         if (list.size() != 0) {
             if(list.get(0) instanceof Income) {
-                type = "income";
+                type = DBHelper.INCOMES;
                 incomes = (ArrayList<Income>) list;
                 for(Income income : incomes) {
                     String stringToAdd;
@@ -181,7 +182,7 @@ public class BudgetFragment extends Fragment {
                     }
                 }
             } else {
-                type = "expense";
+                type = DBHelper.EXPENSES;
                 expenses = (ArrayList<Expense>) list;
                 for(Expense expense : expenses) {
                     String stringToAdd;
@@ -226,7 +227,7 @@ public class BudgetFragment extends Fragment {
     }
 
     //TODO: Move to BudgetFragment
-    private void writeNewCategory(final String category) {
+    private void writeNewCategory(final String category, final View view) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         //Get last Sunday in milliseconds
         Calendar calendar = Calendar.getInstance();
@@ -248,8 +249,9 @@ public class BudgetFragment extends Fragment {
                         break;
                     }
                 }
-                String categoryKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).push().getKey();
-                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child(categoryKey).setValue(category);
+                String categoryKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child(type).push().getKey();
+                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child(type).child(categoryKey).setValue(category);
+                Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
             }
 
             @Override

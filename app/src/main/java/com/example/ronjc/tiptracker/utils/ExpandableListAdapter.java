@@ -3,6 +3,7 @@ package com.example.ronjc.tiptracker.utils;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +29,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
 
@@ -109,8 +115,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
     //TODO: In particular, this block needs a lot of clean up
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup viewGroup) {
-
+    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, final ViewGroup viewGroup) {
+        ButterKnife.bind(viewGroup);
         final String headerTitle = (String) getGroup(groupPosition);
         final LayoutInflater mLayoutInflator = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if(convertView == null) {
@@ -129,7 +135,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             public void onClick(View view) {
                 //TODO: Clean this code up
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
-                View mView = mLayoutInflator.inflate(R.layout.add_budget_dialog, null);
+                final View mView = mLayoutInflator.inflate(R.layout.add_budget_dialog, null);
                 final Typeface bitter = getTypeface(context, FontManager.BITTER);
                 Typeface fontAwesome = getTypeface(context, FontManager.FONTAWESOME);
                 TextView cameraIcon = (TextView) mView.findViewById(R.id.camera_icon);
@@ -150,7 +156,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                     public void onClick(View view) {
                         dialog.dismiss();
                         AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(context);
-                        View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
+                        final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
                         ((TextView)pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
                         TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
                         pencilHeader.setTypeface(bitter);
@@ -171,7 +177,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                         itemButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                if(type.equals(INCOME)) {
+                                if(type.equals(DBHelper.INCOMES)) {
                                     writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
                                 } else {
                                     writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
@@ -228,6 +234,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
                 Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
                 mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
+                Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -264,6 +271,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 String expenseKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).push().getKey();
                 mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
                 mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
+                Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
             }
 
             @Override
