@@ -204,8 +204,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return true;
     }
 
-
-
     private void writeNewIncome(final String name, String amount, final String category) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         //Get rid of dollar sign and any commas

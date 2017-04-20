@@ -159,6 +159,8 @@ public class BudgetFragment extends Fragment {
         ArrayList<Income> incomes;
         ArrayList<Expense> expenses;
         headerList = new ArrayList<String>();
+
+
         childList = new HashMap<String, List<String>>();
         ArrayList<ArrayList<String>> listOfLists = new ArrayList<ArrayList<String>>();
         DecimalFormat decimalFormat = new DecimalFormat("0.00");

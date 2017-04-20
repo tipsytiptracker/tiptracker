@@ -18,6 +18,7 @@ import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -68,10 +70,24 @@ public class BudgetManagement extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser mFirebaseUser;
 
+    private ArrayList<Income> incomeList;
+    private ArrayList<Expense> expenseList;
+    private ArrayList<String> incomeKeys;
+    private ArrayList<String> expenseKeys;
+    private double totalIncome;
+    private double totalExpense;
+    private String currentPeriodID;
+    private int pendingIncome = 0;
+    private int pendingExpense = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget_management);
+
+        final Semaphore semaphore = new Semaphore(0);
+
 
         //Add logo to action bar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -85,19 +101,28 @@ public class BudgetManagement extends AppCompatActivity {
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         //method call to set start and end date
         calculateStartAndEndDate();
+        incomeList = new ArrayList<Income>();
+        expenseList = new ArrayList<Expense>();
+        incomeKeys = new ArrayList<String>();
+        expenseKeys = new ArrayList<String>();
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         //Checks to see if user has a period associated with them in the database that corresponds to the current period
-        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").orderByValue().equalTo(DateManager.trimMilliseconds(startDate.getTime())).addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.exists()) {
-                    //If not, create period for current week
-                    //TODO: Dummy values inserted, replace them when appropriate
-                    writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
-                                    DateManager.trimMilliseconds(endDate.getTime()),
-                                    new ArrayList<Income>(), new ArrayList<Expense>(),
-                                    500.00, 600.00, 400.00);
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                for (DataSnapshot period : periods) {
+                    if((long)period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
+                        currentPeriodID = period.getKey();
+                        readBudget();
+                    } else {
+                        writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
+                                DateManager.trimMilliseconds(endDate.getTime()),
+                                new ArrayList<Income>(), new ArrayList<Expense>(),
+                                500.00, 600.00, 400.00);
+                        readBudget();
+                    }
                 }
             }
             @Override
@@ -105,41 +130,6 @@ public class BudgetManagement extends AppCompatActivity {
 
             }
         });
-
-        /*
-            Bunch of testing down hur
-            Change to get from Database
-         */
-
-        String userID = mFirebaseUser.getUid();
-        mDateTextView.setText("" + sStartDate + " - " + sEndDate);
-        Income income1 = new Income("01", "Paycheck", 2000.00, 1492299999123L, "Salary", userID);
-        Income income2 = new Income("02", "Money from Mom", 50.00, 1492295342323L, "Gifts", userID);
-        Income income3 = new Income("03", "Money found on sidewalk", 20.00, 1492295342123L, "Misc.", userID);
-        ArrayList<Income> incomeList = new ArrayList<Income>();
-        incomeList.add(income1);
-        incomeList.add(income2);
-        incomeList.add(income3);
-        Expense expense1 = new Expense("01", "Rent", 850.00, 1492299999123L, "Rent", userID);
-        Expense expense2 = new Expense("02", "Bagels", 5.00, 1492299999123L, "Grocery", userID);
-        Expense expense3 = new Expense("03", "Eggs", 2.99, 1492299999123L, "Grocery", userID);
-        Expense expense4 = new Expense("04", "Cheese", 1.99, 1492299999123L, "Grocery", userID);
-        Expense expense5 = new Expense("05", "Coffee", 1.99, 1492299999123L, "Coffee", userID);
-        ArrayList<Expense> expenseList = new ArrayList<Expense>();
-        expenseList.add(expense1);
-        expenseList.add(expense2);
-        expenseList.add(expense3);
-        expenseList.add(expense4);
-        expenseList.add(expense5);
-        double totalIncome = calculateTotalIncome(incomeList);
-        double totalExpense = calculateTotalExpense(expenseList);
-
-        Period period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
-
-        //Create and set up adapter for ViewPager
-        mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid()));
-        //Sets up tabbed layout with ViewPager
-        mTabLayout.setupWithViewPager(mViewPager);
 
         //Font styling
         Typeface bitter = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
@@ -161,8 +151,6 @@ public class BudgetManagement extends AppCompatActivity {
                 goToLastWeek();
             }
         });
-
-//        Toast.makeText(this, "Total Income: " + totalIncome + "Total Expenses: " + totalExpense, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -250,6 +238,7 @@ public class BudgetManagement extends AppCompatActivity {
         mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).child(key).setValue(DateManager.trimMilliseconds(startDate.getTime()));
         Period mPeriod = new Period(start, end, income, expense, currentBudget, allIncome, allExpense);
         mDatabaseReference.child(DBHelper.PERIODS).child(key).setValue(mPeriod);
+        currentPeriodID = key;
     }
 
     /**
@@ -291,4 +280,119 @@ public class BudgetManagement extends AppCompatActivity {
         }
         return total.doubleValue();
     }
+
+    private void readBudget() {
+        String userID = mFirebaseUser.getUid();
+        mDateTextView.setText("" + sStartDate + " - " + sEndDate);
+//        mDatabaseReference.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new FindCurrentPeriodListener());
+        mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).addListenerForSingleValueEvent(new RetrieveIncomeKeys());
+        mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).addListenerForSingleValueEvent(new RetrieveExpenseKeys());
+//        totalIncome = calculateTotalIncome(incomeList);
+//        totalExpense = calculateTotalExpense(expenseList);
+    }
+
+    private class FindCurrentPeriodListener implements ValueEventListener{
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+            for(DataSnapshot period : periods) {
+                if ((long)period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
+                    currentPeriodID = period.getKey();
+                    break;
+                }
+            }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private class RetrieveIncomeKeys implements ValueEventListener {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Iterable<DataSnapshot> incomes = dataSnapshot.getChildren();
+            for(DataSnapshot income : incomes) {
+                incomeKeys.add(income.getKey());
+            }
+            iterateKeys(DBHelper.INCOMES);
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private class RetrieveExpenseKeys implements ValueEventListener {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Iterable<DataSnapshot> expenses = dataSnapshot.getChildren();
+            for(DataSnapshot expense : expenses) {
+                expenseKeys.add(expense.getKey());
+            }
+            iterateKeys(DBHelper.EXPENSES);
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private class RetrieveIncome implements ValueEventListener {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Income income = dataSnapshot.getValue(Income.class);
+            incomeList.add(income);
+            pendingIncome--;
+            if(pendingIncome == 0 && pendingExpense == 0) {
+                displayItems();
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private class RetrieveExpense implements ValueEventListener {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Expense expense = dataSnapshot.getValue(Expense.class);
+            expenseList.add(expense);
+            pendingExpense--;
+            if(pendingIncome == 0 && pendingExpense == 0) {
+                displayItems();
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private void iterateKeys(String type) {
+        if (type.equals(DBHelper.INCOMES)) {
+            pendingIncome = incomeKeys.size();
+            for(String key : incomeKeys) {
+                mDatabaseReference.child(DBHelper.INCOMES).child(key).addListenerForSingleValueEvent(new RetrieveIncome());
+            }
+        } else {
+            pendingExpense = expenseKeys.size();
+            for(String key : expenseKeys) {
+                mDatabaseReference.child(DBHelper.EXPENSES).child(key).addListenerForSingleValueEvent(new RetrieveExpense());
+            }
+        }
+    }
+
+    private void displayItems() {
+        Period period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
+
+        //Create and set up adapter for ViewPager
+        mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid()));
+        //Sets up tabbed layout with ViewPager
+        mTabLayout.setupWithViewPager(mViewPager);
+    }
+
 }
