@@ -10,29 +10,40 @@
     tools:context="com.example.ronjc.tiptracker.BudgetGoalActivity">
 
 
+    <TextView
+        android:id="@+id/set_goal_tv"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:paddingTop="30dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorWhite"
+        android:textSize="25dp"
+        android:text="@string/set_budget"/>
+    <com.blackcat.currencyedittext.CurrencyEditText
+        android:id="@+id/set_budget_et"
+        android:paddingTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_budget_goal"
+        android:textColorHint="@color/colorWhiteTransparent"
+        android:textColor="@color/colorWhite"
+        />
+    <TextView
+        android:id="@+id/test"
+        android:text="!!"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/change_budget_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/change_budget"/>
 
-        <TextView
-            android:id="@+id/set_goal_tv"
-            android:textAlignment="center"
-            android:layout_width="match_parent"
-            android:paddingTop="30dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/colorWhite"
-            android:textSize="25dp"
-            android:text="@string/set_budget"/>
-        <com.blackcat.currencyedittext.CurrencyEditText
-            android:id="@+id/set_budget_et"
-            android:paddingTop="30dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/colorWhite"
-            />
-        <Button
-            android:id="@+id/change_budget_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/change_budget"/>
 
-        <include layout="@layout/linechart" />
+
+    <include layout="@layout/linechart" />
+
+
+
 
 </LinearLayout>

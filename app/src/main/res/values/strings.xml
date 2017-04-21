@@ -76,4 +76,6 @@
 
     <!-- Strings for manually adding item dialog-->
     <string name="item_name">Name</string>
+    <string name="enter_budget_goal">Enter new budget goal</string>
+    <string name="title_activity_bg2_fragment">BG2Fragment</string>
 </resources>
