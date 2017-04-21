@@ -84,7 +84,7 @@ public class PayStubsActivity extends AppCompatActivity {
                 final EditText amount = (EditText)mView.findViewById(R.id.paystub_amount);
                 final EditText desc = (EditText)mView.findViewById(R.id.paystub_desc);
                 final Button submit = (Button)mView.findViewById(R.id.paystub_submit);
-                final CheckBox addIncome = (CheckBox) mView.findViewById(R.id.paystub_addtoIncome);
+                final CheckBox checkAddIncome = (CheckBox) mView.findViewById(R.id.paystub_addtoIncome);
 
                 mBuilder.setView(mView);
                 final AlertDialog dialog = mBuilder.create();
@@ -104,6 +104,10 @@ public class PayStubsActivity extends AppCompatActivity {
                             final String descrip = desc.getText().toString();
                             long dateAdded = System.currentTimeMillis(); //gets the milliseconds of the current time
                             Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
+
+                            if(checkAddIncome.isChecked()){ // adds the amount from paystub to their income if box is checked
+                                addIncome(value, descrip, dateAdded);
+                            }
 
 //                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
 //                                    .child(user.getUid()).child("Paystubs");
@@ -185,5 +189,8 @@ public class PayStubsActivity extends AppCompatActivity {
         }); //end of the view all paystubs buttons
 
 
+    }
+
+    private void addIncome (double amount, String desc,  long dateAdded){ //method to add the paystub to their income
     }
 }
