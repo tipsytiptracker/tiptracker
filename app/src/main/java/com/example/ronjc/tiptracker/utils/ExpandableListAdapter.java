@@ -268,7 +268,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 String expenseKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).push().getKey();
                 mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
                 mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
-                Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
             }
 
             @Override

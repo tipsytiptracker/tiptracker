@@ -106,32 +106,7 @@ public class BudgetManagement extends AppCompatActivity {
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
-        //Checks to see if user has a period associated with them in the database that corresponds to the current period
-        mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getChildrenCount() > 0 ) {
-                    Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-                    for (DataSnapshot period : periods) {
-                        if ((long) period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
-                            currentPeriodID = period.getKey();
-                            readBudget();
-                        }
-                    }
-                } else {
-                        writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
-                                DateManager.trimMilliseconds(endDate.getTime()),
-                                new ArrayList<Income>(), new ArrayList<Expense>(),
-                                500.00, 600.00, 400.00);
-                        readBudget();
-                    }
-                }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        retrieveCurrentPeriod();
 
         //Font styling
         Typeface bitter = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
@@ -203,6 +178,7 @@ public class BudgetManagement extends AppCompatActivity {
         sEndDate = simpleDateFormat.format(endDate);
         //Change date on UI
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
+        retrieveCurrentPeriod();
     }
 
     /**
@@ -221,6 +197,7 @@ public class BudgetManagement extends AppCompatActivity {
         sStartDate = simpleDateFormat.format(startDate);
         sEndDate = simpleDateFormat.format(endDate);
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
+        retrieveCurrentPeriod();
     }
 
     /**
@@ -384,5 +361,42 @@ public class BudgetManagement extends AppCompatActivity {
         mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID));
         //Sets up tabbed layout with ViewPager
         mTabLayout.setupWithViewPager(mViewPager);
+    }
+
+    private void retrieveCurrentPeriod() {
+        //Checks to see if user has a period associated with them in the database that corresponds to the current period
+        mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getChildrenCount() > 0 ) {
+                    boolean foundPeriod = false;
+                    Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                    for (DataSnapshot period : periods) {
+                        if ((long) period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
+                            currentPeriodID = period.getKey();
+                            foundPeriod = true;
+                            break;
+                        }
+                    }
+                    if(!foundPeriod) {
+                        writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
+                                DateManager.trimMilliseconds(endDate.getTime()),
+                                new ArrayList<Income>(), new ArrayList<Expense>(),
+                                500.00, 600.00, 400.00);
+                    }
+                    readBudget();
+                } else {
+                    writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
+                            DateManager.trimMilliseconds(endDate.getTime()),
+                            new ArrayList<Income>(), new ArrayList<Expense>(),
+                            500.00, 600.00, 400.00);
+                    readBudget();
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }
