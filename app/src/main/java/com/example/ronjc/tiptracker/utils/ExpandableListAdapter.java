@@ -62,10 +62,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     private String categoryKey;
 
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList, String userID, String type) {
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, String userID, String type) {
         this.context = context;
         this.headerList = headerList;
-        this.childList = chidList;
+        this.childList = childList;
         this.userID = userID;
         this.type = type;
     }
@@ -112,7 +112,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     public long getGroupId(int groupPosition) {
         return groupPosition;
     }
-
     //TODO: In particular, this block needs a lot of clean up
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, final ViewGroup viewGroup) {

@@ -86,9 +86,6 @@ public class BudgetManagement extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget_management);
 
-        final Semaphore semaphore = new Semaphore(0);
-
-
         //Add logo to action bar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
@@ -103,20 +100,25 @@ public class BudgetManagement extends AppCompatActivity {
         calculateStartAndEndDate();
         incomeList = new ArrayList<Income>();
         expenseList = new ArrayList<Expense>();
+
         incomeKeys = new ArrayList<String>();
         expenseKeys = new ArrayList<String>();
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
         //Checks to see if user has a period associated with them in the database that corresponds to the current period
-        mDatabaseReference.child("users").child(mFirebaseUser.getUid()).child("periods").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-                for (DataSnapshot period : periods) {
-                    if((long)period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
-                        currentPeriodID = period.getKey();
-                        readBudget();
-                    } else {
+                if(dataSnapshot.getChildrenCount() > 0 ) {
+                    Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                    for (DataSnapshot period : periods) {
+                        if ((long) period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
+                            currentPeriodID = period.getKey();
+                            readBudget();
+                        }
+                    }
+                } else {
                         writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
                                 DateManager.trimMilliseconds(endDate.getTime()),
                                 new ArrayList<Income>(), new ArrayList<Expense>(),
@@ -124,7 +126,7 @@ public class BudgetManagement extends AppCompatActivity {
                         readBudget();
                     }
                 }
-            }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -291,23 +293,6 @@ public class BudgetManagement extends AppCompatActivity {
 //        totalExpense = calculateTotalExpense(expenseList);
     }
 
-    private class FindCurrentPeriodListener implements ValueEventListener{
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-            for(DataSnapshot period : periods) {
-                if ((long)period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
-                    currentPeriodID = period.getKey();
-                    break;
-                }
-            }
-        }
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    }
-
     private class RetrieveIncomeKeys implements ValueEventListener {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -361,7 +346,7 @@ public class BudgetManagement extends AppCompatActivity {
             Expense expense = dataSnapshot.getValue(Expense.class);
             expenseList.add(expense);
             pendingExpense--;
-            if(pendingIncome == 0 && pendingExpense == 0) {
+            if(pendingExpense == 0 && pendingIncome == 0) {
                 displayItems();
             }
         }
@@ -375,11 +360,17 @@ public class BudgetManagement extends AppCompatActivity {
     private void iterateKeys(String type) {
         if (type.equals(DBHelper.INCOMES)) {
             pendingIncome = incomeKeys.size();
+            if(pendingIncome == 0 && pendingExpense == 0) {
+                displayItems();
+            }
             for(String key : incomeKeys) {
                 mDatabaseReference.child(DBHelper.INCOMES).child(key).addListenerForSingleValueEvent(new RetrieveIncome());
             }
         } else {
             pendingExpense = expenseKeys.size();
+            if(pendingExpense == 0 && pendingIncome == 0) {
+                displayItems();
+            }
             for(String key : expenseKeys) {
                 mDatabaseReference.child(DBHelper.EXPENSES).child(key).addListenerForSingleValueEvent(new RetrieveExpense());
             }
@@ -390,9 +381,8 @@ public class BudgetManagement extends AppCompatActivity {
         Period period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
 
         //Create and set up adapter for ViewPager
-        mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid()));
+        mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID));
         //Sets up tabbed layout with ViewPager
         mTabLayout.setupWithViewPager(mViewPager);
     }
-
 }
