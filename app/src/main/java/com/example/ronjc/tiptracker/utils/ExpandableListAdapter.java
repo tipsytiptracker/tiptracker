@@ -62,10 +62,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     private String categoryKey;
 
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> chidList, String userID, String type) {
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, String userID, String type) {
         this.context = context;
         this.headerList = headerList;
-        this.childList = chidList;
+        this.childList = childList;
         this.userID = userID;
         this.type = type;
     }
@@ -112,7 +112,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     public long getGroupId(int groupPosition) {
         return groupPosition;
     }
-
     //TODO: In particular, this block needs a lot of clean up
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, final ViewGroup viewGroup) {
@@ -204,8 +203,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return true;
     }
 
-
-
     private void writeNewIncome(final String name, String amount, final String category) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         //Get rid of dollar sign and any commas
@@ -271,7 +268,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 String expenseKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).push().getKey();
                 mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
                 mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
-                Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
             }
 
             @Override

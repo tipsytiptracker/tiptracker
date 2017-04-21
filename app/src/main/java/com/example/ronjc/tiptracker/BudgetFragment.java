@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
@@ -24,6 +25,7 @@ import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.ExpandableListAdapter;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,10 +40,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 
@@ -57,11 +56,13 @@ public class BudgetFragment extends Fragment {
     private static final String PAGE_KEY = "page";
     private static final String LIST_KEY = "list";
     private static final String USER_ID_KEY = "user";
+    private static final String PERIOD_KEY = "period";
     private String type = "";
 
     //User ID being passed from ExpandableListAdapter
     private String userID = "";
     private int page;
+    private String currentPeriodID;
     private ExpandableListAdapter listAdapter;
     private ExpandableListView expandableListView;
 
@@ -75,16 +76,19 @@ public class BudgetFragment extends Fragment {
     private HashMap<String, List<String>> childList;
     private OnFragmentInteractionListener mListener;
 
+    private DatabaseReference mDatabaseReference;
+
     public BudgetFragment() {
         // Required empty public constructor
     }
 
-    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list, Date startDate, String userID) {
+    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list, Date startDate, String userID, String currentPeriodID) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
         args.putSerializable(LIST_KEY, list);
         args.putString(USER_ID_KEY, userID);
+        args.putString(PERIOD_KEY, currentPeriodID);
         mBudgetFragment.setArguments(args);
         return mBudgetFragment;
     }
@@ -92,10 +96,13 @@ public class BudgetFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        headerList = new ArrayList<String>();
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         if (getArguments() != null) {
             page = getArguments().getInt(PAGE_KEY, 0);
             list = (ArrayList<?>) getArguments().getSerializable(LIST_KEY);
             userID = getArguments().getString(USER_ID_KEY);
+            currentPeriodID = getArguments().getString(PERIOD_KEY);
         }
     }
 
@@ -103,11 +110,27 @@ public class BudgetFragment extends Fragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_budget, container, false);
+        final View view = inflater.inflate(R.layout.fragment_budget, container, false);
+        type = page == 1 ? DBHelper.INCOMES : DBHelper.EXPENSES;
         expandableListView = (ExpandableListView) view.findViewById(R.id.budget_list);
-        prepareListData();
-        listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type);
-        expandableListView.setAdapter(listAdapter);
+        mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> categories = dataSnapshot.getChildren();
+                for (DataSnapshot category : categories) {
+                    if(!headerList.contains(category.getValue().toString())) {
+                        headerList.add(category.getValue().toString());
+                    }
+                }
+                prepareListData();
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type);
+                expandableListView.setAdapter(listAdapter);
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
         Button addCategoryButton = (Button)view.findViewById(R.id.add_category_button);
         final Typeface bitter = FontManager.getTypeface(view.getContext(), BITTER);
         addCategoryButton.setTypeface(bitter);
@@ -130,7 +153,7 @@ public class BudgetFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         String newCategory = mEditText.getText().toString();
-                        writeNewCategory(newCategory, mView);
+                        writeNewCategory(newCategory);
                         dialog.dismiss();
                         Snackbar.make(mView, getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
                     }
@@ -158,52 +181,107 @@ public class BudgetFragment extends Fragment {
     private void prepareListData() {
         ArrayList<Income> incomes;
         ArrayList<Expense> expenses;
-        headerList = new ArrayList<String>();
         childList = new HashMap<String, List<String>>();
         ArrayList<ArrayList<String>> listOfLists = new ArrayList<ArrayList<String>>();
         DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-        if (list.size() != 0) {
-            if(list.get(0) instanceof Income) {
-                type = DBHelper.INCOMES;
-                incomes = (ArrayList<Income>) list;
-                for(Income income : incomes) {
-                    String stringToAdd;
-                    if(!headerList.contains(income.getCategory())) {
-                        headerList.add(income.getCategory());
-                        ArrayList<String> incomeList = new ArrayList<String>();
-                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
-                        incomeList.add(stringToAdd);
-                        listOfLists.add(incomeList);
-                    } else {
-                        int index = headerList.indexOf(income.getCategory());
-                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
-                        listOfLists.get(index).add(stringToAdd);
-                    }
+        //Check if incomes or expenses. 1 is incomes, 2 is expenses
+        if(type.equals(DBHelper.INCOMES)) {
+            if(list.size() == 0) {
+                for (int i = 0; i < headerList.size(); i++) {
+                    childList.put(headerList.get(i), new ArrayList<String>());
                 }
             } else {
-                type = DBHelper.EXPENSES;
-                expenses = (ArrayList<Expense>) list;
-                for(Expense expense : expenses) {
-                    String stringToAdd;
-                    if(!headerList.contains(expense.getCategory())) {
-                        headerList.add(expense.getCategory());
-                        ArrayList<String> expenseList = new ArrayList<String>();
-                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
-                        expenseList.add(stringToAdd);
-                        listOfLists.add(expenseList);
-                    } else {
-                        int index = headerList.indexOf(expense.getCategory());
-                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
-                        listOfLists.get(index).add(stringToAdd);
-                    }
+                for(int i = 0; i < headerList.size(); i++) {
+                    listOfLists.add(new ArrayList<String>());
+                }
+                String stringToAdd;
+                incomes = (ArrayList<Income>)list;
+                for(Income income : incomes) {
+                    int index = headerList.indexOf(income.getCategory());
+                    stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
+                    listOfLists.get(index).add(stringToAdd);
+                }
+                for(int i = 0; i < headerList.size(); i++) {
+                    childList.put(headerList.get(i), listOfLists.get(i));
                 }
             }
-            for(int i = 0; i < headerList.size(); i++) {
-                childList.put(headerList.get(i), listOfLists.get(i));
+        } else {
+            if(list.size() == 0) {
+                for (int i = 0; i < headerList.size(); i++) {
+                    childList.put(headerList.get(i), new ArrayList<String>());
+                }
+            } else {
+                for(int i = 0; i < headerList.size(); i++) {
+                    listOfLists.add(new ArrayList<String>());
+                }
+                String stringToAdd;
+                expenses = (ArrayList<Expense>)list;
+                for(Expense expense : expenses) {
+                    int index = headerList.indexOf(expense.getCategory());
+                    stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
+                    listOfLists.get(index).add(stringToAdd);
+                }
+                for(int i = 0; i < headerList.size(); i++) {
+                    childList.put(headerList.get(i), listOfLists.get(i));
+                }
             }
         }
-
+//        ArrayList<String> emptyLIst = new ArrayList<>();
+//        emptyLIst.add("Sring");
+//        if(page == 1) {
+//            type = DBHelper.INCOMES;
+//            if (list.size() != 0) {
+//                incomes = (ArrayList<Income>) list;
+//                for(Income income : incomes) {
+//                    String stringToAdd;
+//                    if(!headerList.contains(income.getCategory())) {
+//                        headerList.add(income.getCategory());
+//                        ArrayList<String> incomeList = new ArrayList<String>();
+//                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
+//                        incomeList.add(stringToAdd);
+//                        listOfLists.add(incomeList);
+//                    } else {
+//                        int index = headerList.indexOf(income.getCategory());
+//                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
+//                        listOfLists.get(index).add(stringToAdd);
+//                    }
+//                    for(int i = 0; i < headerList.size(); i++) {
+//                        childList.put(headerList.get(i), em);
+//                    }
+//                }
+//            } else {
+//                for(int i = 0; i < headerList.size(); i++) {
+//                    childList.put(headerList.get(i), );
+//                }
+//            }
+//        } else {
+//            type = DBHelper.EXPENSES;
+//            if(list.size() != 0) {
+//                expenses = (ArrayList<Expense>) list;
+//                for(Expense expense : expenses) {
+//                    String stringToAdd;
+//                    if(!headerList.contains(expense.getCategory())) {
+//                        headerList.add(expense.getCategory());
+//                        ArrayList<String> expenseList = new ArrayList<String>();
+//                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
+//                        expenseList.add(stringToAdd);
+//                        listOfLists.add(expenseList);
+//                    } else {
+//                        int index = headerList.indexOf(expense.getCategory());
+//                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
+//                        listOfLists.get(index).add(stringToAdd);
+//                    }
+//                    for(int i = 0; i < headerList.size(); i++) {
+//                        childList.put(headerList.get(i), childList.get(i));
+//                    }
+//                }
+//            } else {
+//                for(int i = 0; i < headerList.size(); i++) {
+//                    childList.put(headerList.get(i), new ArrayList<String>());
+//                }
+//            }
+//        }
 //        headerList.add("Rent");
 //        headerList.add("Grocery");
 //        headerList.add("Misc.");
@@ -226,8 +304,7 @@ public class BudgetFragment extends Fragment {
 //        childList.put(headerList.get(2), misc);
     }
 
-    //TODO: Move to BudgetFragment
-    private void writeNewCategory(final String category, final View view) {
+    private void writeNewCategory(final String category) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         //Get last Sunday in milliseconds
         Calendar calendar = Calendar.getInstance();
