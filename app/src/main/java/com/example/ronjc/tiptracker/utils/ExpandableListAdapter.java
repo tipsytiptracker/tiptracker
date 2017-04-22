@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +26,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.math.BigDecimal;
+import java.security.DomainCombiner;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,6 +40,7 @@ import butterknife.ButterKnife;
 
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
+import static java.security.AccessController.getContext;
 
 /**
  * TODO: This Class needs a lot of clean up!
@@ -60,15 +66,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private String userID;
     private String type;
     private String currentPeriodID;
+    private TextView totalTextView;
 
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, String userID, String type, String currentPeriodID) {
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, String userID, String type, String currentPeriodID, TextView totalTextView) {
         this.context = context;
         this.headerList = headerList;
         this.childList = childList;
         this.userID = userID;
         this.type = type;
         this.currentPeriodID = currentPeriodID;
+        this.totalTextView = totalTextView;
     }
 
     @Override
@@ -237,6 +245,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
         String stringToAdd = name + ": " + amount;
         childList.get(category).add(stringToAdd);
+        updateTotal(doubleAmount);
+
 //            }
 //
 //            @Override
@@ -285,6 +295,20 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 //        int i = headerList.indexOf(category);
         String stringToAdd = name + ": " + amount;
         childList.get(category).add(stringToAdd);
+        updateTotal(doubleAmount);
 //    }
+    }
+
+    private void updateTotal(double doubleAmount) {
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String total = totalTextView.getText().toString().substring(8);
+        double parsedTotal = Double.parseDouble(total);
+        BigDecimal bigDecimal1 = new BigDecimal(doubleAmount);
+        bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal2 = new BigDecimal(parsedTotal);
+        bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+        parsedTotal = bigDecimal1.add(bigDecimal2).doubleValue();
+        total = context.getString(R.string.total) + decimalFormat.format(parsedTotal);
+        totalTextView.setText(total);
     }
 }
