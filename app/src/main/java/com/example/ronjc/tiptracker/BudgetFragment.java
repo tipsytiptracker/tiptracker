@@ -9,6 +9,8 @@ import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +39,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +65,7 @@ public class BudgetFragment extends Fragment {
     //User ID being passed from ExpandableListAdapter
     private String userID = "";
     private int page;
-    private String currentPeriodID;
+    private String currentPeriodID = "";
     private ExpandableListAdapter listAdapter;
     private ExpandableListView expandableListView;
 
@@ -96,6 +99,7 @@ public class BudgetFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         headerList = new ArrayList<String>();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         if (getArguments() != null) {
@@ -123,7 +127,7 @@ public class BudgetFragment extends Fragment {
                     }
                 }
                 prepareListData();
-                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type);
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type, currentPeriodID);
                 expandableListView.setAdapter(listAdapter);
             }
             @Override
@@ -197,6 +201,8 @@ public class BudgetFragment extends Fragment {
                 }
                 String stringToAdd;
                 incomes = (ArrayList<Income>)list;
+                //For some reason, arraylist contains null elements on creation. remove them using this line
+                incomes.removeAll(Collections.singleton(null));
                 for(Income income : incomes) {
                     int index = headerList.indexOf(income.getCategory());
                     stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
@@ -217,6 +223,7 @@ public class BudgetFragment extends Fragment {
                 }
                 String stringToAdd;
                 expenses = (ArrayList<Expense>)list;
+                expenses.removeAll(Collections.singleton(null));
                 for(Expense expense : expenses) {
                     int index = headerList.indexOf(expense.getCategory());
                     stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
@@ -306,35 +313,11 @@ public class BudgetFragment extends Fragment {
 
     private void writeNewCategory(final String category) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        //Get last Sunday in milliseconds
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        final long time = DateManager.trimMilliseconds(startDate.getTime());
-        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //Get key for period to write
-                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-                String periodToWrite = "";
-                for(DataSnapshot period : periods) {
-                    if ((long)period.getValue() == time) {
-                        periodToWrite = period.getKey();
-                        break;
-                    }
-                }
-                String categoryKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child(type).push().getKey();
-                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child(type).child(categoryKey).setValue(category);
-                Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        String categoryKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).push().getKey();
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).child(categoryKey).setValue(category);
+        Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
+        headerList.add(category);
+        childList.put(category, new ArrayList<String>());
+        listAdapter.notifyDataSetChanged();
     }
 }
