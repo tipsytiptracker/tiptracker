@@ -1,5 +1,6 @@
 package com.example.ronjc.tiptracker;
 
+import android.app.ProgressDialog;
 import android.graphics.Typeface;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -79,6 +80,13 @@ public class BudgetManagement extends AppCompatActivity {
     private String currentPeriodID;
     private int pendingIncome = 0;
     private int pendingExpense = 0;
+    private BudgetPageAdapter mBudgetPageAdapter;
+
+    private ProgressDialog mProgressDialog;
+
+    private Period period;
+
+    private boolean initialStart = true;
 
 
     @Override
@@ -91,6 +99,11 @@ public class BudgetManagement extends AppCompatActivity {
         getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
         getSupportActionBar().setTitle("");
 
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setTitle("Retrieving...");
+        mProgressDialog.setMessage(getString(R.string.please_wait));
+        mProgressDialog.setCancelable(false);
+
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -98,11 +111,6 @@ public class BudgetManagement extends AppCompatActivity {
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         //method call to set start and end date
         calculateStartAndEndDate();
-        incomeList = new ArrayList<Income>();
-        expenseList = new ArrayList<Expense>();
-
-        incomeKeys = new ArrayList<String>();
-        expenseKeys = new ArrayList<String>();
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
@@ -355,30 +363,49 @@ public class BudgetManagement extends AppCompatActivity {
     }
 
     private void displayItems() {
-        Period period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
-
+            period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
         //Create and set up adapter for ViewPager
-        mViewPager.setAdapter(new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID));
         //Sets up tabbed layout with ViewPager
-        mTabLayout.setupWithViewPager(mViewPager);
+//        if(initialStart) {
+            mViewPager.setAdapter(null);
+            mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID);
+            mViewPager.setAdapter(mBudgetPageAdapter);
+            mTabLayout.setupWithViewPager(mViewPager);
+//            initialStart = false;
+//        }
+//        mBudgetPageAdapter.notifyDataSetChanged();
+//        mViewPager.setAdapter(mBudgetPageAdapter);
+//        mTabLayout.setupWithViewPager(mViewPager);
+        showProgress(false);
     }
 
     private void retrieveCurrentPeriod() {
+        showProgress(true);
+        incomeKeys = new ArrayList<String>();
+        expenseKeys = new ArrayList<String>();
+        incomeList = new ArrayList<Income>();
+        expenseList = new ArrayList<Expense>();
         //Checks to see if user has a period associated with them in the database that corresponds to the current period
         mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                //Check if there are periods associated with the user
                 if(dataSnapshot.getChildrenCount() > 0 ) {
                     boolean foundPeriod = false;
+                    //Get all periods fo this user
                     Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                    //Iterate through users
                     for (DataSnapshot period : periods) {
+                        //If a period has a matching value in time, set that to current PeriodID
                         if ((long) period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
                             currentPeriodID = period.getKey();
                             foundPeriod = true;
                             break;
                         }
                     }
+                    //If not period matches, create a new one to the database
                     if(!foundPeriod) {
+                        //TODO: change to actual values
                         writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
                                 DateManager.trimMilliseconds(endDate.getTime()),
                                 new ArrayList<Income>(), new ArrayList<Expense>(),
@@ -398,5 +425,13 @@ public class BudgetManagement extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showProgress(boolean show) {
+        if(show) {
+            mProgressDialog.show();
+        } else {
+            mProgressDialog.dismiss();
+        }
     }
 }

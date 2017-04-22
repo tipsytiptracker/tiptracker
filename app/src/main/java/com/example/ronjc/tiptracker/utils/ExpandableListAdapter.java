@@ -50,7 +50,7 @@ import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
  * Created on 4/15/2017.
  */
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter{
+public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private final static String INCOME = "income";
 
@@ -59,15 +59,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     private HashMap<String, List<String>> childList;
     private String userID;
     private String type;
-    private String categoryKey;
+    private String currentPeriodID;
 
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, String userID, String type) {
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, String userID, String type, String currentPeriodID) {
         this.context = context;
         this.headerList = headerList;
         this.childList = childList;
         this.userID = userID;
         this.type = type;
+        this.currentPeriodID = currentPeriodID;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     public View getChildView(int groupPosition, int childPosition, boolean iaLastChild, View convertView, ViewGroup viewGroup) {
         final String childText = (String) getChild(groupPosition, childPosition);
         if (convertView == null) {
-            LayoutInflater mLayoutInflator = (LayoutInflater)this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater mLayoutInflator = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = mLayoutInflator.inflate(R.layout.list_item, null);
         }
         TextView textListChild = (TextView) convertView.findViewById(R.id.lblListItem);
@@ -112,17 +113,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     public long getGroupId(int groupPosition) {
         return groupPosition;
     }
+
     //TODO: In particular, this block needs a lot of clean up
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, final ViewGroup viewGroup) {
         ButterKnife.bind(viewGroup);
         final String headerTitle = (String) getGroup(groupPosition);
         final LayoutInflater mLayoutInflator = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = mLayoutInflator.inflate(R.layout.list_group, null);
         }
-        TextView lblListHeader = (TextView)convertView.findViewById(R.id.lblListHeader);
-        TextView plusIcon = (TextView)convertView.findViewById(R.id.add_icon);
+        TextView lblListHeader = (TextView) convertView.findViewById(R.id.lblListHeader);
+        TextView plusIcon = (TextView) convertView.findViewById(R.id.add_icon);
 
         Typeface bitter = FontManager.getTypeface(convertView.getContext(), BITTER);
         Typeface fontAwesome = FontManager.getTypeface(convertView.getContext(), FontManager.FONTAWESOME);
@@ -156,7 +158,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                         dialog.dismiss();
                         AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(context);
                         final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
-                        ((TextView)pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
+                        ((TextView) pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
                         TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
                         pencilHeader.setTypeface(bitter);
                         pencilHeader.setText(context.getString(R.string.add) + " " + headerTitle);
@@ -176,7 +178,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                         itemButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                if(type.equals(DBHelper.INCOMES)) {
+                                if (type.equals(DBHelper.INCOMES)) {
                                     writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
                                 } else {
                                     writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
@@ -203,78 +205,86 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return true;
     }
 
-    private void writeNewIncome(final String name, String amount, final String category) {
+    private void writeNewIncome(final String name, final String amount, final String category) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         //Get rid of dollar sign and any commas
         final double doubleAmount = Double.parseDouble(amount.substring(1).replace(",", ""));
-        //Get last Sunday in milliseconds
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        final long time = DateManager.trimMilliseconds(startDate.getTime());
-        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //Get key for period to write
-                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-                String periodToWrite = "";
-                for(DataSnapshot period : periods) {
-                    if ((long)period.getValue() == time) {
-                        periodToWrite = period.getKey();
-                        break;
-                    }
-                }
-                String incomeKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).push().getKey();
-                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
-                Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
-                mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
-                Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
-            }
+//        //Get last Sunday in milliseconds
+//        final Calendar calendar = Calendar.getInstance();
+//        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+//        calendar.set(Calendar.HOUR_OF_DAY, 0);
+//        calendar.set(Calendar.MINUTE, 0);
+//        calendar.set(Calendar.SECOND, 0);
+//        Date startDate = calendar.getTime();
+//        final long time = DateManager.trimMilliseconds(startDate.getTime());
+//        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                //Get key for period to write
+//                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+//                String periodToWrite = "";
+//                for(DataSnapshot period : periods) {
+//                    if ((long)period.getValue() == time) {
+//                        periodToWrite = period.getKey();
+//                        break;
+//                    }
+//                }
+        String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+        //if they add to this from a past or future period, then its date will be out of the bounds of the actual period
+        Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
+        Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
+        String stringToAdd = name + ": " + amount;
+        childList.get(category).add(stringToAdd);
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void writeNewExpense(String name, String amount, String category) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         double doubleAmount = Double.parseDouble(amount.substring(1));
         final Expense expense = new Expense(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
-        //Get last Sunday in milliseconds
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        Date startDate = calendar.getTime();
-        final long time = DateManager.trimMilliseconds(startDate.getTime());
-        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //Get key for period to write
-                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-                String periodToWrite = "";
-                for(DataSnapshot period : periods) {
-                    if ((long)period.getValue() == time) {
-                        periodToWrite = period.getKey();
-                        break;
-                    }
-                }
-                String expenseKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).push().getKey();
-                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
-                mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
-                Toast.makeText(context, context.getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+//        //Get last Sunday in milliseconds
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+//        calendar.set(Calendar.HOUR_OF_DAY, 0);
+//        calendar.set(Calendar.MINUTE, 0);
+//        calendar.set(Calendar.SECOND, 0);
+//        Date startDate = calendar.getTime();
+//        final long time = DateManager.trimMilliseconds(startDate.getTime());
+//        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                //Get key for period to write
+//                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+//                String periodToWrite = "";
+//                for(DataSnapshot period : periods) {
+//                    if ((long)period.getValue() == time) {
+//                        periodToWrite = period.getKey();
+//                        break;
+//                    }
+//                }
+        String expenseKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
+        mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
+        Toast.makeText(context, context.getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//        int i = headerList.indexOf(category);
+        String stringToAdd = name + ": " + amount;
+        childList.get(category).add(stringToAdd);
+//    }
     }
 }

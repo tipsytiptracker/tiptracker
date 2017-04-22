@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.example.ronjc.tiptracker.BudgetFragment;
 import com.example.ronjc.tiptracker.model.Expense;
@@ -26,7 +27,7 @@ import java.util.List;
  * Created on 4/14/2017.
  */
 
-public class BudgetPageAdapter extends FragmentPagerAdapter{
+public class BudgetPageAdapter extends FragmentStatePagerAdapter{
 
     private final int NUM_ITEMS = 2;
     private String tabTitles[] = new String[] {"Income", "Expenses"};
@@ -41,6 +42,12 @@ public class BudgetPageAdapter extends FragmentPagerAdapter{
 
     public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period, String userID, String currentPeriodID) {
         super(fragmentManager);
+//        List<Fragment> al = fragmentManager.getFragments();
+//        if (al != null) {
+//            for (Fragment frag : al) {
+//                fragmentManager.beginTransaction().remove(frag).commit();
+//            }
+//        }
         this.context = context;
         this.startDate = new Date(period.getStartDate());
         this.endDate = new Date(period.getEndDate());
@@ -63,5 +70,10 @@ public class BudgetPageAdapter extends FragmentPagerAdapter{
     @Override
     public CharSequence getPageTitle(int position) {
         return tabTitles[position];
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
     }
 }
