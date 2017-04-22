@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/pie_chart_outer_layout"
+    android:background="@color/metroTileColorPressed">
+    <com.github.mikephil.charting.charts.PieChart
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center"
+        android:id="@+id/actual_pie_chart"
+        android:layout_width="300dp"
+        android:layout_height="300dp"></com.github.mikephil.charting.charts.PieChart>
+
+</LinearLayout>
