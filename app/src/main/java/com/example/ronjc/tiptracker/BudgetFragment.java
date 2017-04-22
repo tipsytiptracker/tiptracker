@@ -105,6 +105,9 @@ public class BudgetFragment extends Fragment {
 
     private ViewGroup viewGroup;
 
+    DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+
     public BudgetFragment() {
         // Required empty public constructor
     }
@@ -146,6 +149,7 @@ public class BudgetFragment extends Fragment {
         viewGroup = container;
         type = page == 1 ? DBHelper.INCOMES : DBHelper.EXPENSES;
         expandableListView = (ExpandableListView) view.findViewById(R.id.budget_list);
+        final TextView mTotalTextView = (TextView)view.findViewById(R.id.total_tv);
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -156,7 +160,7 @@ public class BudgetFragment extends Fragment {
                     }
                 }
                 prepareListData();
-                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type, currentPeriodID);
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type, currentPeriodID, mTotalTextView);
                 expandableListView.setAdapter(listAdapter);
             }
             @Override
@@ -165,7 +169,6 @@ public class BudgetFragment extends Fragment {
         });
 
         Button addCategoryButton = (Button)view.findViewById(R.id.add_category_button);
-        TextView mTotalTextView = (TextView)view.findViewById(R.id.total_tv);
         TextView mPieChart = (TextView)view.findViewById(R.id.pie_chart_icon);
         final Typeface bitter = FontManager.getTypeface(view.getContext(), BITTER);
         Typeface fontAwesome = FontManager.getTypeface(view.getContext(), FONTAWESOME);
@@ -174,7 +177,7 @@ public class BudgetFragment extends Fragment {
         mPieChart.setTypeface(fontAwesome);
 
         mPieChart.setOnClickListener(new PieChartListener());
-        mTotalTextView.setText(getString(R.string.total) + total);
+        mTotalTextView.setText(getString(R.string.total) + decimalFormat.format(total));
         addCategoryButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -202,9 +205,6 @@ public class BudgetFragment extends Fragment {
                 dialog.show();
             }
         });
-
-        AlertDialog.Builder pieChartBuilder = new AlertDialog.Builder(getContext());
-        View pieView = inflater.inflate(R.layout.piechart, null);
 
         return view;
 
