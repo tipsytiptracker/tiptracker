@@ -4,6 +4,7 @@ package com.example.ronjc.tiptracker;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.icu.util.Calendar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,8 +18,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blackcat.currencyedittext.CurrencyEditText;
+import com.example.ronjc.tiptracker.model.Expense;
+import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.model.Period;
 import com.example.ronjc.tiptracker.model.User;
+import com.example.ronjc.tiptracker.utils.DBHelper;
+import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
@@ -41,6 +46,7 @@ import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +68,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
     LineChart lineChart;
+    String periodId;
+    String pID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,18 +91,17 @@ public class BudgetGoalActivity extends AppCompatActivity {
         String customFont = "fonts/bitter.ttf";
         Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
         budgetBtn.setTypeface(iconFont);
+        FontManager.markAsIconContainer(budgetBtn,iconFont);
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
-
-
+        user = mAuth.getCurrentUser();
 
         budgetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 changedGoal = setBudget.getText().toString();
-                user = mAuth.getCurrentUser();
                 goal.setText("Current Budget: " + changedGoal);
                 changedGoal = changedGoal.replace(",","");
                 dbRef.orderByChild("email").equalTo(user.getEmail()).
@@ -104,12 +111,13 @@ public class BudgetGoalActivity extends AppCompatActivity {
                                 //Updates current budget goal to Firebase
                                 dbRef.child("users").child(user.getUid()).child("current_budget").
                                         setValue(Double.parseDouble(changedGoal.substring(1)));
+                                dbRef.child("periods").child(Utils.PERIODID).child("budgetGoal").push()
+                                            .setValue(Double.parseDouble(changedGoal.substring(1)));
 
-
-                                dbRef.child("periods").child(user.getUid()).child("budgetGoal")
-                                        .setValue(Double.parseDouble(changedGoal.substring(1)));
-
-
+                                dbRef.child("periods").child(Utils.PERIODID).child("endDate").push()
+                                        .setValue(System.currentTimeMillis());
+                                //GetXYValues();
+                                //period key ends in OzG
                             }
 
                             @Override
@@ -120,48 +128,11 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
             }
         });
-        user = mAuth.getCurrentUser();
-        dbRef.child("periods").child(user.getUid()).child("budgetGoal")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<String> list1 = new ArrayList<String>();
-                ArrayList<String> list3 = new ArrayList<String>();
 
-                for (DataSnapshot child: dataSnapshot.getChildren()) {
-
-                    Period users = child.getValue(Period.class);
-
-                    String get_amount = ""+users.getBudgetGoal();
-
-                    long get_date = users.getStartDate();
-
-                    DateFormat df = new SimpleDateFormat("MM/dd/yy");
-                    String gd = df.format(get_date) + "\n";
-
-                    list1.add(get_amount);
-                    list3.add(gd);
-
-                }
-                TextView t = (TextView)findViewById(R.id.test);
-                String amounts = TextUtils.join("", list1);
-                //t.setText(list1.toString());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
         //Add line graph that displays user income, expense and budget goal
         List<Entry> entries = new ArrayList<Entry>();
         //add for loop to add other entries
-
-
-
-        ArrayList<String> list1 = new ArrayList<String>();
-        ArrayList<String> list2 = new ArrayList<String>();
 
         entries.add(new Entry(3,4));
         entries.add(new Entry(5,6));
@@ -212,5 +183,43 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
 
 
+    }
+    private void GetXYValues(){
+        pID =Utils.PERIODID;
+
+        dbRef.child("periods").child(pID).child("budgetGoal")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ArrayList<String> list1 = new ArrayList<String>();
+                        ArrayList<String> list3 = new ArrayList<String>();
+
+                        for (DataSnapshot child: dataSnapshot.getChildren()) {
+
+                            Period period = child.getValue(Period.class);
+
+                            String get_amount = ""+period.getBudgetGoal();
+
+                            //long get_date = users.getStartDate();
+
+                            //DateFormat df = new SimpleDateFormat("MM/dd/yy");
+                            //String gd = df.format(get_date) + "\n";
+
+                            list1.add(get_amount);
+                            //list3.add(gd);
+
+                        }
+                        TextView t = (TextView)findViewById(R.id.test);
+                        String amounts = TextUtils.join("", list1);
+                        t.setText(amounts);
+                        Toast.makeText(BudgetGoalActivity.this,"HERE",Toast.LENGTH_LONG).show();;
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+        ;
     }
 }
