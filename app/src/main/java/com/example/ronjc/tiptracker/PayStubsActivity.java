@@ -3,6 +3,7 @@ package com.example.ronjc.tiptracker;
 import android.graphics.Typeface;
 import android.icu.text.DateFormat;
 import android.icu.text.SimpleDateFormat;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.model.PayStub;
+import com.example.ronjc.tiptracker.utils.DBHelper;
+import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,7 +28,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,6 +52,7 @@ public class PayStubsActivity extends AppCompatActivity {
     FirebaseAuth firebaseAuth;
     FirebaseAuth.AuthStateListener mAuthListener;
     FirebaseUser user;
+    String periodID = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,6 +197,90 @@ public class PayStubsActivity extends AppCompatActivity {
 
     }
 
-    private void addIncome (double amount, String desc,  long dateAdded){ //method to add the paystub to their income
+    private void addIncome (double amount, String desc,  long dateAdded){//method to add the paystub to their income
+        String ps_id = getPeriodId();
+
+        myRef.child("periods").child(ps_id).child("categories").child("incomes").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot data: dataSnapshot.getChildren()){
+                    if (!data.getValue().toString().equals("Uploaded Paystubs")) {
+                        writePSCategory();
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+
+            }
+        });
+
+    }
+
+    private void writePSCategory() {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        //Get last Sunday in milliseconds
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date startDate = calendar.getTime();
+        final long time = DateManager.trimMilliseconds(startDate.getTime());
+        mDatabase.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                String periodToWrite = "";
+                for(DataSnapshot period : periods) {
+                    if ((long)period.getValue() == time) {
+                        periodToWrite = period.getKey();
+                        break;
+                    }
+                }
+                String categoryKey = mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child("incomes").push().getKey();
+                mDatabase.child(DBHelper.PERIODS).child(periodToWrite).child(DBHelper.CATEGORIES).child("incomes").child(categoryKey).setValue("Uploaded Paystubs");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private String getPeriodId(){
+
+        myRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                //Get last Sunday in milliseconds
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                Date startDate = calendar.getTime();
+                final long time = DateManager.trimMilliseconds(startDate.getTime());
+
+                for (DataSnapshot period : periods) {
+                    if ((long) period.getValue() == time) {
+                        periodID = period.getKey();
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return periodID;
     }
 }
