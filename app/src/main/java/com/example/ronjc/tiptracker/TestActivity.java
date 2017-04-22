@@ -28,13 +28,10 @@ public class TestActivity extends AppCompatActivity {
 
         textView = (TextView) findViewById(R.id.textView);
         imageView = (ImageView) findViewById(R.id.imageView);
-
-        mCam = new Camera(this);
-
-
     }
 
     public void takePic(View view) {
+        mCam = new Camera(this);
         mCam.takePicture();
     }
 
@@ -44,7 +41,6 @@ public class TestActivity extends AppCompatActivity {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             bitmap = mCam.getBitmap();
             imageView.setImageBitmap(bitmap);
-
         }
     }
 

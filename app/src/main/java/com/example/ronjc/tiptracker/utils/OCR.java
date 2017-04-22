@@ -3,6 +3,7 @@ package com.example.ronjc.tiptracker.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.android.gms.vision.Frame;
@@ -36,7 +37,7 @@ public class OCR {
         List<? extends com.google.android.gms.vision.text.Text> lineList;
         List<? extends com.google.android.gms.vision.text.Text> wordList;
         Rect lineRect = new Rect(0, 0, 0, 0);
-        Rect wordRect = new Rect(0, 0,0 , 0);
+        Rect wordRect = new Rect(0, 0, 0, 0);
 
         firstloop:
         for (int i = 0; i < textBlocks.size(); i++) {
@@ -70,15 +71,32 @@ public class OCR {
                 wordList = lineList.get(j).getComponents();
 
                 for (int k = 0; k < wordList.size(); k++) {
-                    if (wordList.get(k).getBoundingBox().top > wordRect.top - 15 &&
-                            wordList.get(k).getBoundingBox().top < wordRect.top + 15 &&
+                    if (wordList.get(k).getBoundingBox().top > wordRect.top - 30 &&
+                            wordList.get(k).getBoundingBox().top < wordRect.top + 30 &&
                             !lineList.get(j).getBoundingBox().equals(lineRect)) {
-                        total = wordList.get(k).getValue();
+                        if (k + 1 < wordList.size()) {
+                            if (wordList.get(k + 1).getValue().equals("$") ||
+                                    wordList.get(k + 1).getValue().equals("s")) {
+                                total = wordList.get(k + 2).getValue();
+                            } else
+                                total = wordList.get(k + 1).getValue();
+                        } else
+                            total = wordList.get(k).getValue();
                         break secondloop;
                     }
                 }
             }
         }
+        
+        if (total.equals("")) {
+            Log.d("myTotal", "blank");
+            total = "0.00";
+        }
+        if (total.contains("$") || total.contains("s") || total.contains("S") || total.contains("g")) {
+            Log.d("myTotal", total);
+            total = total.substring(1);
+        }
         return total;
     }
 }
+
