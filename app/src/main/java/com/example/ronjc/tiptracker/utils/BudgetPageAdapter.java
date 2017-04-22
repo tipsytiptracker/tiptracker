@@ -34,6 +34,8 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
     private Date startDate, endDate;
     private ArrayList<Expense> expenses;
     private ArrayList<Income> incomes;
+    private double totalIncomes = 0.00;
+    private double totalExpenses = 0.00;
     private Context context;
     private String currentPeriodID;
 
@@ -53,6 +55,8 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
         this.endDate = new Date(period.getEndDate());
         this.expenses = period.getExpenses();
         this.incomes = period.getIncomes();
+        this.totalExpenses = period.getTotalExpenses();
+        this.totalIncomes = period.getTotalIncome();
         this.userID = userID;
         this.currentPeriodID = currentPeriodID;
     }
@@ -64,7 +68,11 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
 
     @Override
     public Fragment getItem(int position) {
-        return position == 0 ? BudgetFragment.newInstance(position + 1, incomes, startDate, userID, currentPeriodID) : BudgetFragment.newInstance(position + 1, expenses, startDate, userID, currentPeriodID);
+        if(position == 0) {
+            return BudgetFragment.newInstance(position + 1, incomes, startDate, userID, currentPeriodID, totalIncomes);
+        } else {
+            return BudgetFragment.newInstance(position + 1, expenses, startDate, userID, currentPeriodID, totalExpenses);
+        }
     }
 
     @Override

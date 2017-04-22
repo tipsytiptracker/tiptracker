@@ -34,6 +34,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -46,6 +48,7 @@ import java.util.List;
 
 
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
+import static com.example.ronjc.tiptracker.utils.FontManager.FONTAWESOME;
 
 
 /**
@@ -60,12 +63,14 @@ public class BudgetFragment extends Fragment {
     private static final String LIST_KEY = "list";
     private static final String USER_ID_KEY = "user";
     private static final String PERIOD_KEY = "period";
+    private static final String TOTAL_KEY = "total";
     private String type = "";
 
     //User ID being passed from ExpandableListAdapter
     private String userID = "";
     private int page;
     private String currentPeriodID = "";
+    private double total = 0.00;
     private ExpandableListAdapter listAdapter;
     private ExpandableListView expandableListView;
 
@@ -85,13 +90,16 @@ public class BudgetFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list, Date startDate, String userID, String currentPeriodID) {
+    public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list,
+                                             Date startDate, String userID, String currentPeriodID,
+                                            double total) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
         args.putSerializable(LIST_KEY, list);
         args.putString(USER_ID_KEY, userID);
         args.putString(PERIOD_KEY, currentPeriodID);
+        args.putDouble(TOTAL_KEY, total);
         mBudgetFragment.setArguments(args);
         return mBudgetFragment;
     }
@@ -107,6 +115,7 @@ public class BudgetFragment extends Fragment {
             list = (ArrayList<?>) getArguments().getSerializable(LIST_KEY);
             userID = getArguments().getString(USER_ID_KEY);
             currentPeriodID = getArguments().getString(PERIOD_KEY);
+            total = getArguments().getDouble(TOTAL_KEY, 0);
         }
     }
 
@@ -136,8 +145,14 @@ public class BudgetFragment extends Fragment {
         });
 
         Button addCategoryButton = (Button)view.findViewById(R.id.add_category_button);
+        TextView mTotalTextView = (TextView)view.findViewById(R.id.total_tv);
+        TextView mPieChart = (TextView)view.findViewById(R.id.pie_chart_icon);
         final Typeface bitter = FontManager.getTypeface(view.getContext(), BITTER);
+        Typeface fontAwesome = FontManager.getTypeface(view.getContext(), FONTAWESOME);
         addCategoryButton.setTypeface(bitter);
+        mTotalTextView.setTypeface(bitter);
+        mPieChart.setTypeface(fontAwesome);
+        mTotalTextView.setText(getString(R.string.total) + total);
         addCategoryButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {

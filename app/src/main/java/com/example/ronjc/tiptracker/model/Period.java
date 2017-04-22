@@ -63,4 +63,13 @@ public class Period {
     public double getBudgetGoal() {
         return budgetGoal;
     }
+
+    public double getTotalIncome() {
+        return totalIncome;
+    }
+
+    public double getTotalExpenses() {
+        return totalExpenses;
+    }
+
 }

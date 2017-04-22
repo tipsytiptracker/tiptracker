@@ -73,6 +73,7 @@
     <string name="category_added">Category was successfully added</string>
     <string name="income_added">Income was successfully added</string>
     <string name="expense_added">Expense was successfully added</string>
+    <string name="total">Total: $</string>
 
     <!-- Strings for manually adding item dialog-->
     <string name="item_name">Name</string>
