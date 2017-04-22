@@ -2,6 +2,7 @@ package com.example.ronjc.tiptracker;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,17 @@ import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.ExpandableListAdapter;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -84,7 +96,14 @@ public class BudgetFragment extends Fragment {
     private HashMap<String, List<String>> childList;
     private OnFragmentInteractionListener mListener;
 
+    private ArrayList<Double> amountsByCategory;
+
+    private LinearLayout mPieLayout;
+    private PieChart mPieChart;
+
     private DatabaseReference mDatabaseReference;
+
+    private ViewGroup viewGroup;
 
     public BudgetFragment() {
         // Required empty public constructor
@@ -124,6 +143,7 @@ public class BudgetFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_budget, container, false);
+        viewGroup = container;
         type = page == 1 ? DBHelper.INCOMES : DBHelper.EXPENSES;
         expandableListView = (ExpandableListView) view.findViewById(R.id.budget_list);
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -152,6 +172,8 @@ public class BudgetFragment extends Fragment {
         addCategoryButton.setTypeface(bitter);
         mTotalTextView.setTypeface(bitter);
         mPieChart.setTypeface(fontAwesome);
+
+        mPieChart.setOnClickListener(new PieChartListener());
         mTotalTextView.setText(getString(R.string.total) + total);
         addCategoryButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -180,6 +202,10 @@ public class BudgetFragment extends Fragment {
                 dialog.show();
             }
         });
+
+        AlertDialog.Builder pieChartBuilder = new AlertDialog.Builder(getContext());
+        View pieView = inflater.inflate(R.layout.piechart, null);
+
         return view;
 
     }
@@ -201,18 +227,24 @@ public class BudgetFragment extends Fragment {
         ArrayList<Income> incomes;
         ArrayList<Expense> expenses;
         childList = new HashMap<String, List<String>>();
+        amountsByCategory = new ArrayList<Double>();
         ArrayList<ArrayList<String>> listOfLists = new ArrayList<ArrayList<String>>();
         DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        BigDecimal bigDecimal1;
+        BigDecimal bigDecimal2;
 
         //Check if incomes or expenses. 1 is incomes, 2 is expenses
         if(type.equals(DBHelper.INCOMES)) {
             if(list.size() == 0) {
                 for (int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), new ArrayList<String>());
+                    amountsByCategory.add(0.00);
                 }
             } else {
                 for(int i = 0; i < headerList.size(); i++) {
                     listOfLists.add(new ArrayList<String>());
+                    amountsByCategory.add(0.00);
+
                 }
                 String stringToAdd;
                 incomes = (ArrayList<Income>)list;
@@ -222,6 +254,11 @@ public class BudgetFragment extends Fragment {
                     int index = headerList.indexOf(income.getCategory());
                     stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
                     listOfLists.get(index).add(stringToAdd);
+                    bigDecimal1 = new BigDecimal(amountsByCategory.get(index));
+                    bigDecimal2 = new BigDecimal(income.getAmount());
+                    bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+                    bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+                    amountsByCategory.set(index, bigDecimal1.add(bigDecimal2).doubleValue());
                 }
                 for(int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), listOfLists.get(i));
@@ -231,10 +268,12 @@ public class BudgetFragment extends Fragment {
             if(list.size() == 0) {
                 for (int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), new ArrayList<String>());
+                    amountsByCategory.add(0.00);
                 }
             } else {
                 for(int i = 0; i < headerList.size(); i++) {
                     listOfLists.add(new ArrayList<String>());
+                    amountsByCategory.add(0.00);
                 }
                 String stringToAdd;
                 expenses = (ArrayList<Expense>)list;
@@ -243,6 +282,11 @@ public class BudgetFragment extends Fragment {
                     int index = headerList.indexOf(expense.getCategory());
                     stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
                     listOfLists.get(index).add(stringToAdd);
+                    bigDecimal1 = new BigDecimal(amountsByCategory.get(index));
+                    bigDecimal2 = new BigDecimal(expense.getAmount());
+                    bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+                    bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+                    amountsByCategory.set(index, bigDecimal1.add(bigDecimal2).doubleValue());
                 }
                 for(int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), listOfLists.get(i));
@@ -334,5 +378,94 @@ public class BudgetFragment extends Fragment {
         headerList.add(category);
         childList.put(category, new ArrayList<String>());
         listAdapter.notifyDataSetChanged();
+    }
+
+    private class PieChartListener implements View.OnClickListener{
+        @Override
+        public void onClick(View view) {
+            LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View pieView = layoutInflater.inflate(R.layout.piechart, viewGroup, false);
+            mPieLayout = (LinearLayout) pieView.findViewById(R.id.pie_chart_outer_layout);
+            AlertDialog.Builder pieChartBuilder = new AlertDialog.Builder(getContext());
+            mPieChart = (PieChart) pieView.findViewById(R.id.actual_pie_chart);
+
+            mPieChart.setUsePercentValues(true);
+            mPieChart.setDrawHoleEnabled(true);
+            mPieChart.setHoleRadius(16);
+            mPieChart.setTransparentCircleRadius(20);
+            mPieChart.setRotationAngle(0);
+            mPieChart.setRotationEnabled(true);
+
+//            mPieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+//                @Override
+//                public void onValueSelected(Entry e, Highlight h) {
+//                    if (e == null) {
+//                        return;
+//
+//                    }
+//                    Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), headerList.get(e.getX()) + " = " + e.getVal() + "%", Snackbar.LENGTH_SHORT).show();
+//                }
+//                @Override
+//                public void onNothingSelected() {
+//
+//                }
+//            });
+            addData();
+//            Legend l = mPieChart.getLegend();
+//            l.setPosition(Legend.LegendPosition.RIGHT_OF_CHART);
+//            l.setXEntrySpace(7);
+//            l.setYEntrySpace(5);
+
+            pieChartBuilder.setView(pieView);
+            final AlertDialog dialog = pieChartBuilder.create();
+            dialog.show();
+        }
+        private void addData() {
+            List<PieEntry> yValues = new ArrayList<PieEntry>();
+            for (int i = 0; i < amountsByCategory.size(); i++) {
+                yValues.add(new PieEntry(amountsByCategory.get(i).floatValue(), i));
+            }
+            PieDataSet mDataSet = new PieDataSet(yValues, getString(R.string.pie_chart_label));
+            mDataSet.setSliceSpace(3);
+            mDataSet.setSelectionShift(5);
+
+            ArrayList<Integer> colors = new ArrayList<Integer>();
+
+            for (int c : ColorTemplate.VORDIPLOM_COLORS) {
+                colors.add(c);
+            }
+
+
+            for (int c : ColorTemplate.JOYFUL_COLORS) {
+                colors.add(c);
+            }
+
+            for (int c : ColorTemplate.COLORFUL_COLORS) {
+                colors.add(c);
+            }
+
+            for (int c : ColorTemplate.LIBERTY_COLORS) {
+                colors.add(c);
+            }
+
+            for (int c : ColorTemplate.PASTEL_COLORS) {
+                colors.add(c);
+
+            }
+
+            colors.add(ColorTemplate.getHoloBlue());
+            mDataSet.setColors(colors);
+
+            PieData data = new PieData(mDataSet);
+            data.setValueFormatter(new PercentFormatter());
+            data.setValueTextSize(11f);
+            data.setValueTextColor(Color.BLACK);
+
+            mPieChart.setData(data);
+
+            mPieChart.highlightValues(null);
+
+            mPieChart.invalidate();
+        }
     }
 }
