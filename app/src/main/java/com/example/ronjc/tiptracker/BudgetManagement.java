@@ -26,6 +26,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,9 +87,6 @@ public class BudgetManagement extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
 
     private Period period;
-
-    private boolean initialStart = true;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,7 +167,6 @@ public class BudgetManagement extends AppCompatActivity {
 
     /**
      * Changes current dates to next Sunday and Saturday, respectively
-     * TODO: Will most likely need to refresh the information on the user's screen on call to this method
      */
     private void goToNextWeek() {
         Calendar calendar = Calendar.getInstance();
@@ -363,6 +361,8 @@ public class BudgetManagement extends AppCompatActivity {
     }
 
     private void displayItems() {
+        totalIncome = calculateTotalIncome(incomeList);
+        totalExpense = calculateTotalExpense(expenseList);
             period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
         //Create and set up adapter for ViewPager
         //Sets up tabbed layout with ViewPager
