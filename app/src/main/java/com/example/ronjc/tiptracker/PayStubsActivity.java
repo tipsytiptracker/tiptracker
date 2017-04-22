@@ -203,20 +203,24 @@ public class PayStubsActivity extends AppCompatActivity {
         myRef.child("periods").child(ps_id).child("categories").child("incomes").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot data: dataSnapshot.getChildren()){
-                    if (!data.getValue().toString().equals("Uploaded Paystubs")) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+
+                    if (!data.getValue().equals("Uploaded Paystubs")) {
                         writePSCategory();
+                        Toast.makeText(PayStubsActivity.this, "GoodJab", Toast.LENGTH_LONG).show();
                     }
 
+                    else {
+                        Toast.makeText(PayStubsActivity.this, "Sorry", Toast.LENGTH_LONG).show();
+                    }
                 }
-            }
 
+            }
             @Override
             public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
-
     }
 
     private void writePSCategory() {
