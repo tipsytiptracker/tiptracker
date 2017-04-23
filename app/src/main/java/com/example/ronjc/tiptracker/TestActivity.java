@@ -41,11 +41,13 @@ public class TestActivity extends AppCompatActivity {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             bitmap = mCam.getBitmap();
             imageView.setImageBitmap(bitmap);
+            mOCR = new OCR(this, bitmap);
+            textView.setText(mOCR.getNetPay());
         }
     }
 
     public void goOCR(View view) {
         mOCR = new OCR(this, bitmap);
-        textView.setText(mOCR.getTotal());
+        textView.setText(mOCR.getNetPay());
     }
 }
