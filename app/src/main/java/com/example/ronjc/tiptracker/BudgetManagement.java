@@ -2,12 +2,18 @@ package com.example.ronjc.tiptracker;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.pm.PackageManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +33,9 @@ import com.example.ronjc.tiptracker.utils.Camera;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.example.ronjc.tiptracker.utils.OCR;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -56,7 +65,7 @@ import butterknife.ButterKnife;
  * @author Ronald Mangiliman
  */
 
-public class BudgetManagement extends AppCompatActivity {
+public class BudgetManagement extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     //Bind UI views to references
     @BindView(R.id.left_arrow_icon)
@@ -107,6 +116,8 @@ public class BudgetManagement extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
     private Period period;
 
+    private GoogleApiClient mGoogleApiClient;
+
     private Camera mCamera;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +136,14 @@ public class BudgetManagement extends AppCompatActivity {
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         ButterKnife.bind(this);
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -149,7 +168,7 @@ public class BudgetManagement extends AppCompatActivity {
                 goToNextWeek();
             }
         });
-        mLeftArrowIcon.setOnClickListener(new View.OnClickListener(){
+        mLeftArrowIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 goToLastWeek();
@@ -157,6 +176,41 @@ public class BudgetManagement extends AppCompatActivity {
         });
 
         mCamera = new Camera(this);
+    }
+
+    @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Snackbar.make(mViewPager, "Location services turned off.", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            Snackbar.make(mViewPager, "" + mLastLocation.getLatitude() + mLastLocation.getLongitude() , Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     /**
