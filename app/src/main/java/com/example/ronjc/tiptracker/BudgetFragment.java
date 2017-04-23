@@ -94,6 +94,9 @@ public class BudgetFragment extends Fragment {
 
     //HashMap of children
     private HashMap<String, List<String>> childList;
+    //HashMap of IDs
+    private HashMap<String, List<String>> idList;
+
     private OnFragmentInteractionListener mListener;
 
     private ArrayList<Double> amountsByCategory;
@@ -160,7 +163,7 @@ public class BudgetFragment extends Fragment {
                     }
                 }
                 prepareListData();
-                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, userID, type, currentPeriodID, mTotalTextView);
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, idList, userID, type, currentPeriodID, mTotalTextView);
                 expandableListView.setAdapter(listAdapter);
             }
             @Override
@@ -227,8 +230,10 @@ public class BudgetFragment extends Fragment {
         ArrayList<Income> incomes;
         ArrayList<Expense> expenses;
         childList = new HashMap<String, List<String>>();
+        idList = new HashMap<String, List<String>>();
         amountsByCategory = new ArrayList<Double>();
         ArrayList<ArrayList<String>> listOfLists = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> listOfIDLists= new ArrayList<ArrayList<String>>();
         DecimalFormat decimalFormat = new DecimalFormat("0.00");
         BigDecimal bigDecimal1;
         BigDecimal bigDecimal2;
@@ -238,11 +243,13 @@ public class BudgetFragment extends Fragment {
             if(list.size() == 0) {
                 for (int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), new ArrayList<String>());
+                    idList.put(headerList.get(i), new ArrayList<String>());
                     amountsByCategory.add(0.00);
                 }
             } else {
                 for(int i = 0; i < headerList.size(); i++) {
                     listOfLists.add(new ArrayList<String>());
+                    listOfIDLists.add(new ArrayList<String>());
                     amountsByCategory.add(0.00);
 
                 }
@@ -254,6 +261,7 @@ public class BudgetFragment extends Fragment {
                     int index = headerList.indexOf(income.getCategory());
                     stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
                     listOfLists.get(index).add(stringToAdd);
+                    listOfIDLists.get(index).add(income.getId());
                     bigDecimal1 = new BigDecimal(amountsByCategory.get(index));
                     bigDecimal2 = new BigDecimal(income.getAmount());
                     bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -262,17 +270,20 @@ public class BudgetFragment extends Fragment {
                 }
                 for(int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), listOfLists.get(i));
+                    idList.put(headerList.get(i), listOfIDLists.get(i));
                 }
             }
         } else {
             if(list.size() == 0) {
                 for (int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), new ArrayList<String>());
+                    idList.put(headerList.get(i), new ArrayList<String>());
                     amountsByCategory.add(0.00);
                 }
             } else {
                 for(int i = 0; i < headerList.size(); i++) {
                     listOfLists.add(new ArrayList<String>());
+                    listOfIDLists.add(new ArrayList<String>());
                     amountsByCategory.add(0.00);
                 }
                 String stringToAdd;
@@ -282,6 +293,7 @@ public class BudgetFragment extends Fragment {
                     int index = headerList.indexOf(expense.getCategory());
                     stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
                     listOfLists.get(index).add(stringToAdd);
+                    listOfIDLists.get(index).add(expense.getId());
                     bigDecimal1 = new BigDecimal(amountsByCategory.get(index));
                     bigDecimal2 = new BigDecimal(expense.getAmount());
                     bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -290,84 +302,10 @@ public class BudgetFragment extends Fragment {
                 }
                 for(int i = 0; i < headerList.size(); i++) {
                     childList.put(headerList.get(i), listOfLists.get(i));
+                    idList.put(headerList.get(i), listOfIDLists.get(i));
                 }
             }
         }
-//        ArrayList<String> emptyLIst = new ArrayList<>();
-//        emptyLIst.add("Sring");
-//        if(page == 1) {
-//            type = DBHelper.INCOMES;
-//            if (list.size() != 0) {
-//                incomes = (ArrayList<Income>) list;
-//                for(Income income : incomes) {
-//                    String stringToAdd;
-//                    if(!headerList.contains(income.getCategory())) {
-//                        headerList.add(income.getCategory());
-//                        ArrayList<String> incomeList = new ArrayList<String>();
-//                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
-//                        incomeList.add(stringToAdd);
-//                        listOfLists.add(incomeList);
-//                    } else {
-//                        int index = headerList.indexOf(income.getCategory());
-//                        stringToAdd = income.getName() + ": $" + decimalFormat.format(income.getAmount());
-//                        listOfLists.get(index).add(stringToAdd);
-//                    }
-//                    for(int i = 0; i < headerList.size(); i++) {
-//                        childList.put(headerList.get(i), em);
-//                    }
-//                }
-//            } else {
-//                for(int i = 0; i < headerList.size(); i++) {
-//                    childList.put(headerList.get(i), );
-//                }
-//            }
-//        } else {
-//            type = DBHelper.EXPENSES;
-//            if(list.size() != 0) {
-//                expenses = (ArrayList<Expense>) list;
-//                for(Expense expense : expenses) {
-//                    String stringToAdd;
-//                    if(!headerList.contains(expense.getCategory())) {
-//                        headerList.add(expense.getCategory());
-//                        ArrayList<String> expenseList = new ArrayList<String>();
-//                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
-//                        expenseList.add(stringToAdd);
-//                        listOfLists.add(expenseList);
-//                    } else {
-//                        int index = headerList.indexOf(expense.getCategory());
-//                        stringToAdd = expense.getName() + ": $" + decimalFormat.format(expense.getAmount());
-//                        listOfLists.get(index).add(stringToAdd);
-//                    }
-//                    for(int i = 0; i < headerList.size(); i++) {
-//                        childList.put(headerList.get(i), childList.get(i));
-//                    }
-//                }
-//            } else {
-//                for(int i = 0; i < headerList.size(); i++) {
-//                    childList.put(headerList.get(i), new ArrayList<String>());
-//                }
-//            }
-//        }
-//        headerList.add("Rent");
-//        headerList.add("Grocery");
-//        headerList.add("Misc.");
-//
-//        List<String> rent = new ArrayList<String>();
-//        rent.add("Weekly: $300.00");
-//
-//        List<String> groceries = new ArrayList<String>();
-//        groceries.add("Avocados: $5.99");
-//        groceries.add("Tofu: $1.29");
-//        groceries.add("Broccoli: $1.29");
-//        groceries.add("Coffee: $8.99");
-//
-//
-//        List<String> misc = new ArrayList<String>();
-//        misc.add("420: $5.00");
-//
-//        childList.put(headerList.get(0), rent); // Header, Child data
-//        childList.put(headerList.get(1), groceries);
-//        childList.put(headerList.get(2), misc);
     }
 
     private void writeNewCategory(final String category) {
@@ -396,25 +334,7 @@ public class BudgetFragment extends Fragment {
             mPieChart.setRotationAngle(0);
             mPieChart.setRotationEnabled(true);
 
-//            mPieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-//                @Override
-//                public void onValueSelected(Entry e, Highlight h) {
-//                    if (e == null) {
-//                        return;
-//
-//                    }
-//                    Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), headerList.get(e.getX()) + " = " + e.getVal() + "%", Snackbar.LENGTH_SHORT).show();
-//                }
-//                @Override
-//                public void onNothingSelected() {
-//
-//                }
-//            });
             addData();
-//            Legend l = mPieChart.getLegend();
-//            l.setPosition(Legend.LegendPosition.RIGHT_OF_CHART);
-//            l.setXEntrySpace(7);
-//            l.setYEntrySpace(5);
 
             pieChartBuilder.setView(pieView);
             final AlertDialog dialog = pieChartBuilder.create();

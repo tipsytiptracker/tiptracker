@@ -14,15 +14,6 @@
         android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
         android:textSize="18sp"
         android:textColor="@color/colorWhite" />
-    <!--<TextView-->
-        <!--android:clickable="true"-->
-        <!--android:gravity="right"-->
-        <!--android:id="@+id/add_icon"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:textSize="18sp"-->
-        <!--android:text="@string/fa_plus"-->
-        <!--android:textColor="@color/colorWhite"/>-->
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

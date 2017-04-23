@@ -26,7 +26,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.math.BigDecimal;
+import java.nio.DoubleBuffer;
 import java.security.DomainCombiner;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -39,6 +42,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
+import static com.example.ronjc.tiptracker.utils.FontManager.FONTAWESOME;
 import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
 import static java.security.AccessController.getContext;
 
@@ -63,16 +67,20 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Context context;
     private List<String> headerList;
     private HashMap<String, List<String>> childList;
+    private HashMap<String, List<String>> idList;
     private String userID;
     private String type;
     private String currentPeriodID;
     private TextView totalTextView;
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
 
-    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, String userID, String type, String currentPeriodID, TextView totalTextView) {
+
+    public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList, HashMap<String, List<String>> idList, String userID, String type, String currentPeriodID, TextView totalTextView) {
         this.context = context;
         this.headerList = headerList;
         this.childList = childList;
+        this.idList = idList;
         this.userID = userID;
         this.type = type;
         this.currentPeriodID = currentPeriodID;
@@ -90,14 +98,25 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getChildView(int groupPosition, int childPosition, boolean iaLastChild, View convertView, ViewGroup viewGroup) {
+    public View getChildView(final int groupPosition, final int childPosition, boolean iaLastChild, View convertView, ViewGroup viewGroup) {
         final String childText = (String) getChild(groupPosition, childPosition);
         if (convertView == null) {
             LayoutInflater mLayoutInflator = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = mLayoutInflator.inflate(R.layout.list_item, null);
         }
         TextView textListChild = (TextView) convertView.findViewById(R.id.lblListItem);
+        TextView removeIcon = (TextView) convertView.findViewById(R.id.remove_icon);
+        Typeface bitter = FontManager.getTypeface(convertView.getContext(), BITTER);
+        Typeface fontAwesome = FontManager.getTypeface(convertView.getContext(), FONTAWESOME);
+        textListChild.setTypeface(bitter);
+        removeIcon.setTypeface(fontAwesome);
         textListChild.setText(childText);
+        removeIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                confirmRemoval(groupPosition, childPosition);
+            }
+        });
 
         return convertView;
     }
@@ -214,89 +233,29 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     private void writeNewIncome(final String name, final String amount, final String category) {
-        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         //Get rid of dollar sign and any commas
         final double doubleAmount = Double.parseDouble(amount.substring(1).replace(",", ""));
-//        //Get last Sunday in milliseconds
-//        final Calendar calendar = Calendar.getInstance();
-//        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-//        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
-//        Date startDate = calendar.getTime();
-//        final long time = DateManager.trimMilliseconds(startDate.getTime());
-//        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                //Get key for period to write
-//                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-//                String periodToWrite = "";
-//                for(DataSnapshot period : periods) {
-//                    if ((long)period.getValue() == time) {
-//                        periodToWrite = period.getKey();
-//                        break;
-//                    }
-//                }
         String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
         //if they add to this from a past or future period, then its date will be out of the bounds of the actual period
-        Income income = new Income(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, userID);
         mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
         Toast.makeText(context, context.getString(R.string.income_added), Toast.LENGTH_SHORT).show();
         String stringToAdd = name + ": " + amount;
         childList.get(category).add(stringToAdd);
         updateTotal(doubleAmount);
-
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-
     }
 
     private void writeNewExpense(String name, String amount, String category) {
-        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         double doubleAmount = Double.parseDouble(amount.substring(1));
-        final Expense expense = new Expense(userID, name, doubleAmount, System.currentTimeMillis(), category, userID);
-//        //Get last Sunday in milliseconds
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-//        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
-//        Date startDate = calendar.getTime();
-//        final long time = DateManager.trimMilliseconds(startDate.getTime());
-//        mDatabase.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                //Get key for period to write
-//                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-//                String periodToWrite = "";
-//                for(DataSnapshot period : periods) {
-//                    if ((long)period.getValue() == time) {
-//                        periodToWrite = period.getKey();
-//                        break;
-//                    }
-//                }
         String expenseKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
+        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, userID);
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
         mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
         Toast.makeText(context, context.getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-//        int i = headerList.indexOf(category);
         String stringToAdd = name + ": " + amount;
         childList.get(category).add(stringToAdd);
         updateTotal(doubleAmount);
-//    }
     }
 
     private void updateTotal(double doubleAmount) {
@@ -310,5 +269,69 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         parsedTotal = bigDecimal1.add(bigDecimal2).doubleValue();
         total = context.getString(R.string.total) + decimalFormat.format(parsedTotal);
         totalTextView.setText(total);
+    }
+
+    private void removeItem(int groupPosition, int childPosition) {
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+        String item = childList.get(headerList.get(groupPosition)).get(childPosition);
+        String itemAmount = item.substring(item.lastIndexOf("$") + 1);
+        String total = totalTextView.getText().toString().substring(8);
+
+        double parsedItemAmount = Double.parseDouble(itemAmount);
+        double parsedTotal = Double.parseDouble(total);
+
+        BigDecimal bigDecimal1 = new BigDecimal(parsedItemAmount);
+        bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal2 = new BigDecimal(parsedTotal);
+        bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        parsedTotal = bigDecimal2.subtract(bigDecimal1).doubleValue();
+
+        total = context.getString(R.string.total) + decimalFormat.format(parsedTotal);
+
+        childList.get(headerList.get(groupPosition)).remove(childPosition);
+        String itemID = idList.get(headerList.get(groupPosition)).get(childPosition);
+        idList.get(headerList.get(groupPosition)).remove(childPosition);
+        notifyDataSetChanged();
+
+        totalTextView.setText(total);
+
+        String typeToDelete = type.equals(DBHelper.INCOMES) ? DBHelper.INCOMES : DBHelper.EXPENSES;
+
+        mDatabase.child(typeToDelete).child(itemID).setValue(null);
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(typeToDelete).child(itemID).setValue(null);
+    }
+
+    private void confirmRemoval(final int groupPosition, final int childPosition) {
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
+        LayoutInflater mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View mView = mLayoutInflater.inflate(R.layout.confirm_removal, null);
+        Typeface bitter = getTypeface(context, FontManager.BITTER);
+        TextView confirmRemovalHeader = (TextView)mView.findViewById(R.id.confirm_removal_header);
+        TextView areYouSure = (TextView)mView.findViewById(R.id.confirm_text_view);
+        Button confirmRemovalButton = (Button)mView.findViewById(R.id.confirm_removal_button);
+        Button cancelRemovalButton = (Button)mView.findViewById(R.id.cancel_removal_button);
+        areYouSure.setTypeface(bitter);
+        confirmRemovalHeader.setTypeface(bitter);
+        confirmRemovalButton.setTypeface(bitter);
+        cancelRemovalButton.setTypeface(bitter);
+        mBuilder.setView(mView);
+        final AlertDialog alertDialog = mBuilder.create();
+        alertDialog.show();
+        confirmRemovalButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                removeItem(groupPosition, childPosition);
+                alertDialog.dismiss();
+            }
+        });
+        cancelRemovalButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+            }
+        });
     }
 }
