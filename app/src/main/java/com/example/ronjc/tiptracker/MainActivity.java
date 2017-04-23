@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -151,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
         }
-
     }
 
     /**
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         showProgress(false);
                         if(!task.isSuccessful()) {
-                            Snackbar.make(mLinearLayout, getString(R.string.google_sign_in_failed), Snackbar.LENGTH_LONG);
+                            Snackbar.make(mLinearLayout, getString(R.string.google_sign_in_failed), Snackbar.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
     private class ConnectionFailed implements GoogleApiClient.OnConnectionFailedListener {
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Snackbar.make(mLinearLayout, getString(R.string.connection_failed), Snackbar.LENGTH_LONG);
+            Snackbar.make(mLinearLayout, getString(R.string.connection_failed), Snackbar.LENGTH_LONG).show();
         }
     }
 

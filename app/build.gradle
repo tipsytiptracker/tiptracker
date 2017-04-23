@@ -38,14 +38,18 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:10.2.1'
     compile 'com.firebaseui:firebase-ui-database:1.2.0'
     compile 'com.google.android.gms:play-services-auth:10.2.1'
+    compile 'com.google.android.gms:play-services-vision:10.2.1'
     compile 'com.google.firebase:firebase-database:10.2.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
     compile 'com.jakewharton:butterknife:8.5.1'
     compile 'com.github.BlacKCaT27:CurrencyEditText:v1.4.4'
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    compile 'com.github.BlacKCaT27:CurrencyEditText:v1.4.4' //special editText for currency
 }
 
 allprojects {

@@ -3,6 +3,10 @@ package com.example.ronjc.tiptracker.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -12,6 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static android.R.attr.angle;
+import static android.R.attr.bitmap;
 
 /**
  * Created by Alex on 4/10/2017.
@@ -42,6 +49,7 @@ public class Camera {
     private String mCurrentPhotoPath;//holds a file path for the photo
     private Uri photoUri;//holds the uri for the photo
     private Context context;//activity context
+    private Bitmap bitmap;
     private static final int REQUEST_TAKE_PHOTO = 1;
 
     //Constructor, pass activity context
@@ -90,6 +98,17 @@ public class Camera {
     }
 
     /**
+     * Name: getBitmap
+     * Purpose: create a bitmap for the current Camera object
+     * @return Bitmap from the photo taken
+     */
+    public Bitmap getBitmap () {
+        bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+        fixOrientation();
+        return bitmap;
+    }
+
+    /**
      * Name: takePicture
      * Purpose:  start an image capture intent.  Stores the image in
      * a unique file created by createImageFile() function.
@@ -113,6 +132,47 @@ public class Camera {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 ((Activity)context).startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
+        }
+    }
+
+    /**
+     * Name: fixOrientation
+     * Purpose:  Determine what angle the picture was rotated when stored,
+     * then create a bitmap that contains the correct orientation of the picture.
+     */
+    private void fixOrientation () {
+        ExifInterface ei = null;
+        Matrix matrix;
+        try {
+            ei = new ExifInterface(mCurrentPhotoPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED);
+
+        switch(orientation) {
+
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix = new Matrix();
+                matrix.postRotate(90);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                        matrix, true);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix = new Matrix();
+                matrix.postRotate(180);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                        matrix, true);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                matrix = new Matrix();
+                matrix.postRotate(270);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                        matrix, true);
+                break;
         }
     }
 }
