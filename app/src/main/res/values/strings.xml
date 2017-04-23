@@ -75,9 +75,15 @@
     <string name="expense_added">Expense was successfully added</string>
     <string name="total">Total: $</string>
     <string name="pie_chart_label">Amounts by category</string>
+    <string name="retrieving">Retrieving...</string>
 
     <!-- Strings for manually adding item dialog-->
     <string name="item_name">Name</string>
     <string name="enter_budget_goal">Enter new budget goal</string>
     <string name="title_activity_bg2_fragment">BG2Fragment</string>
+
+    <!--Strings for removing items-->
+    <string name="confirm_removal_header">Confirm Removal</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="confirm">Confirm</string>
 </resources>

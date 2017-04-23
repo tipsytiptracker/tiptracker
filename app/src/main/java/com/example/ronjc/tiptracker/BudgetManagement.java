@@ -99,7 +99,7 @@ public class BudgetManagement extends AppCompatActivity {
         getSupportActionBar().setTitle("");
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setTitle("Retrieving...");
+        mProgressDialog.setTitle(getString(R.string.retrieving));
         mProgressDialog.setMessage(getString(R.string.please_wait));
         mProgressDialog.setCancelable(false);
 
