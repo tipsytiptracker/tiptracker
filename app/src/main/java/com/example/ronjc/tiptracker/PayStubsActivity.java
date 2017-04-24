@@ -53,6 +53,7 @@ public class PayStubsActivity extends AppCompatActivity {
     FirebaseAuth.AuthStateListener mAuthListener;
     FirebaseUser user;
     String periodID = "";
+    boolean check_category = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,19 +201,23 @@ public class PayStubsActivity extends AppCompatActivity {
     private void addIncome (double amount, String desc,  long dateAdded){//method to add the paystub to their income
         String ps_id = getPeriodId();
 
-        myRef.child("periods").child(ps_id).child("categories").child("incomes").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("periods").child(ps_id).child("categories").child("incomes").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
 
-                    if (!data.getValue().equals("Uploaded Paystubs")) {
-                        writePSCategory();
-                        Toast.makeText(PayStubsActivity.this, "GoodJab", Toast.LENGTH_LONG).show();
+                    if (data.getValue().equals("Uploaded Paystubs")) {
+                        check_category = true;
                     }
+                } //end for loop
 
-                    else {
-                        Toast.makeText(PayStubsActivity.this, "Sorry", Toast.LENGTH_LONG).show();
-                    }
+                if(check_category){ //paystub category exists, do not create it and insert amount to income
+                    Toast.makeText(PayStubsActivity.this, "Paystub category exists!", Toast.LENGTH_LONG).show();
+                }
+
+                else{ //paystub category does not exist create it and insert amount to income
+                    writePSCategory();
+                    Toast.makeText(PayStubsActivity.this, "Paystub category created", Toast.LENGTH_LONG).show();
                 }
 
             }
