@@ -90,8 +90,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
 
-        long x = System.currentTimeMillis();
-        final String y = Long.toString(x);
+        final long currentTime = System.currentTimeMillis();
+        final String currentTimestr = Long.toString(currentTime);
+        final String periodKey = getPeriodId();
 
         budgetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,19 +108,17 @@ public class BudgetGoalActivity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
 
                                 //Updates current budget goal to Firebase
-                                dbRef.child("users").child(user.getUid()).child("current_budget").
-                                        setValue(Double.parseDouble(changedGoal.substring(1)));
-
-
-                                dbRef.child("periods").child(getPeriodId()).child("budgetGoal").push()
+                                dbRef.child("users").child(user.getUid()).child("current_budget")
                                         .setValue(Double.parseDouble(changedGoal.substring(1)));
 
-                                dbRef.child("periods").child(getPeriodId()).child("endDate").push()
-                                        .setValue(System.currentTimeMillis());
+                                dbRef.child("periods").child(periodKey).child("budgetGoal")
+                                        .setValue(currentTime);
+
+                                dbRef.child("periods").child(periodKey).child("budgetGoal").child(currentTimestr)
+                                        .setValue(Double.parseDouble(changedGoal.substring(1)));
 
 
-                                GetXYValues();
-                                //period key ends in OzG
+
                             }
 
                             @Override
@@ -149,6 +148,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
 
     }
+
     private void GetXYValues(){
         dbRef.child("periods").child(getPeriodId()).child("budgetGoal")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -184,36 +184,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
 
     private String getPeriodId(){
-        dbRef = FirebaseDatabase.getInstance().getReference();
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
-        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //Get key for period to write
-                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
-                //Get last Sunday in milliseconds
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-                calendar.set(Calendar.HOUR_OF_DAY, 0);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
-                Date startDate = calendar.getTime();
-                final long time = DateManager.trimMilliseconds(startDate.getTime());
-
-                for (DataSnapshot period : periods) {
-                    if ((long) period.getValue() == time) {
-                        periodId = period.getKey();
-                        break;
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        return periodId;
+        String key = dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).push().getKey();
+        return key;
     }
 
     private void createLineGraph(){
