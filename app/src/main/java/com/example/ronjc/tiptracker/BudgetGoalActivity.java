@@ -65,13 +65,12 @@ public class BudgetGoalActivity extends AppCompatActivity {
     String changedGoal;
     @BindView(R.id.change_budget_btn) Button budgetBtn;
     @BindView(R.id.budget_goal_graph) Button budgetGraphbtn;
-    @BindView(R.id.income_graph) Button lineGraphbtn;
+    @BindView(R.id.income_graph) Button incomeGraphbtn;
     @BindView(R.id.expense_graph) Button expenseGraphbtn;
     DatabaseReference dbRef;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
-    LineChart lineChart;
     String periodId;
 
     @Override
@@ -87,27 +86,17 @@ public class BudgetGoalActivity extends AppCompatActivity {
         FontManager.markAsIconContainer(findViewById(R.id.budget_goal_activity), iconFont);
 
 
-
-        String customFont = "fonts/bitter.ttf";
-        Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
-        budgetBtn.setTypeface(iconFont);
-        budgetGraphbtn.setTypeface(iconFont);
-        lineGraphbtn.setTypeface(iconFont);
-        expenseGraphbtn.setTypeface(iconFont);
-        FontManager.markAsIconContainer(budgetBtn,iconFont);
-        FontManager.markAsIconContainer(budgetGraphbtn,iconFont);
-        FontManager.markAsIconContainer(lineGraphbtn,iconFont);
-        FontManager.markAsIconContainer(expenseGraphbtn,iconFont);
-
-
         dbRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
 
+        long x = System.currentTimeMillis();
+        final String y = Long.toString(x);
 
         budgetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
 
                 changedGoal = setBudget.getText().toString();
                 goal.setText("Current Budget: " + changedGoal);
@@ -116,6 +105,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
                         addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+
                                 //Updates current budget goal to Firebase
                                 dbRef.child("users").child(user.getUid()).child("current_budget").
                                         setValue(Double.parseDouble(changedGoal.substring(1)));
@@ -141,37 +131,20 @@ public class BudgetGoalActivity extends AppCompatActivity {
             }
         });
 
-        Button b = (Button)findViewById(R.id.budget_goal_graph);
-        b.setOnClickListener(new View.OnClickListener() {
+
+        budgetGraphbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {createLineGraph();}}
+        );
+        incomeGraphbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {createIncomeGraph();}}
+        );
+        expenseGraphbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
-                View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-
-                LineChart lineChart2 = (LineChart)view2.findViewById(R.id.linegraph);
-
-
-                mBuilder.setView(view2).show();
-                final AlertDialog dialog = mBuilder.create();
-
-                List<Entry> entries = new ArrayList<Entry>();
-                //add for loop to add other entries
-
-                entries.add(new Entry(3,4));
-                entries.add(new Entry(5,6));
-                entries.add(new Entry(6,8));
-                LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
-                dataSet.setColor(Color.parseColor("#2ecc44"));
-                List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-                dataSet.setCircleColor(Color.parseColor("#2ecc44"));
-                dataSets.add(dataSet);
-
-                LineData data = new LineData(dataSets);
-                lineChart2.setBackgroundColor(Color.WHITE);
-                lineChart2.setData(data);
-            }
-        });
+                createExpenseGraph();}}
+        );
 
 
 
@@ -243,4 +216,94 @@ public class BudgetGoalActivity extends AppCompatActivity {
         return periodId;
     }
 
+    private void createLineGraph(){
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
+        view2.setBackgroundColor(Color.parseColor("#ccffcd"));
+        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+
+
+        mBuilder.setView(view2).show();
+        final AlertDialog dialog = mBuilder.create();
+
+        List<Entry> entries = new ArrayList<Entry>();
+        //add for loop to add other entries
+
+        entries.add(new Entry(3,4));
+        entries.add(new Entry(5,6));
+        entries.add(new Entry(6,8));
+        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
+        dataSet.setColor(Color.BLACK);
+        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+        dataSet.setCircleColor(Color.BLACK);
+        dataSets.add(dataSet);
+
+        XAxis xAxis = linechart.getXAxis();
+        xAxis.setDrawGridLines(false);
+
+
+        LineData data = new LineData(dataSets);
+        linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
+        linechart.setData(data);
+    }
+    private void createIncomeGraph(){
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
+        view2.setBackgroundColor(Color.parseColor("#ccffcd"));
+
+        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+
+
+        mBuilder.setView(view2).show();
+        final AlertDialog dialog = mBuilder.create();
+
+        List<Entry> entries = new ArrayList<Entry>();
+        //add for loop to add other entries
+
+        entries.add(new Entry(3,4));
+        entries.add(new Entry(5,6));
+        entries.add(new Entry(6,8));
+        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
+        dataSet.setColor(Color.BLUE);
+        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+        dataSet.setCircleColor(Color.BLUE);
+        dataSets.add(dataSet);
+
+        XAxis xAxis = linechart.getXAxis();
+        xAxis.setDrawGridLines(false);
+
+        LineData data = new LineData(dataSets);
+        linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
+        linechart.setData(data);
+    }
+    private void createExpenseGraph(){
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
+        view2.setBackgroundColor(Color.parseColor("#ccffcd"));
+
+        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+
+
+        mBuilder.setView(view2).show();
+        final AlertDialog dialog = mBuilder.create();
+
+        List<Entry> entries = new ArrayList<Entry>();
+        //add for loop to add other entries
+
+        entries.add(new Entry(3,4));
+        entries.add(new Entry(5,6));
+        entries.add(new Entry(6,8));
+        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
+        dataSet.setColor(Color.RED);
+        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+        dataSet.setCircleColor(Color.RED);
+        dataSets.add(dataSet);
+
+        XAxis xAxis = linechart.getXAxis();
+        xAxis.setDrawGridLines(false);
+
+        LineData data = new LineData(dataSets);
+        linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
+        linechart.setData(data);
+    }
 }
