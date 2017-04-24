@@ -46,6 +46,10 @@
     <!-- Strings related to managing budget-->
     <string name="set_budget">Current Budget</string>
     <string name="change_budget">Change Budget</string>
+    <string name="view_graph_reports">View Graph Reports</string>
+    <string name="budget_goal_progress">View Budget Goal Progress</string>
+    <string name="income_progress">View Income Progress</string>
+    <string name="expense_progress">View Expense Progress</string>
 
     <!-- Strings related to Paystubs -->
     <string name="paystubs">Paystubs</string>

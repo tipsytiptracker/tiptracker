@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -63,13 +64,15 @@ public class BudgetGoalActivity extends AppCompatActivity {
     @BindView(R.id.set_goal_tv) TextView goal;
     String changedGoal;
     @BindView(R.id.change_budget_btn) Button budgetBtn;
+    @BindView(R.id.budget_goal_graph) Button budgetGraphbtn;
+    @BindView(R.id.income_graph) Button lineGraphbtn;
+    @BindView(R.id.expense_graph) Button expenseGraphbtn;
     DatabaseReference dbRef;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
     LineChart lineChart;
     String periodId;
-    String pID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +82,6 @@ public class BudgetGoalActivity extends AppCompatActivity {
         getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
         getSupportActionBar().setTitle("");
         ButterKnife.bind(this);
-        lineChart = (LineChart) findViewById(R.id.linegraph);
-
-
 
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
         FontManager.markAsIconContainer(findViewById(R.id.budget_goal_activity), iconFont);
@@ -91,11 +91,19 @@ public class BudgetGoalActivity extends AppCompatActivity {
         String customFont = "fonts/bitter.ttf";
         Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
         budgetBtn.setTypeface(iconFont);
+        budgetGraphbtn.setTypeface(iconFont);
+        lineGraphbtn.setTypeface(iconFont);
+        expenseGraphbtn.setTypeface(iconFont);
         FontManager.markAsIconContainer(budgetBtn,iconFont);
+        FontManager.markAsIconContainer(budgetGraphbtn,iconFont);
+        FontManager.markAsIconContainer(lineGraphbtn,iconFont);
+        FontManager.markAsIconContainer(expenseGraphbtn,iconFont);
+
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+
 
         budgetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,12 +119,16 @@ public class BudgetGoalActivity extends AppCompatActivity {
                                 //Updates current budget goal to Firebase
                                 dbRef.child("users").child(user.getUid()).child("current_budget").
                                         setValue(Double.parseDouble(changedGoal.substring(1)));
-                                dbRef.child("periods").child(Utils.PERIODID).child("budgetGoal").push()
-                                            .setValue(Double.parseDouble(changedGoal.substring(1)));
 
-                                dbRef.child("periods").child(Utils.PERIODID).child("endDate").push()
+
+                                dbRef.child("periods").child(getPeriodId()).child("budgetGoal").push()
+                                        .setValue(Double.parseDouble(changedGoal.substring(1)));
+
+                                dbRef.child("periods").child(getPeriodId()).child("endDate").push()
                                         .setValue(System.currentTimeMillis());
-                                //GetXYValues();
+
+
+                                GetXYValues();
                                 //period key ends in OzG
                             }
 
@@ -129,65 +141,43 @@ public class BudgetGoalActivity extends AppCompatActivity {
             }
         });
 
+        Button b = (Button)findViewById(R.id.budget_goal_graph);
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        //Add line graph that displays user income, expense and budget goal
-        List<Entry> entries = new ArrayList<Entry>();
-        //add for loop to add other entries
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+                View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
 
-        entries.add(new Entry(3,4));
-        entries.add(new Entry(5,6));
-        entries.add(new Entry(6,8));
-
-        //
-
-
-        /*Income and Expense graphs
-        List<Entry> entries2 = new ArrayList<Entry>();
-        //add for loop to add other entries
-        entries2.add(new Entry(3,12));
-        entries2.add(new Entry(5,5));
-
-        List<Entry> entries3 = new ArrayList<Entry>();
-        //add for loop to add other entries
-        entries3.add(new Entry(3,2));
-        entries3.add(new Entry(5,8));
-        */
-        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
-        dataSet.setColor(Color.parseColor("#2ecc44"));
-        //LineDataSet dataSet2 = new LineDataSet(entries2, "More Stuff"); // add entries to dataset
-        //dataSet2.setColor(Color.BLUE);
-        //LineDataSet dataSet3 = new LineDataSet(entries3, "More Stuff");
-        //dataSet3.setColor(Color.RED);
-
-        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-        dataSet.setCircleColor(Color.parseColor("#2ecc44"));
-        dataSets.add(dataSet);
-        //dataSet2.setCircleColor(Color.BLUE);
-        //dataSets.add(dataSet2);
-        //dataSet3.setCircleColor(Color.RED);
-        //dataSets.add(dataSet3);
-
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setDrawGridLines(false);
-
-        LineData data = new LineData(dataSets);
-        lineChart.setBackgroundColor(Color.WHITE);
-        lineChart.setData(data);
-        lineChart.invalidate();
+                LineChart lineChart2 = (LineChart)view2.findViewById(R.id.linegraph);
 
 
-        //X axis will be dates (by week) and Y will be money
-        //Create 3 graphs and the tab slider
+                mBuilder.setView(view2).show();
+                final AlertDialog dialog = mBuilder.create();
 
+                List<Entry> entries = new ArrayList<Entry>();
+                //add for loop to add other entries
 
+                entries.add(new Entry(3,4));
+                entries.add(new Entry(5,6));
+                entries.add(new Entry(6,8));
+                LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
+                dataSet.setColor(Color.parseColor("#2ecc44"));
+                List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+                dataSet.setCircleColor(Color.parseColor("#2ecc44"));
+                dataSets.add(dataSet);
+
+                LineData data = new LineData(dataSets);
+                lineChart2.setBackgroundColor(Color.WHITE);
+                lineChart2.setData(data);
+            }
+        });
 
 
 
     }
     private void GetXYValues(){
-        pID =Utils.PERIODID;
-
-        dbRef.child("periods").child(pID).child("budgetGoal")
+        dbRef.child("periods").child(getPeriodId()).child("budgetGoal")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -195,7 +185,6 @@ public class BudgetGoalActivity extends AppCompatActivity {
                         ArrayList<String> list3 = new ArrayList<String>();
 
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
-
                             Period period = child.getValue(Period.class);
 
                             String get_amount = ""+period.getBudgetGoal();
@@ -209,9 +198,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
                             //list3.add(gd);
 
                         }
-                        TextView t = (TextView)findViewById(R.id.test);
                         String amounts = TextUtils.join("", list1);
-                        t.setText(amounts);
                         Toast.makeText(BudgetGoalActivity.this,"HERE",Toast.LENGTH_LONG).show();;
                     }
 
@@ -220,6 +207,40 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
                     }
                 });
-        ;
     }
+
+
+    private String getPeriodId(){
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                //Get last Sunday in milliseconds
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                Date startDate = calendar.getTime();
+                final long time = DateManager.trimMilliseconds(startDate.getTime());
+
+                for (DataSnapshot period : periods) {
+                    if ((long) period.getValue() == time) {
+                        periodId = period.getKey();
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return periodId;
+    }
+
 }
