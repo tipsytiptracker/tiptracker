@@ -14,6 +14,7 @@ import android.support.v4.content.FileProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -44,13 +45,13 @@ import static android.R.attr.bitmap;
  *
  */
 
-public class Camera {
+public class Camera implements Serializable{
 
     private String mCurrentPhotoPath;//holds a file path for the photo
     private Uri photoUri;//holds the uri for the photo
     private Context context;//activity context
     private Bitmap bitmap;
-    private static final int REQUEST_TAKE_PHOTO = 1;
+    public static final int REQUEST_TAKE_PHOTO = 1;
 
     //Constructor, pass activity context
     public Camera (Context context){

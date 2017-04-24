@@ -1,11 +1,15 @@
 package com.example.ronjc.tiptracker;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,9 +18,11 @@ import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.model.Period;
 import com.example.ronjc.tiptracker.utils.BudgetPageAdapter;
+import com.example.ronjc.tiptracker.utils.Camera;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.example.ronjc.tiptracker.utils.OCR;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -73,20 +79,30 @@ public class BudgetManagement extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser mFirebaseUser;
 
+    //ArrayList of incomes and expenses objects
     private ArrayList<Income> incomeList;
     private ArrayList<Expense> expenseList;
+
+    //List of income and expense keys belonging to user
     private ArrayList<String> incomeKeys;
     private ArrayList<String> expenseKeys;
+
+    //Total amount that income and expenses add up to
     private double totalIncome;
     private double totalExpense;
+
+    //ID of the current period
     private String currentPeriodID;
+
+    //Counters for pending incomes and expense. Workaround for handling async nature of Firebase
     private int pendingIncome = 0;
     private int pendingExpense = 0;
+
     private BudgetPageAdapter mBudgetPageAdapter;
-
     private ProgressDialog mProgressDialog;
-
     private Period period;
+
+    private boolean showAddDialog = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -266,16 +282,20 @@ public class BudgetManagement extends AppCompatActivity {
         return total.doubleValue();
     }
 
+    /**
+     * Read the budge for current periods incomes and expenses
+     * Also displays correct date of current period
+     */
     private void readBudget() {
-        String userID = mFirebaseUser.getUid();
         mDateTextView.setText("" + sStartDate + " - " + sEndDate);
-//        mDatabaseReference.child(DBHelper.USERS).child(userID).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new FindCurrentPeriodListener());
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).addListenerForSingleValueEvent(new RetrieveIncomeKeys());
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).addListenerForSingleValueEvent(new RetrieveExpenseKeys());
-//        totalIncome = calculateTotalIncome(incomeList);
-//        totalExpense = calculateTotalExpense(expenseList);
     }
 
+    /**
+     * Sub class that iterates through all income associated with a current period and adds their key
+     * to array list
+     */
     private class RetrieveIncomeKeys implements ValueEventListener {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -291,6 +311,10 @@ public class BudgetManagement extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sub class that iterates through all expenses associated with a current period and adds their key
+     * to array list
+     */
     private class RetrieveExpenseKeys implements ValueEventListener {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -306,12 +330,21 @@ public class BudgetManagement extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sub class that gets income from database and adds it into local array list as an instance of
+     * Income class.
+     */
     private class RetrieveIncome implements ValueEventListener {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Income income = dataSnapshot.getValue(Income.class);
             incomeList.add(income);
+
+            //decrement number of pending incomce
             pendingIncome--;
+
+            //due to asynchronous nature of Firebase, we must check to see if there are no remaining
+            //pending income and expense. If not, display the items.
             if(pendingIncome == 0 && pendingExpense == 0) {
                 displayItems();
             }
@@ -323,12 +356,20 @@ public class BudgetManagement extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sub class that gets expenses from database and adds it into local array list as instance of
+     * expense
+     */
     private class RetrieveExpense implements ValueEventListener {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Expense expense = dataSnapshot.getValue(Expense.class);
             expenseList.add(expense);
+
+            //decrement pending exenses
             pendingExpense--;
+
+            //if no more pending expenses and income, display items
             if(pendingExpense == 0 && pendingIncome == 0) {
                 displayItems();
             }
@@ -340,15 +381,28 @@ public class BudgetManagement extends AppCompatActivity {
         }
     }
 
+    /**
+     * Iterates through arraylist of income or expenses keys and retrieves each matching income/expense
+     * from the database
+     * @param type
+     */
     private void iterateKeys(String type) {
+
+        //If iterating through incomes
         if (type.equals(DBHelper.INCOMES)) {
             pendingIncome = incomeKeys.size();
+
+            //if there are no incomes and expenses to iterate through, display UI
             if(pendingIncome == 0 && pendingExpense == 0) {
                 displayItems();
             }
+
+            //Otherwise, retrieve income
             for(String key : incomeKeys) {
                 mDatabaseReference.child(DBHelper.INCOMES).child(key).addListenerForSingleValueEvent(new RetrieveIncome());
             }
+
+        //Following code functions the same as above, except with expenses
         } else {
             pendingExpense = expenseKeys.size();
             if(pendingExpense == 0 && pendingIncome == 0) {
@@ -360,42 +414,62 @@ public class BudgetManagement extends AppCompatActivity {
         }
     }
 
+    /**
+     * Displays the UI of incomes and expenses
+     */
     private void displayItems() {
+
+        //Calculate the total amount of money for income and expenses
         totalIncome = calculateTotalIncome(incomeList);
         totalExpense = calculateTotalExpense(expenseList);
-            period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
-        //Create and set up adapter for ViewPager
-        //Sets up tabbed layout with ViewPager
-//        if(initialStart) {
-            mViewPager.setAdapter(null);
-            mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID);
-            mViewPager.setAdapter(mBudgetPageAdapter);
-            mTabLayout.setupWithViewPager(mViewPager);
-//            initialStart = false;
-//        }
-//        mBudgetPageAdapter.notifyDataSetChanged();
-//        mViewPager.setAdapter(mBudgetPageAdapter);
-//        mTabLayout.setupWithViewPager(mViewPager);
+
+        //Create new Period object
+        period = new Period(startDate.getTime(), endDate.getTime(), incomeList, expenseList, 500.00, totalIncome, totalExpense);
+
+        //Remove any adapter for ViewPager, if there is one. This is to update UI when switching dates
+        mViewPager.setAdapter(null);
+
+        //Create new Adapter for ViewPager
+        mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID);
+
+        //Set adapter for ViewPager
+        mViewPager.setAdapter(mBudgetPageAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
+
+        //Hide Progress Dialog
         showProgress(false);
     }
 
+    /**
+     * Retrieves the current Period that user is on
+     */
     private void retrieveCurrentPeriod() {
+
+        //Displays loading dialog
         showProgress(true);
+
+        //Create new arraylists for keys and incomes and expenses
         incomeKeys = new ArrayList<String>();
         expenseKeys = new ArrayList<String>();
         incomeList = new ArrayList<Income>();
         expenseList = new ArrayList<Expense>();
+
+
         //Checks to see if user has a period associated with them in the database that corresponds to the current period
         mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 //Check if there are periods associated with the user
                 if(dataSnapshot.getChildrenCount() > 0 ) {
                     boolean foundPeriod = false;
+
                     //Get all periods fo this user
                     Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+
                     //Iterate through users
                     for (DataSnapshot period : periods) {
+
                         //If a period has a matching value in time, set that to current PeriodID
                         if ((long) period.getValue() == DateManager.trimMilliseconds(startDate.getTime())) {
                             currentPeriodID = period.getKey();
@@ -403,7 +477,8 @@ public class BudgetManagement extends AppCompatActivity {
                             break;
                         }
                     }
-                    //If not period matches, create a new one to the database
+
+                    //If no period matches, create a new one to the database
                     if(!foundPeriod) {
                         //TODO: change to actual values
                         writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
@@ -412,6 +487,8 @@ public class BudgetManagement extends AppCompatActivity {
                                 500.00, 600.00, 400.00);
                     }
                     readBudget();
+
+                //Case where if user has no periods written in database
                 } else {
                     writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
                             DateManager.trimMilliseconds(endDate.getTime()),

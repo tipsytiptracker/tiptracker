@@ -1,5 +1,6 @@
 package com.example.ronjc.tiptracker.utils;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -38,18 +39,13 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
     private double totalExpenses = 0.00;
     private Context context;
     private String currentPeriodID;
+    private String ocrString;
 
     //User ID being passed from BudgetManagement
     private String userID;
 
     public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period, String userID, String currentPeriodID) {
         super(fragmentManager);
-//        List<Fragment> al = fragmentManager.getFragments();
-//        if (al != null) {
-//            for (Fragment frag : al) {
-//                fragmentManager.beginTransaction().remove(frag).commit();
-//            }
-//        }
         this.context = context;
         this.startDate = new Date(period.getStartDate());
         this.endDate = new Date(period.getEndDate());
