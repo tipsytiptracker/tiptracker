@@ -77,6 +77,7 @@ public class PayStubsActivity extends AppCompatActivity {
         Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.FONTAWESOME);
         mPictureTile.setTypeface(typeface);
 
+        getPeriodId();
 
         mPaystubButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -200,13 +201,12 @@ public class PayStubsActivity extends AppCompatActivity {
     }
 
     private void addIncome (double amount, String desc,  long dateAdded){//method to add the paystub to their income
-        String ps_id = getPeriodId();
 
         final double am = amount;
         final String des = desc;
         final long da = dateAdded;
 
-        myRef.child("periods").child(ps_id).child("categories").child("incomes").addValueEventListener(new ValueEventListener() {
+        myRef.child("periods").child(periodID).child("categories").child("incomes").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
@@ -218,12 +218,12 @@ public class PayStubsActivity extends AppCompatActivity {
 
                 if(check_category){ //paystub category exists, do not create it and insert amount to income
                     Toast.makeText(PayStubsActivity.this, "Paystub category exists!", Toast.LENGTH_LONG).show();
-                    AddIncomeDB(des,am,da);
+//                    AddIncomeDB(des,am,da);
                 }
 
                 else{ //paystub category does not exist create it and insert amount to income
                     writePSCategory();
-                    AddIncomeDB(des,am,da);
+//                    AddIncomeDB(des,am,da);
                     Toast.makeText(PayStubsActivity.this, "Paystub category created", Toast.LENGTH_LONG).show();
                 }
 
@@ -270,17 +270,17 @@ public class PayStubsActivity extends AppCompatActivity {
     }
 
     private void AddIncomeDB(final String name, final double amount, long dateAdded) { //inserts their income to db
-
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        final String currentPeriodID = getPeriodId();
-
-        String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
-        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
-        Income income = new Income(incomeKey, name, amount, dateAdded, "Uploaded Paystubs", user.getUid());
-        mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
+//
+//        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+////        final String currentPeriodID = getPeriodId();
+//
+//        String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
+//        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+//        Income income = new Income(incomeKey, name, amount, dateAdded, "Uploaded Paystubs", user.getUid());
+//        mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
     }
 
-    private String getPeriodId(){
+    private void getPeriodId(){
 
         myRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -308,6 +308,5 @@ public class PayStubsActivity extends AppCompatActivity {
 
             }
         });
-        return periodID;
     }
 }
