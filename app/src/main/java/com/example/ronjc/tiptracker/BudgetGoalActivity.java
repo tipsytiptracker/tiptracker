@@ -59,6 +59,8 @@ import butterknife.ButterKnife;
 
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 
+//Activity that allows Users to set a budget goal and
+//view progress through graphs (previous budget goals, income and expenses)
 
 public class BudgetGoalActivity extends AppCompatActivity {
 
@@ -103,10 +105,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
         };
         handler.postDelayed(run,500);
 
-
+        //When "Change Button" is clicked it connects to Firebase and stores values
         budgetBtn.setOnClickListener(new View.OnClickListener() {
-
-
             @Override
             public void onClick(View view) {
                 final long currentTime = System.currentTimeMillis();
@@ -124,7 +124,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
                                 //Updates current budget goal to Firebase
                                 dbRef.child("users").child(user.getUid()).child("current_budget")
                                         .setValue(Double.parseDouble(changedGoal.substring(1)));
-
+                                //Pushes thee budget goal value and current time the button was pressed
+                                //Adds the two values as a key,value pair to Period tree in Firebase
                                 dbRef.child("periods").child(periodID).child("budgetGoal")
                                         .child(currentTimestr)
                                         .setValue(Double.parseDouble(changedGoal.substring(1)));
@@ -142,16 +143,16 @@ public class BudgetGoalActivity extends AppCompatActivity {
             }
         });
 
-
-        budgetGraphbtn.setOnClickListener(new View.OnClickListener() {
+        //Button's that bring up a view for its corresponding graph
+        budgetGraphbtn.setOnClickListener(new View.OnClickListener() {//Creates view for budget goal progress graph
             @Override
             public void onClick(View view) {createLineGraph();}}
         );
-        incomeGraphbtn.setOnClickListener(new View.OnClickListener() {
+        incomeGraphbtn.setOnClickListener(new View.OnClickListener() {//Creates view for income progress graph
             @Override
             public void onClick(View view) {createIncomeGraph();}}
         );
-        expenseGraphbtn.setOnClickListener(new View.OnClickListener() {
+        expenseGraphbtn.setOnClickListener(new View.OnClickListener() {//Creates view for expense progress graph
             @Override
             public void onClick(View view) {
                 createExpenseGraph();}}
@@ -187,7 +188,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
     }
 
 
-    private void getPeriodId(){
+    private void getPeriodId(){//Gets the key for the user's period session
         dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -216,7 +217,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
         });
     }
 
-    private void createLineGraph(){
+    private void createLineGraph(){//Draws and plots the graph for budget goal progress graph
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
         View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
         view2.setBackgroundColor(Color.parseColor("#ccffcd"));
@@ -246,7 +247,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
         linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
         linechart.setData(data);
     }
-    private void createIncomeGraph(){
+    private void createIncomeGraph(){//Draws and plots the graph for income progress graph
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
         View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
         view2.setBackgroundColor(Color.parseColor("#ccffcd"));
@@ -276,7 +277,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
         linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
         linechart.setData(data);
     }
-    private void createExpenseGraph(){
+    private void createExpenseGraph(){//Draws and plots the graph for expense progress graph
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
         View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
         view2.setBackgroundColor(Color.parseColor("#ccffcd"));

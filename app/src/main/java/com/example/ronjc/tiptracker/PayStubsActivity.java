@@ -116,7 +116,7 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
                 final CheckBox checkAddIncome = (CheckBox) mView.findViewById(R.id.paystub_addtoIncome);
 
                 mBuilder.setView(mView);
-                mBuilder.show();
+                //mBuilder.show();
                 final AlertDialog dialog = mBuilder.create();
 
                 submit.setOnClickListener(new View.OnClickListener() {
