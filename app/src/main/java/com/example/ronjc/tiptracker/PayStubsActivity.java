@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.model.PayStub;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
@@ -107,7 +108,7 @@ public class PayStubsActivity extends AppCompatActivity {
 
                         else{
                             //excludes the dollar sign from the string
-                            final double value = Double.parseDouble(amount.getText().toString().substring(1));
+                            final double value = Double.parseDouble(amount.getText().toString().substring(1).replace(",", ""));
                             final String descrip = desc.getText().toString();
                             long dateAdded = System.currentTimeMillis(); //gets the milliseconds of the current time
                             Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
@@ -201,6 +202,10 @@ public class PayStubsActivity extends AppCompatActivity {
     private void addIncome (double amount, String desc,  long dateAdded){//method to add the paystub to their income
         String ps_id = getPeriodId();
 
+        final double am = amount;
+        final String des = desc;
+        final long da = dateAdded;
+
         myRef.child("periods").child(ps_id).child("categories").child("incomes").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -213,10 +218,12 @@ public class PayStubsActivity extends AppCompatActivity {
 
                 if(check_category){ //paystub category exists, do not create it and insert amount to income
                     Toast.makeText(PayStubsActivity.this, "Paystub category exists!", Toast.LENGTH_LONG).show();
+                    AddIncomeDB(des,am,da);
                 }
 
                 else{ //paystub category does not exist create it and insert amount to income
                     writePSCategory();
+                    AddIncomeDB(des,am,da);
                     Toast.makeText(PayStubsActivity.this, "Paystub category created", Toast.LENGTH_LONG).show();
                 }
 
@@ -260,6 +267,17 @@ public class PayStubsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void AddIncomeDB(final String name, final double amount, long dateAdded) { //inserts their income to db
+
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        final String currentPeriodID = getPeriodId();
+
+        String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+        Income income = new Income(incomeKey, name, amount, dateAdded, "Uploaded Paystubs", user.getUid());
+        mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
     }
 
     private String getPeriodId(){
