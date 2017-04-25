@@ -8,4 +8,5 @@ package com.example.ronjc.tiptracker.utils;
 
 public class Utils {
     public static int BUDGET = 0;
+    public static String PERIODID = "";
 }

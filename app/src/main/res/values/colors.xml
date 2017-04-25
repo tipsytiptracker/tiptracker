@@ -13,6 +13,6 @@
     <color name="metroTileColorPressed">#0c3c08</color>
     <color name="metroTileColorFocused">#60ab59</color>
     <color name="colorWhite">#ffffff</color>
-    <color name="colorWhiteTransparent">#a2ffffff</color>
+    <color name="colorWhiteTransparent">#caffffff</color>
     <color name="colorPoint">#83ef89</color>
 </resources>
