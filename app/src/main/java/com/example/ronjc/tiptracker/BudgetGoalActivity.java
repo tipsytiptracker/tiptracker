@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.icu.util.Calendar;
+import android.os.Handler;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -71,7 +72,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
-    String periodId;
+    String periodID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,14 +91,25 @@ public class BudgetGoalActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
 
-        final long currentTime = System.currentTimeMillis();
-        final String currentTimestr = Long.toString(currentTime);
-        final String periodKey = getPeriodId();
+        getPeriodId();
+
+        Handler handler = new Handler();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                getXYValues();
+            }
+        };
+        handler.postDelayed(run,500);
+
 
         budgetBtn.setOnClickListener(new View.OnClickListener() {
+
+
             @Override
             public void onClick(View view) {
-
+                final long currentTime = System.currentTimeMillis();
+                final String currentTimestr = Long.toString(currentTime);
 
                 changedGoal = setBudget.getText().toString();
                 goal.setText("Current Budget: " + changedGoal);
@@ -106,15 +118,14 @@ public class BudgetGoalActivity extends AppCompatActivity {
                         addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                Map<String, String> map = new HashMap<String, String>();
 
                                 //Updates current budget goal to Firebase
                                 dbRef.child("users").child(user.getUid()).child("current_budget")
                                         .setValue(Double.parseDouble(changedGoal.substring(1)));
 
-                                dbRef.child("periods").child(periodKey).child("budgetGoal")
-                                        .setValue(currentTime);
-
-                                dbRef.child("periods").child(periodKey).child("budgetGoal").child(currentTimestr)
+                                dbRef.child("periods").child(periodID).child("budgetGoal")
+                                        .child(currentTimestr)
                                         .setValue(Double.parseDouble(changedGoal.substring(1)));
 
 
@@ -149,30 +160,22 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
     }
 
-    private void GetXYValues(){
-        dbRef.child("periods").child(getPeriodId()).child("budgetGoal")
+    private void getXYValues(){
+        dbRef.child("periods").child(periodID).child("budgetGoal")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        ArrayList<String> list1 = new ArrayList<String>();
-                        ArrayList<String> list3 = new ArrayList<String>();
+
+                        ArrayList<String> budgetKeys = new ArrayList<String>();
+                        ArrayList<String> budgetValues = new ArrayList<String>();
 
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
-                            Period period = child.getValue(Period.class);
-
-                            String get_amount = ""+period.getBudgetGoal();
-
-                            //long get_date = users.getStartDate();
-
-                            //DateFormat df = new SimpleDateFormat("MM/dd/yy");
-                            //String gd = df.format(get_date) + "\n";
-
-                            list1.add(get_amount);
-                            //list3.add(gd);
+                            budgetKeys.add(child.getKey());
+                            budgetValues.add(child.getValue().toString());
 
                         }
-                        String amounts = TextUtils.join("", list1);
-                        Toast.makeText(BudgetGoalActivity.this,"HERE",Toast.LENGTH_LONG).show();;
+                        String amounts = TextUtils.join("", budgetValues);
+                        Toast.makeText(BudgetGoalActivity.this,amounts,Toast.LENGTH_LONG).show();;
                     }
 
                     @Override
@@ -183,9 +186,33 @@ public class BudgetGoalActivity extends AppCompatActivity {
     }
 
 
-    private String getPeriodId(){
-        String key = dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).push().getKey();
-        return key;
+    private void getPeriodId(){
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                //Get last Sunday in milliseconds
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                Date startDate = calendar.getTime();
+                final long time = DateManager.trimMilliseconds(startDate.getTime());
+
+                for (DataSnapshot period : periods) {
+                    if ((long) period.getValue() == time) {
+                        periodID = period.getKey();
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void createLineGraph(){
