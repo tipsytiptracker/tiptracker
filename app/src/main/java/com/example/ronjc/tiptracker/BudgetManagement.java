@@ -7,11 +7,14 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.support.design.widget.TabLayout;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -521,7 +524,98 @@ public class BudgetManagement extends AppCompatActivity {
             Bitmap mBitmap = mCamera.getBitmap();
             OCR mOCR = new OCR(this, mBitmap);
             String ocrString = mOCR.getTotal();
-            Toast.makeText(this, ocrString, Toast.LENGTH_SHORT).show();
+            LayoutInflater mLayoutInflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            Typeface bitter = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
+
+            displayAddDialog(mLayoutInflator, bitter, mCamera.getHeader(), ocrString, mCamera.getType());
+
+//            Toast.makeText(this, ocrString, Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    //Horrible workaround needed because bad design lol
+    private void displayAddDialog(LayoutInflater mLayoutInflator, Typeface bitter, final String headerTitle, String cameraAmount, final String type) {
+
+        //Create dialog
+        AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(this);
+        final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
+        ((TextView) pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
+        TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
+        pencilHeader.setTypeface(bitter);
+        pencilHeader.setText(getString(R.string.add) + " " + headerTitle);
+        final TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
+        final EditText itemNameEditText = (EditText) pencilView.findViewById(R.id.add_item_name);
+        itemNameEditText.setTypeface(bitter);
+        TextInputLayout itemAmount = (TextInputLayout) pencilView.findViewById(R.id.add_item_amount_text_input);
+        final EditText itemAmountEditText = (EditText) pencilView.findViewById(R.id.item_amount);
+        itemAmountEditText.setText(cameraAmount);
+        itemAmountEditText.setTypeface(bitter);
+        Button itemButton = (Button) pencilView.findViewById(R.id.add_item_manually_button);
+
+        //Set font styling
+        itemName.setTypeface(bitter);
+        itemAmount.setTypeface(bitter);
+        itemButton.setTypeface(bitter);
+
+        //Show dialog
+        pencilBuilder.setView(pencilView);
+        final AlertDialog pencilDialog = pencilBuilder.create();
+
+        //Write new income or expense
+        itemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (type.equals(DBHelper.INCOMES)) {
+                    writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                } else {
+                    writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                }
+                pencilDialog.dismiss();
+            }
+        });
+        pencilDialog.show();
+    }
+
+    private void writeNewIncome(final String name, final String amount, final String category) {
+        final double doubleAmount = Double.parseDouble(amount.substring(1).replace(",", ""));
+
+        BigDecimal bigDecimal1 = new BigDecimal(totalIncome);
+        bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal2 = new BigDecimal(doubleAmount);
+        bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        totalIncome = bigDecimal1.add(bigDecimal2).doubleValue();
+
+        String incomeKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
+        mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+
+        //TODO: Find solution for this. Currently, if they add to this from a past or future period, then its date will be out of the bounds of the actual period
+        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid());
+        mDatabaseReference.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
+
+        //alert user of success
+        Toast.makeText(this, getString(R.string.income_added), Toast.LENGTH_SHORT).show();
+        incomeList.add(income);
+        displayItems();
+    }
+
+    private void writeNewExpense(String name, String amount, String category) {
+        double doubleAmount = Double.parseDouble(amount.substring(1));
+
+        BigDecimal bigDecimal1 = new BigDecimal(totalExpense);
+        bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal2 = new BigDecimal(doubleAmount);
+        bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        totalExpense = bigDecimal1.add(bigDecimal2).doubleValue();
+
+        String expenseKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
+        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid());
+        mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
+        mDatabaseReference.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
+        Toast.makeText(this, getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
+        expenseList.add(expense);
+        displayItems();
     }
 }

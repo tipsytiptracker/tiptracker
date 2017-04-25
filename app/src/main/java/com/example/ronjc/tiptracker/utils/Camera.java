@@ -54,6 +54,8 @@ public class Camera implements Parcelable{
     private Context context;//activity context
     private Bitmap bitmap;
     public static final int REQUEST_TAKE_PHOTO = 1;
+    private String header;
+    private String type;
 
     //Constructor, pass activity context
     public Camera (Context context){
@@ -204,4 +206,20 @@ public class Camera implements Parcelable{
             return new Camera[size];
         }
     };
+
+    public String getHeader() {
+        return header;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

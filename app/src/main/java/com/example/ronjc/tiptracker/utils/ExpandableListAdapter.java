@@ -361,7 +361,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
      * @param bitter
      * @param headerTitle
      */
-    private void creatFromPicture(LayoutInflater mLayoutInflator, Typeface bitter, String headerTitle) {
+    private void createFromPicture(LayoutInflater mLayoutInflator, Typeface bitter, String headerTitle) {
+        mCamera.setHeader(headerTitle);
+        mCamera.setType(type);
         mCamera.takePicture();
 //            displayAddDialog(mLayoutInflator, bitter, headerTitle, ocrString);
     }
@@ -489,7 +491,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
-                creatFromPicture(mLayoutInflator, bitter, headerTitle);
+                createFromPicture(mLayoutInflator, bitter, headerTitle);
             }
         });
 

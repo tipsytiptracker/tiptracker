@@ -104,8 +104,6 @@ public class PayStubsActivity extends AppCompatActivity {
                         }//end else
                     }
                 });
-
-
                 dialog.show();
             }
         });
