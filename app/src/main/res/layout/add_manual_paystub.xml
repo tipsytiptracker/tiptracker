@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="25sp"
+        android:layout_marginTop="10dp"
         android:textColor="@color/colorWhite"
         android:layout_gravity="center"/>
 
@@ -42,7 +43,7 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="20dp">
 
         <Button
             android:layout_width="wrap_content"
@@ -50,12 +51,14 @@
             android:text="@string/paystub_submit"
             android:background="@drawable/button_bg"
             android:id="@+id/paystub_submit"
+            android:layout_marginBottom="15dp"
+            android:layout_marginLeft="10dp"
             />
 
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
+            android:layout_marginLeft="120dp"
             android:textColor="@color/colorWhite"
             android:id="@+id/paystub_addtoIncome"
             android:buttonTint="@color/colorWhite"

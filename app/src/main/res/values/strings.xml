@@ -49,7 +49,9 @@
 
     <!-- Strings related to Paystubs -->
     <string name="paystubs">Paystubs</string>
+    <string name="your_paystubs">Your Paystubs</string>
     <string name="add_paystub">Add a PayStub Manually</string>
+    <string name="view_paystub">View All Your PayStubs</string>
     <string name="paystub_amount">Enter an Amount</string>
     <string name="paystub_submit">Submit</string>
     <string name="paystub_desc">Enter a description</string>
