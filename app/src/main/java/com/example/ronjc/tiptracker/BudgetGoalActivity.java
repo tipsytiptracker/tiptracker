@@ -4,7 +4,6 @@ package com.example.ronjc.tiptracker;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.icu.util.Calendar;
 import android.os.Handler;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -52,6 +51,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Calendar;
+
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
