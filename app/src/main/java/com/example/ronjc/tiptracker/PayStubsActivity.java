@@ -192,7 +192,6 @@ public class PayStubsActivity extends AppCompatActivity {
 
                     }
                 });
-
                 dialog.show();
             }
         }); //end of the view all paystubs buttons

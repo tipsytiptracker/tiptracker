@@ -9,11 +9,14 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -44,13 +47,15 @@ import static android.R.attr.bitmap;
  *
  */
 
-public class Camera {
+public class Camera implements Parcelable{
 
     private String mCurrentPhotoPath;//holds a file path for the photo
     private Uri photoUri;//holds the uri for the photo
     private Context context;//activity context
     private Bitmap bitmap;
-    private static final int REQUEST_TAKE_PHOTO = 1;
+    public static final int REQUEST_TAKE_PHOTO = 1;
+    private String header;
+    private String type;
 
     //Constructor, pass activity context
     public Camera (Context context){
@@ -174,5 +179,47 @@ public class Camera {
                         matrix, true);
                 break;
         }
+    }
+
+    public Camera(Parcel in) {
+        String[] data = new String[1];
+        in.readStringArray(data);
+        this.mCurrentPhotoPath = data[0];
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeStringArray(new String[] {this.mCurrentPhotoPath});
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Camera createFromParcel(Parcel in) {
+            return new Camera(in);
+        }
+
+        public Camera[] newArray(int size) {
+            return new Camera[size];
+        }
+    };
+
+    public String getHeader() {
+        return header;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
