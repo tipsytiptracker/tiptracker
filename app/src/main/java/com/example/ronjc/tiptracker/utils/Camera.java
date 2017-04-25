@@ -9,6 +9,8 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 
@@ -45,7 +47,7 @@ import static android.R.attr.bitmap;
  *
  */
 
-public class Camera implements Serializable{
+public class Camera implements Parcelable{
 
     private String mCurrentPhotoPath;//holds a file path for the photo
     private Uri photoUri;//holds the uri for the photo
@@ -176,4 +178,30 @@ public class Camera implements Serializable{
                 break;
         }
     }
+
+    public Camera(Parcel in) {
+        String[] data = new String[1];
+        in.readStringArray(data);
+        this.mCurrentPhotoPath = data[0];
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeStringArray(new String[] {this.mCurrentPhotoPath});
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Camera createFromParcel(Parcel in) {
+            return new Camera(in);
+        }
+
+        public Camera[] newArray(int size) {
+            return new Camera[size];
+        }
+    };
 }

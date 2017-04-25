@@ -118,15 +118,9 @@ public class BudgetFragment extends Fragment {
 
     private ViewGroup viewGroup;
 
-    private Camera mCamera;
-    private boolean showAddDialog;
-    private String ocrString;
-
-    private Activity mActivity;
-
     DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-
+    private Camera mCamera;
 
     public BudgetFragment() {
         // Required empty public constructor
@@ -134,7 +128,7 @@ public class BudgetFragment extends Fragment {
 
     public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list,
                                              Date startDate, String userID, String currentPeriodID,
-                                             double total) {
+                                             double total, Camera camera) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
@@ -142,6 +136,7 @@ public class BudgetFragment extends Fragment {
         args.putString(USER_ID_KEY, userID);
         args.putString(PERIOD_KEY, currentPeriodID);
         args.putDouble(TOTAL_KEY, total);
+        args.putParcelable(CAMERA_KEY, camera);
         mBudgetFragment.setArguments(args);
         return mBudgetFragment;
     }
@@ -158,11 +153,8 @@ public class BudgetFragment extends Fragment {
             userID = getArguments().getString(USER_ID_KEY);
             currentPeriodID = getArguments().getString(PERIOD_KEY);
             total = getArguments().getDouble(TOTAL_KEY, 0);
-            mCamera = (Camera) getArguments().getSerializable(CAMERA_KEY);
-            showAddDialog = getArguments().getBoolean(SHOW_KEY);
-            ocrString = getArguments().getString(OCR_KEY);
+            mCamera = (Camera) getArguments().getParcelable(CAMERA_KEY);
         }
-        mActivity = getActivity();
     }
 
     @Override
@@ -184,7 +176,7 @@ public class BudgetFragment extends Fragment {
                     }
                 }
                 prepareListData();
-                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, idList, userID, type, currentPeriodID, mTotalTextView, mActivity);
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, idList, userID, type, currentPeriodID, mTotalTextView, mCamera);
                 expandableListView.setAdapter(listAdapter);
             }
             @Override

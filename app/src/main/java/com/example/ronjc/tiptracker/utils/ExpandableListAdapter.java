@@ -71,19 +71,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private String type;
     private String currentPeriodID;
     private TextView totalTextView;
-    private boolean showAddDialog;
-    private String ocrString;
-
-    private boolean showDialog = false;
-
-    private Activity mActivity;
+    private Camera mCamera;
 
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
     public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String,
                                 List<String>> childList, HashMap<String, List<String>> idList,
                                  String userID, String type, String currentPeriodID,
-                                 TextView totalTextView, Activity activity) {
+                                 TextView totalTextView, Camera camera) {
         this.context = context;
         this.headerList = headerList;
         this.childList = childList;
@@ -92,7 +87,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.type = type;
         this.currentPeriodID = currentPeriodID;
         this.totalTextView = totalTextView;
-        this.mActivity = activity;
+        this.mCamera = camera;
     }
 
     @Override
@@ -367,7 +362,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
      * @param headerTitle
      */
     private void creatFromPicture(LayoutInflater mLayoutInflator, Typeface bitter, String headerTitle) {
-        Camera mCamera = new Camera(context);
         mCamera.takePicture();
 //            displayAddDialog(mLayoutInflator, bitter, headerTitle, ocrString);
     }

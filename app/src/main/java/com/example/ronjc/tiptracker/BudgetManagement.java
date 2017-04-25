@@ -102,8 +102,7 @@ public class BudgetManagement extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
     private Period period;
 
-    private boolean showAddDialog = false;
-
+    private Camera mCamera;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,6 +150,8 @@ public class BudgetManagement extends AppCompatActivity {
                 goToLastWeek();
             }
         });
+
+        mCamera = new Camera(this);
     }
 
     /**
@@ -430,7 +431,7 @@ public class BudgetManagement extends AppCompatActivity {
         mViewPager.setAdapter(null);
 
         //Create new Adapter for ViewPager
-        mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID);
+        mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID, mCamera);
 
         //Set adapter for ViewPager
         mViewPager.setAdapter(mBudgetPageAdapter);
