@@ -217,14 +217,12 @@ public class PayStubsActivity extends AppCompatActivity {
                 } //end for loop
 
                 if(check_category){ //paystub category exists, do not create it and insert amount to income
-                    Toast.makeText(PayStubsActivity.this, "Paystub category exists!", Toast.LENGTH_LONG).show();
-//                    AddIncomeDB(des,am,da);
+                    AddIncomeDB(des,am,da);
                 }
 
                 else{ //paystub category does not exist create it and insert amount to income
                     writePSCategory();
-//                    AddIncomeDB(des,am,da);
-                    Toast.makeText(PayStubsActivity.this, "Paystub category created", Toast.LENGTH_LONG).show();
+                    AddIncomeDB(des,am,da);
                 }
 
             }
@@ -270,14 +268,14 @@ public class PayStubsActivity extends AppCompatActivity {
     }
 
     private void AddIncomeDB(final String name, final double amount, long dateAdded) { //inserts their income to db
-//
-//        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-////        final String currentPeriodID = getPeriodId();
-//
-//        String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
-//        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
-//        Income income = new Income(incomeKey, name, amount, dateAdded, "Uploaded Paystubs", user.getUid());
-//        mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
+
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        final String currentPeriodID = periodID;
+
+       String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+       Income income = new Income(incomeKey, name, amount, dateAdded, "Uploaded Paystubs", user.getUid());
+        mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
     }
 
     private void getPeriodId(){
