@@ -34,6 +34,7 @@ import java.nio.DoubleBuffer;
 import java.security.DomainCombiner;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -72,13 +73,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private String currentPeriodID;
     private TextView totalTextView;
     private Camera mCamera;
+    private ArrayList<Double> amountsByCategory;
 
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
     public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String,
                                 List<String>> childList, HashMap<String, List<String>> idList,
                                  String userID, String type, String currentPeriodID,
-                                 TextView totalTextView, Camera camera) {
+                                 TextView totalTextView, Camera camera, ArrayList<Double> amountsByCategory) {
         this.context = context;
         this.headerList = headerList;
         this.childList = childList;
@@ -88,6 +90,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.currentPeriodID = currentPeriodID;
         this.totalTextView = totalTextView;
         this.mCamera = camera;
+        this.amountsByCategory = amountsByCategory;
     }
 
     @Override
@@ -204,6 +207,20 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Get correct ArrayList via category, and then all the new entry
         childList.get(category).add(stringToAdd);
+        idList.get(category).add(incomeKey);
+
+        //Get index of category to use for amounts by category
+        int categoryIndex = headerList.indexOf(category);
+
+        //Get current amount for that category
+        double currentAmount = amountsByCategory.get(categoryIndex);
+
+        //Add new income's amount to category amount
+        BigDecimal bigDecimal1 = new BigDecimal(currentAmount);
+        bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal2 = new BigDecimal(doubleAmount);
+        bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+        amountsByCategory.set(categoryIndex, bigDecimal1.add(bigDecimal2).doubleValue());
 
         //update the total amount
         updateTotal(doubleAmount);
@@ -225,6 +242,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         Toast.makeText(context, context.getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
         String stringToAdd = name + ": " + amount;
         childList.get(category).add(stringToAdd);
+        idList.get(category).add(expenseKey);
+        int categoryIndex = headerList.indexOf(category);
+        double currentAmount = amountsByCategory.get(categoryIndex);
+
+        BigDecimal bigDecimal1 = new BigDecimal(currentAmount);
+        bigDecimal1 = bigDecimal1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bigDecimal2 = new BigDecimal(doubleAmount);
+        bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
+        amountsByCategory.set(categoryIndex, bigDecimal1.add(bigDecimal2).doubleValue());
+
         updateTotal(doubleAmount);
     }
 
@@ -356,16 +383,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     /**
+     * Sets camera objects header and type and starts intent Picture intent
      *
-     * @param mLayoutInflator
-     * @param bitter
-     * @param headerTitle
+     * @param headerTitle category that will appear in dialog and the category the item being added will belong to.
      */
-    private void createFromPicture(LayoutInflater mLayoutInflator, Typeface bitter, String headerTitle) {
+    private void createFromPicture(String headerTitle) {
         mCamera.setHeader(headerTitle);
         mCamera.setType(type);
         mCamera.takePicture();
-//            displayAddDialog(mLayoutInflator, bitter, headerTitle, ocrString);
     }
 
     /**
@@ -415,55 +440,55 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         pencilDialog.show();
     }
 
-    /**
-     * Display add dialog after taking picture for OCR
-     *
-     * @param mLayoutInflator Layout Inflator
-     * @param bitter Typeface
-     * @param headerTitle category
-     * @param cameraAmount String amount returned from OCR object
-     */
-    private void displayAddDialog(LayoutInflater mLayoutInflator, Typeface bitter, final String headerTitle, String cameraAmount) {
-
-        //Create dialog
-        AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(context);
-        final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
-        ((TextView) pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
-        TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
-        pencilHeader.setTypeface(bitter);
-        pencilHeader.setText(context.getString(R.string.add) + " " + headerTitle);
-        final TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
-        final EditText itemNameEditText = (EditText) pencilView.findViewById(R.id.add_item_name);
-        itemNameEditText.setTypeface(bitter);
-        TextInputLayout itemAmount = (TextInputLayout) pencilView.findViewById(R.id.add_item_amount_text_input);
-        final EditText itemAmountEditText = (EditText) pencilView.findViewById(R.id.item_amount);
-        itemAmountEditText.setText(cameraAmount);
-        itemAmountEditText.setTypeface(bitter);
-        Button itemButton = (Button) pencilView.findViewById(R.id.add_item_manually_button);
-
-        //Set font styling
-        itemName.setTypeface(bitter);
-        itemAmount.setTypeface(bitter);
-        itemButton.setTypeface(bitter);
-
-        //Show dialog
-        pencilBuilder.setView(pencilView);
-        final AlertDialog pencilDialog = pencilBuilder.create();
-
-        //Write new income or expense
-        itemButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (type.equals(DBHelper.INCOMES)) {
-                    writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
-                } else {
-                    writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
-                }
-                pencilDialog.dismiss();
-            }
-        });
-        pencilDialog.show();
-    }
+//    /**
+//     * Display add dialog after taking picture for OCR
+//     *
+//     * @param mLayoutInflator Layout Inflator
+//     * @param bitter Typeface
+//     * @param headerTitle category
+//     * @param cameraAmount String amount returned from OCR object
+//     */
+//    private void displayAddDialog(LayoutInflater mLayoutInflator, Typeface bitter, final String headerTitle, String cameraAmount) {
+//
+//        //Create dialog
+//        AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(context);
+//        final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
+//        ((TextView) pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
+//        TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
+//        pencilHeader.setTypeface(bitter);
+//        pencilHeader.setText(context.getString(R.string.add) + " " + headerTitle);
+//        final TextInputLayout itemName = (TextInputLayout) pencilView.findViewById(R.id.add_item_name_text_input);
+//        final EditText itemNameEditText = (EditText) pencilView.findViewById(R.id.add_item_name);
+//        itemNameEditText.setTypeface(bitter);
+//        TextInputLayout itemAmount = (TextInputLayout) pencilView.findViewById(R.id.add_item_amount_text_input);
+//        final EditText itemAmountEditText = (EditText) pencilView.findViewById(R.id.item_amount);
+//        itemAmountEditText.setText(cameraAmount);
+//        itemAmountEditText.setTypeface(bitter);
+//        Button itemButton = (Button) pencilView.findViewById(R.id.add_item_manually_button);
+//
+//        //Set font styling
+//        itemName.setTypeface(bitter);
+//        itemAmount.setTypeface(bitter);
+//        itemButton.setTypeface(bitter);
+//
+//        //Show dialog
+//        pencilBuilder.setView(pencilView);
+//        final AlertDialog pencilDialog = pencilBuilder.create();
+//
+//        //Write new income or expense
+//        itemButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (type.equals(DBHelper.INCOMES)) {
+//                    writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+//                } else {
+//                    writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+//                }
+//                pencilDialog.dismiss();
+//            }
+//        });
+//        pencilDialog.show();
+//    }
 
     /**
      * Displays an options dialog that allows user to choose between manual entry or OCR entry
@@ -491,7 +516,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
-                createFromPicture(mLayoutInflator, bitter, headerTitle);
+                createFromPicture(headerTitle);
             }
         });
 

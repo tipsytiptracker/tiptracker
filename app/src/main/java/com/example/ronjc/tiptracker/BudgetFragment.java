@@ -176,7 +176,7 @@ public class BudgetFragment extends Fragment {
                     }
                 }
                 prepareListData();
-                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, idList, userID, type, currentPeriodID, mTotalTextView, mCamera);
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, idList, userID, type, currentPeriodID, mTotalTextView, mCamera, amountsByCategory);
                 expandableListView.setAdapter(listAdapter);
             }
             @Override
@@ -373,6 +373,8 @@ public class BudgetFragment extends Fragment {
         //Update local data
         headerList.add(category);
         childList.put(category, new ArrayList<String>());
+        idList.put(category, new ArrayList<String>());
+        amountsByCategory.add(0.00);
 
         //Update view
         listAdapter.notifyDataSetChanged();
