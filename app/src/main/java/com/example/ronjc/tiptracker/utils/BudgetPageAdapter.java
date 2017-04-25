@@ -1,5 +1,6 @@
 package com.example.ronjc.tiptracker.utils;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -38,18 +39,12 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
     private double totalExpenses = 0.00;
     private Context context;
     private String currentPeriodID;
-
     //User ID being passed from BudgetManagement
     private String userID;
+    private Camera camera;
 
-    public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period, String userID, String currentPeriodID) {
+    public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period, String userID, String currentPeriodID, Camera camera) {
         super(fragmentManager);
-//        List<Fragment> al = fragmentManager.getFragments();
-//        if (al != null) {
-//            for (Fragment frag : al) {
-//                fragmentManager.beginTransaction().remove(frag).commit();
-//            }
-//        }
         this.context = context;
         this.startDate = new Date(period.getStartDate());
         this.endDate = new Date(period.getEndDate());
@@ -59,6 +54,7 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
         this.totalIncomes = period.getTotalIncome();
         this.userID = userID;
         this.currentPeriodID = currentPeriodID;
+        this.camera = camera;
     }
 
     @Override
@@ -69,9 +65,9 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
     @Override
     public Fragment getItem(int position) {
         if(position == 0) {
-            return BudgetFragment.newInstance(position + 1, incomes, startDate, userID, currentPeriodID, totalIncomes);
+            return BudgetFragment.newInstance(position + 1, incomes, startDate, userID, currentPeriodID, totalIncomes, camera);
         } else {
-            return BudgetFragment.newInstance(position + 1, expenses, startDate, userID, currentPeriodID, totalExpenses);
+            return BudgetFragment.newInstance(position + 1, expenses, startDate, userID, currentPeriodID, totalExpenses, camera);
         }
     }
 
