@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -510,6 +511,17 @@ public class BudgetManagement extends AppCompatActivity {
             mProgressDialog.show();
         } else {
             mProgressDialog.dismiss();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == Camera.REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            Bitmap mBitmap = mCamera.getBitmap();
+            OCR mOCR = new OCR(this, mBitmap);
+            String ocrString = mOCR.getTotal();
+            Toast.makeText(this, ocrString, Toast.LENGTH_SHORT).show();
         }
     }
 }
