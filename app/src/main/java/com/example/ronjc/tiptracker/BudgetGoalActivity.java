@@ -77,6 +77,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
     private FirebaseUser user;
     String periodID;
 
+    ArrayList<String> XValues = new ArrayList<>();
+    ArrayList<String> YValues = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +92,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
         FontManager.markAsIconContainer(findViewById(R.id.budget_goal_activity), iconFont);
 
+        XValues = new ArrayList<>();
+        YValues = new ArrayList<>();
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
@@ -96,14 +101,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
         getPeriodId();
 
-        Handler handler = new Handler();
-        Runnable run = new Runnable() {
-            @Override
-            public void run() {
-                getXYValues();
-            }
-        };
-        handler.postDelayed(run,500);
+
+
+
 
         //When "Change Button" is clicked it connects to Firebase and stores values
         budgetBtn.setOnClickListener(new View.OnClickListener() {
@@ -119,7 +119,6 @@ public class BudgetGoalActivity extends AppCompatActivity {
                         addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                Map<String, String> map = new HashMap<String, String>();
 
                                 //Updates current budget goal to Firebase
                                 dbRef.child("users").child(user.getUid()).child("current_budget")
@@ -129,11 +128,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
                                 dbRef.child("periods").child(periodID).child("budgetGoal")
                                         .child(currentTimestr)
                                         .setValue(Double.parseDouble(changedGoal.substring(1)));
-
-
-
                             }
-
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
 
@@ -171,13 +166,14 @@ public class BudgetGoalActivity extends AppCompatActivity {
                         ArrayList<String> budgetKeys = new ArrayList<String>();
                         ArrayList<String> budgetValues = new ArrayList<String>();
 
+
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
                             budgetKeys.add(child.getKey());
                             budgetValues.add(child.getValue().toString());
 
                         }
-                        String amounts = TextUtils.join("", budgetValues);
-                        Toast.makeText(BudgetGoalActivity.this,amounts,Toast.LENGTH_LONG).show();;
+                        YValues = budgetValues;
+                        XValues = budgetKeys;
                     }
 
                     @Override
@@ -189,7 +185,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
 
     private void getPeriodId(){//Gets the key for the user's period session
-        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Get key for period to write
@@ -216,41 +213,79 @@ public class BudgetGoalActivity extends AppCompatActivity {
             }
         });
     }
-
+    /**
+     * Bottom 3 methods create graphs that correspond to the budget goal, income, and expense history.
+     * The methods use the MPAndroidChart library to create line graphs.
+     * X-Axis represents the time period, while the Y-Axis represents the dollar amount.
+    **/
     private void createLineGraph(){//Draws and plots the graph for budget goal progress graph
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
         View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-        view2.setBackgroundColor(Color.parseColor("#ccffcd"));
-        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
 
 
         mBuilder.setView(view2).show();
         final AlertDialog dialog = mBuilder.create();
 
-        List<Entry> entries = new ArrayList<Entry>();
-        //add for loop to add other entries
-
-        entries.add(new Entry(3,4));
-        entries.add(new Entry(5,6));
-        entries.add(new Entry(6,8));
-        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
-        dataSet.setColor(Color.BLACK);
-        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-        dataSet.setCircleColor(Color.BLACK);
-        dataSets.add(dataSet);
-
-        XAxis xAxis = linechart.getXAxis();
-        xAxis.setDrawGridLines(false);
+        Handler handler = new Handler();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                getXYValues();
+                Handler handler = new Handler();
+                Runnable run = new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+                        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
+                        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
 
 
-        LineData data = new LineData(dataSets);
-        linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
-        linechart.setData(data);
+
+                         mBuilder.setView(view2).show();
+                        final AlertDialog dialog = mBuilder.create();
+
+                        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+                        linechart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+                        linechart.getAxisRight().setEnabled(false);
+
+                        List<Entry> entries = new ArrayList<Entry>();
+                        //add for loop to add other entries
+                        XValues.get(1);
+                        int lengthX = XValues.size();
+                        for(int i = 0; i<lengthX;i++){
+                            final float time = Float.parseFloat(XValues.get(i));
+                            entries.add(new Entry(i,Float.parseFloat(YValues.get(i))));
+                        }
+
+                        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
+                        dataSet.setColor(Color.BLACK);
+                        dataSet.setDrawValues(false);
+                        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+                        dataSet.setCircleColor(Color.BLACK);
+                        dataSets.add(dataSet);
+
+                        XAxis xAxis = linechart.getXAxis();
+                        xAxis.setDrawGridLines(false);
+
+
+                        LineData data = new LineData(dataSets);
+                        linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
+                        linechart.setData(data);
+                    }
+                };
+                handler.postDelayed(run,500);
+            }
+        };
+        handler.postDelayed(run,500);
+
+
     }
     private void createIncomeGraph(){//Draws and plots the graph for income progress graph
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
         View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-        view2.setBackgroundColor(Color.parseColor("#ccffcd"));
+        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
+
 
         LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
 
@@ -274,13 +309,13 @@ public class BudgetGoalActivity extends AppCompatActivity {
         xAxis.setDrawGridLines(false);
 
         LineData data = new LineData(dataSets);
-        linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
+        linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
         linechart.setData(data);
     }
     private void createExpenseGraph(){//Draws and plots the graph for expense progress graph
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
         View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-        view2.setBackgroundColor(Color.parseColor("#ccffcd"));
+        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
 
         LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
 
@@ -304,7 +339,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
         xAxis.setDrawGridLines(false);
 
         LineData data = new LineData(dataSets);
-        linechart.setBackgroundColor(Color.parseColor("#ccffcd"));
+        linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
         linechart.setData(data);
     }
 }
