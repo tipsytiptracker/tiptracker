@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -441,6 +442,9 @@ public class BudgetManagement extends AppCompatActivity {
         mViewPager.setAdapter(mBudgetPageAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
 
+        //Change tab font to Bitter
+        changeTabFont();
+
         //Hide Progress Dialog
         showProgress(false);
     }
@@ -617,5 +621,28 @@ public class BudgetManagement extends AppCompatActivity {
         Toast.makeText(this, getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
         expenseList.add(expense);
         displayItems();
+    }
+
+    /**
+     * Changes tab font
+     *
+     * http://stackoverflow.com/questions/31067265/change-the-font-of-tab-text-in-android-design-support-tablayout
+     */
+    private void changeTabFont() {
+        Typeface bitter = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
+
+        ViewGroup vg = (ViewGroup) mTabLayout.getChildAt(0);
+        int tabsCount = vg.getChildCount();
+        for (int j = 0; j < tabsCount; j++) {
+            ViewGroup vgTab = (ViewGroup) vg.getChildAt(j);
+            int tabChildsCount = vgTab.getChildCount();
+            for (int i = 0; i < tabChildsCount; i++) {
+                View tabViewChild = vgTab.getChildAt(i);
+                if (tabViewChild instanceof TextView) {
+                    ((TextView) tabViewChild).setTypeface(bitter);
+                }
+            }
+        }
+
     }
 }
