@@ -2,6 +2,7 @@
 package com.example.ronjc.tiptracker;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -77,6 +79,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
     private FirebaseUser user;
     String periodID;
 
+    int graphIncrementer;
+
     ArrayList<String> XValues = new ArrayList<>();
     ArrayList<String> YValues = new ArrayList<>();
 
@@ -91,6 +95,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
         Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
         FontManager.markAsIconContainer(findViewById(R.id.budget_goal_activity), iconFont);
+
+        graphIncrementer = 0;
 
         XValues = new ArrayList<>();
         YValues = new ArrayList<>();
@@ -141,15 +147,22 @@ public class BudgetGoalActivity extends AppCompatActivity {
         //Button's that bring up a view for its corresponding graph
         budgetGraphbtn.setOnClickListener(new View.OnClickListener() {//Creates view for budget goal progress graph
             @Override
-            public void onClick(View view) {createLineGraph();}}
+            public void onClick(View view) {
+                graphIncrementer = 1;
+                createLineGraph();
+            }}
         );
         incomeGraphbtn.setOnClickListener(new View.OnClickListener() {//Creates view for income progress graph
             @Override
-            public void onClick(View view) {createIncomeGraph();}}
+            public void onClick(View view) {
+                graphIncrementer = 2;
+                createIncomeGraph();
+            }}
         );
         expenseGraphbtn.setOnClickListener(new View.OnClickListener() {//Creates view for expense progress graph
             @Override
             public void onClick(View view) {
+                graphIncrementer = 3;
                 createExpenseGraph();}}
         );
 
@@ -158,29 +171,36 @@ public class BudgetGoalActivity extends AppCompatActivity {
     }
 
     private void getXYValues(){
-        dbRef.child("periods").child(periodID).child("budgetGoal")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+        switch (graphIncrementer) {
+            case 1:
+                dbRef.child("periods").child(periodID).child("budgetGoal")
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        ArrayList<String> budgetKeys = new ArrayList<String>();
-                        ArrayList<String> budgetValues = new ArrayList<String>();
+                            ArrayList<String> budgetKeys = new ArrayList<String>();
+                            ArrayList<String> budgetValues = new ArrayList<String>();
 
 
-                        for (DataSnapshot child: dataSnapshot.getChildren()) {
-                            budgetKeys.add(child.getKey());
-                            budgetValues.add(child.getValue().toString());
+                            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                budgetKeys.add(child.getKey());
+                                budgetValues.add(child.getValue().toString());
+
+                            }
+                            YValues = budgetValues;
+                            XValues = budgetKeys;
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
                         }
-                        YValues = budgetValues;
-                        XValues = budgetKeys;
-                    }
+                    });
+                break;
+            case 2:
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
 
-                    }
-                });
+        }
     }
 
 
@@ -213,19 +233,33 @@ public class BudgetGoalActivity extends AppCompatActivity {
             }
         });
     }
+    private void getIncomeID(){
+        dbRef.child(DBHelper.PERIODS).child(periodID).child(DBHelper.INCOMES)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ArrayList<String> incomeKey = new ArrayList<String>();
+
+
+
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            incomeKey.add(child.getKey());
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
     /**
      * Bottom 3 methods create graphs that correspond to the budget goal, income, and expense history.
      * The methods use the MPAndroidChart library to create line graphs.
      * X-Axis represents the time period, while the Y-Axis represents the dollar amount.
     **/
     private void createLineGraph(){//Draws and plots the graph for budget goal progress graph
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
-        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
-
-
-        mBuilder.setView(view2).show();
-        final AlertDialog dialog = mBuilder.create();
 
         Handler handler = new Handler();
         Runnable run = new Runnable() {
@@ -236,18 +270,21 @@ public class BudgetGoalActivity extends AppCompatActivity {
                 Runnable run = new Runnable() {
                     @Override
                     public void run() {
-                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+                        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
                         View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
                         view2.setBackgroundColor(Color.parseColor("#bff6bc"));
 
 
+                        mBuilder.setView(view2).show();
 
-                         mBuilder.setView(view2).show();
-                        final AlertDialog dialog = mBuilder.create();
 
                         LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
                         linechart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
                         linechart.getAxisRight().setEnabled(false);
+
+                        Description description = new Description();
+                        description.setText("");
+                        linechart.setDescription(description);
 
                         List<Entry> entries = new ArrayList<Entry>();
                         //add for loop to add other entries
@@ -258,7 +295,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
                             entries.add(new Entry(i,Float.parseFloat(YValues.get(i))));
                         }
 
-                        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
+                        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal Progress"); // add entries to dataset
                         dataSet.setColor(Color.BLACK);
                         dataSet.setDrawValues(false);
                         List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
