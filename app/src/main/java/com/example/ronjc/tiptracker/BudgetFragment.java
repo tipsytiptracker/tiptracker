@@ -355,7 +355,7 @@ public class BudgetFragment extends Fragment {
 
     /**
      * Method that writes a new category entry into the database and updates view with that entry
-     * @param category
+     * @param category new category
      */
     private void writeNewCategory(final String category) {
         //Database reference
