@@ -74,13 +74,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private TextView totalTextView;
     private Camera mCamera;
     private ArrayList<Double> amountsByCategory;
+    private double longitude, latitude;
 
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
     public ExpandableListAdapter(Context context, List<String> headerList, HashMap<String,
                                 List<String>> childList, HashMap<String, List<String>> idList,
                                  String userID, String type, String currentPeriodID,
-                                 TextView totalTextView, Camera camera, ArrayList<Double> amountsByCategory) {
+                                 TextView totalTextView, Camera camera, ArrayList<Double> amountsByCategory,
+                                double longitude, double latitude) {
         this.context = context;
         this.headerList = headerList;
         this.childList = childList;
@@ -91,6 +93,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.totalTextView = totalTextView;
         this.mCamera = camera;
         this.amountsByCategory = amountsByCategory;
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 
     @Override
@@ -198,7 +202,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
 
         //TODO: Find solution for this. Currently, if they add to this from a past or future period, then its date will be out of the bounds of the actual period
-        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, userID, longitude, latitude);
         mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
 
         //alert user of success
@@ -236,7 +240,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private void writeNewExpense(String name, String amount, String category) {
         double doubleAmount = Double.parseDouble(amount.substring(1));
         String expenseKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
-        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, userID);
+        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, userID, longitude, latitude);
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
         mDatabase.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
         Toast.makeText(context, context.getString(R.string.expense_added), Toast.LENGTH_SHORT).show();

@@ -42,8 +42,12 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
     //User ID being passed from BudgetManagement
     private String userID;
     private Camera camera;
+    private double longitude;
+    private double latitude;
 
-    public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period, String userID, String currentPeriodID, Camera camera) {
+    public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period,
+                             String userID, String currentPeriodID, Camera camera, double longitude,
+                             double latitude) {
         super(fragmentManager);
         this.context = context;
         this.startDate = new Date(period.getStartDate());
@@ -55,6 +59,8 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
         this.userID = userID;
         this.currentPeriodID = currentPeriodID;
         this.camera = camera;
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 
     @Override
@@ -65,9 +71,9 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
     @Override
     public Fragment getItem(int position) {
         if(position == 0) {
-            return BudgetFragment.newInstance(position + 1, incomes, startDate, userID, currentPeriodID, totalIncomes, camera);
+            return BudgetFragment.newInstance(position + 1, incomes, startDate, userID, currentPeriodID, totalIncomes, camera, longitude, latitude);
         } else {
-            return BudgetFragment.newInstance(position + 1, expenses, startDate, userID, currentPeriodID, totalExpenses, camera);
+            return BudgetFragment.newInstance(position + 1, expenses, startDate, userID, currentPeriodID, totalExpenses, camera, longitude, latitude);
         }
     }
 

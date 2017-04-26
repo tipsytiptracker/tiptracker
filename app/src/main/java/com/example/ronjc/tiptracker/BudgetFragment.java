@@ -44,6 +44,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -83,8 +84,8 @@ public class BudgetFragment extends Fragment {
     private static final String PERIOD_KEY = "period";
     private static final String TOTAL_KEY = "total";
     private static final String CAMERA_KEY = "camera";
-    private static final String SHOW_KEY = "show";
-    private static final String OCR_KEY = "ocr";
+    private static final String LONGITUDE_KEY = "longitude";
+    private static final String LATITUDE_KEY = "latitude";
 
     private String type = "";
 
@@ -122,13 +123,15 @@ public class BudgetFragment extends Fragment {
 
     private Camera mCamera;
 
+    private double longitude, latitude;
+
     public BudgetFragment() {
         // Required empty public constructor
     }
 
     public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list,
                                              Date startDate, String userID, String currentPeriodID,
-                                             double total, Camera camera) {
+                                             double total, Camera camera, double longitude, double latitude) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
@@ -137,6 +140,8 @@ public class BudgetFragment extends Fragment {
         args.putString(PERIOD_KEY, currentPeriodID);
         args.putDouble(TOTAL_KEY, total);
         args.putParcelable(CAMERA_KEY, camera);
+        args.putDouble(LONGITUDE_KEY, longitude);
+        args.putDouble(LATITUDE_KEY, latitude);
         mBudgetFragment.setArguments(args);
         return mBudgetFragment;
     }
@@ -154,6 +159,8 @@ public class BudgetFragment extends Fragment {
             currentPeriodID = getArguments().getString(PERIOD_KEY);
             total = getArguments().getDouble(TOTAL_KEY, 0);
             mCamera = (Camera) getArguments().getParcelable(CAMERA_KEY);
+            longitude = getArguments().getLong(LONGITUDE_KEY);
+            latitude = getArguments().getLong(LATITUDE_KEY);
         }
     }
 
@@ -176,7 +183,9 @@ public class BudgetFragment extends Fragment {
                     }
                 }
                 prepareListData();
-                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, idList, userID, type, currentPeriodID, mTotalTextView, mCamera, amountsByCategory);
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList,
+                                    idList, userID, type, currentPeriodID, mTotalTextView, mCamera,
+                                    amountsByCategory, longitude, latitude);
                 expandableListView.setAdapter(listAdapter);
             }
             @Override
@@ -186,11 +195,20 @@ public class BudgetFragment extends Fragment {
 
         Button addCategoryButton = (Button)view.findViewById(R.id.add_category_button);
         TextView mPieChart = (TextView)view.findViewById(R.id.pie_chart_icon);
+        TextView mMapMarker = (TextView)view.findViewById(R.id.map_marker_icon);
         final Typeface bitter = FontManager.getTypeface(view.getContext(), BITTER);
         Typeface fontAwesome = FontManager.getTypeface(view.getContext(), FONTAWESOME);
         addCategoryButton.setTypeface(bitter);
         mTotalTextView.setTypeface(bitter);
         mPieChart.setTypeface(fontAwesome);
+        mMapMarker.setTypeface(fontAwesome);
+
+        mMapMarker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayMap();
+            }
+        });
 
         mPieChart.setOnClickListener(new PieChartListener());
         mTotalTextView.setText(getString(R.string.total) + decimalFormat.format(total));
@@ -209,6 +227,7 @@ public class BudgetFragment extends Fragment {
                 final AlertDialog dialog = mBuilder.create();
                 Button mButton = (Button)mView.findViewById(R.id.add_category_dialog_button);
                 mButton.setTypeface(bitter);
+
                 mButton.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View view) {
@@ -461,5 +480,42 @@ public class BudgetFragment extends Fragment {
             String testString = mOCR.getTotal();
             Toast.makeText(getContext(), testString, Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private void displayMap() {
+        ArrayList<LatLng> locations = new ArrayList<LatLng>();
+        ArrayList<String> names = new ArrayList<String>();
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+       if(type.equals(DBHelper.INCOMES)) {
+           if(list.size() > 0) {
+               ArrayList<Income> incomes = (ArrayList<Income>) list;
+               incomes.removeAll(Collections.singleton(null));
+               for (Income income : incomes) {
+                   if(income.getLongitude() != 0 && income.getLatitude() != 0) {
+                       locations.add(new LatLng(income.getLatitude(), income.getLongitude()));
+                       names.add("Spent $" + decimalFormat.format(income.getAmount()) + " on " + income.getName() + ".");
+                   }
+               }
+           }
+       } else {
+           if(list.size() > 0) {
+               ArrayList<Expense> expenses = (ArrayList<Expense>) list;
+               expenses.removeAll(Collections.singleton(null));
+               for (Expense expense : expenses) {
+                   if(expense.getLongitude() != 0 && expense.getLatitude() != 0) {
+                       locations.add(new LatLng(expense.getLatitude(), expense.getLongitude()));
+                       names.add("Spent $" + decimalFormat.format(expense.getAmount()) + " on " + expense.getName() + ".");
+                   }
+               }
+           }
+       }
+        Intent intent = new Intent(getContext(), MapsActivity.class);
+        intent.putParcelableArrayListExtra("locations", locations);
+        intent.putStringArrayListExtra("names", names);
+        intent.putExtra("longitude", longitude);
+        intent.putExtra("latitude", latitude);
+        startActivity(intent);
     }
 }

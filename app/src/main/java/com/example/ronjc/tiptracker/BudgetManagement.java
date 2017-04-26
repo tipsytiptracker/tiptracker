@@ -1,13 +1,22 @@
 package com.example.ronjc.tiptracker;
 
+import android.*;
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.pm.PackageManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +36,10 @@ import com.example.ronjc.tiptracker.utils.Camera;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.example.ronjc.tiptracker.utils.OCR;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,15 +50,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Semaphore;
+
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,7 +67,7 @@ import butterknife.ButterKnife;
  * @author Ronald Mangiliman
  */
 
-public class BudgetManagement extends AppCompatActivity {
+public class BudgetManagement extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     //Bind UI views to references
     @BindView(R.id.left_arrow_icon)
@@ -69,6 +80,9 @@ public class BudgetManagement extends AppCompatActivity {
     TabLayout mTabLayout;
     @BindView(R.id.date_tv)
     TextView mDateTextView;
+
+    public static final int REQUEST_LOCATION = 2;
+
 
     //Start and end date for current period
     private Date startDate, endDate;
@@ -107,7 +121,16 @@ public class BudgetManagement extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
     private Period period;
 
+    private GoogleApiClient mGoogleApiClient;
+
     private Camera mCamera;
+
+    private Location mLastLocation;
+
+    private double longitude, latitude;
+
+    private LocationRequest mLocationRequest;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,6 +148,14 @@ public class BudgetManagement extends AppCompatActivity {
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         ButterKnife.bind(this);
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -149,7 +180,7 @@ public class BudgetManagement extends AppCompatActivity {
                 goToNextWeek();
             }
         });
-        mLeftArrowIcon.setOnClickListener(new View.OnClickListener(){
+        mLeftArrowIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 goToLastWeek();
@@ -158,6 +189,57 @@ public class BudgetManagement extends AppCompatActivity {
 
         mCamera = new Camera(this);
     }
+
+    @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if(ContextCompat.checkSelfPermission(BudgetManagement.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(BudgetManagement.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            } else {
+                ActivityCompat.requestPermissions(BudgetManagement.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+            }
+        }
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if(mLastLocation != null) {
+//            Toast.makeText(this, "" + mLastLocation.getLatitude() + mLastLocation.getLongitude(), Toast.LENGTH_LONG).show();
+            longitude = mLastLocation.getLongitude();
+            latitude = mLastLocation.getLatitude();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode) {
+//            case REQUEST_LOCATION: {
+//                if (grantResults.length > 0 )
+//                return;
+//            }
+//        }
+//    }
 
     /**
      * Calculates the start and end dates for the current period
@@ -436,7 +518,7 @@ public class BudgetManagement extends AppCompatActivity {
         mViewPager.setAdapter(null);
 
         //Create new Adapter for ViewPager
-        mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID, mCamera);
+        mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID, mCamera, longitude, latitude);
 
         //Set adapter for ViewPager
         mViewPager.setAdapter(mBudgetPageAdapter);
@@ -595,7 +677,7 @@ public class BudgetManagement extends AppCompatActivity {
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
 
         //TODO: Find solution for this. Currently, if they add to this from a past or future period, then its date will be out of the bounds of the actual period
-        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid());
+        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid(), longitude, latitude);
         mDatabaseReference.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
 
         //alert user of success
@@ -615,7 +697,7 @@ public class BudgetManagement extends AppCompatActivity {
         totalExpense = bigDecimal1.add(bigDecimal2).doubleValue();
 
         String expenseKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
-        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid());
+        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid(), longitude, latitude);
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
         mDatabaseReference.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
         Toast.makeText(this, getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
@@ -644,5 +726,29 @@ public class BudgetManagement extends AppCompatActivity {
             }
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Snackbar.make(mViewPager, getString(R.string.request_location_accepted), Snackbar.LENGTH_SHORT).show();
+
+                } else {
+                    Snackbar.make(mViewPager, getString(R.string.request_location_declined), Snackbar.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }
