@@ -42,12 +42,12 @@ public class BudgetPageAdapter extends FragmentStatePagerAdapter{
     //User ID being passed from BudgetManagement
     private String userID;
     private Camera camera;
-    private long longitude;
-    private long latitude;
+    private double longitude;
+    private double latitude;
 
     public BudgetPageAdapter(FragmentManager fragmentManager, Context context, Period period,
-                             String userID, String currentPeriodID, Camera camera, long longitude,
-                             long latitude) {
+                             String userID, String currentPeriodID, Camera camera, double longitude,
+                             double latitude) {
         super(fragmentManager);
         this.context = context;
         this.startDate = new Date(period.getStartDate());

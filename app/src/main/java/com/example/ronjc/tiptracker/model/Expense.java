@@ -19,13 +19,13 @@ public class Expense implements Serializable{
     private long date;
     private String category;
     private String userID = "";
-    private long longitude;
-    private long latitude;
+    private double longitude;
+    private double latitude;
 //    private String location;
 
     public Expense() {}
 
-    public Expense(String id, String name, double amount, long date, String category, String userID, long longitude, long latitude) {
+    public Expense(String id, String name, double amount, long date, String category, String userID, double longitude, double latitude) {
         this.id = id;
         this.name = name;
         BigDecimal bigDecimal = new BigDecimal(amount);
@@ -65,11 +65,11 @@ public class Expense implements Serializable{
         return userID;
     }
 
-    public long getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public long getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 }

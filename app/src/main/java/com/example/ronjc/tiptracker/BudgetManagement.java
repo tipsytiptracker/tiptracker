@@ -123,7 +123,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
     private Camera mCamera;
 
-    private long longitude, latitude;
+    private double longitude, latitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,6 +150,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
                     .addApi(LocationServices.API)
                     .build();
         }
+
 
         ButterKnife.bind(this);
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -207,7 +208,10 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
-            Snackbar.make(mViewPager, "" + mLastLocation.getLatitude() + mLastLocation.getLongitude() , Snackbar.LENGTH_SHORT).show();
+            longitude = mLastLocation.getLongitude();
+            latitude = mLastLocation.getLatitude();
+            Toast.makeText(this, "" + longitude + latitude, Toast.LENGTH_SHORT).show();
+//            Snackbar.make(mViewPager, "" + longitude + latitude, Snackbar.LENGTH_LONG).show();
         }
     }
 

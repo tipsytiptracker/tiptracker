@@ -74,7 +74,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private TextView totalTextView;
     private Camera mCamera;
     private ArrayList<Double> amountsByCategory;
-    private long longitude, latitude;
+    private double longitude, latitude;
 
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -82,7 +82,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 List<String>> childList, HashMap<String, List<String>> idList,
                                  String userID, String type, String currentPeriodID,
                                  TextView totalTextView, Camera camera, ArrayList<Double> amountsByCategory,
-                                long longitude, long latitude) {
+                                double longitude, double latitude) {
         this.context = context;
         this.headerList = headerList;
         this.childList = childList;

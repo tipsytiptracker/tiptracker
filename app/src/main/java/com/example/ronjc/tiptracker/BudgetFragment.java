@@ -122,7 +122,7 @@ public class BudgetFragment extends Fragment {
 
     private Camera mCamera;
 
-    private long longitude, latitude;
+    private double longitude, latitude;
 
     public BudgetFragment() {
         // Required empty public constructor
@@ -130,7 +130,7 @@ public class BudgetFragment extends Fragment {
 
     public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list,
                                              Date startDate, String userID, String currentPeriodID,
-                                             double total, Camera camera, long longitude, long latitude) {
+                                             double total, Camera camera, double longitude, double latitude) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
@@ -139,8 +139,8 @@ public class BudgetFragment extends Fragment {
         args.putString(PERIOD_KEY, currentPeriodID);
         args.putDouble(TOTAL_KEY, total);
         args.putParcelable(CAMERA_KEY, camera);
-        args.putLong(LONGITUDE_KEY, longitude);
-        args.putLong(LATITUDE_KEY, latitude);
+        args.putDouble(LONGITUDE_KEY, longitude);
+        args.putDouble(LATITUDE_KEY, latitude);
         mBudgetFragment.setArguments(args);
         return mBudgetFragment;
     }
