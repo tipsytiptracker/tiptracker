@@ -21,6 +21,9 @@ import android.widget.TextView;
 
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.utils.Validator;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -53,12 +56,32 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private ProgressDialog mProgressDialog;
 
+    //AdMob Object
+    InterstitialAd mInterstitialAd;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         ButterKnife.bind(this);
+
+        //Create Ad object with new ID
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+
+        //Create AdListener for when Ad is closed
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                requestNewInterstitial();
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        //Load an initial Ad
+        requestNewInterstitial();
 
         //Auth stateListener. Will redirect user to HomeActivity if auth state changes
         mAuth = FirebaseAuth.getInstance();
@@ -67,8 +90,12 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
+                    if (mInterstitialAd.isLoaded()) {
+                        mInterstitialAd.show();
+                    } else {
+                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                    }
                 }
             }
         };
@@ -193,6 +220,17 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             mProgressDialog.dismiss();
         }
+    }
+
+    /**
+     * Method for loading a new Ad to be displayed
+     */
+    private void requestNewInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("25F3940193EFFA565BAD3A399BC0776D")
+                .build();
+
+        mInterstitialAd.loadAd(adRequest);
     }
 }
 

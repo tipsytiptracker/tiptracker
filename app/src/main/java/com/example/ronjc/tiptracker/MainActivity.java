@@ -3,6 +3,7 @@ package com.example.ronjc.tiptracker;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,9 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -50,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     private ProgressDialog mProgressDialog;
 
+    //AdMob Object
+    InterstitialAd mInterstitialAd;
+
     //Set references to UI Elements
     @BindView(R.id.ma_email_pass_sign_in_button)
     Button mEmailPasswordSignInButton;
@@ -66,6 +73,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
+
+        //Create Ad object with new ID
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+
+        //Create AdListener for when Ad is closed
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                requestNewInterstitial();
+                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        //Load an initial Ad
+        requestNewInterstitial();
 
         //Configure Google sign in
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -85,8 +109,12 @@ public class MainActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser mFirebaseUser = firebaseAuth.getCurrentUser();
                 if(mFirebaseUser != null) {
-                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                    startActivity(intent);
+                    if (mInterstitialAd.isLoaded()) {
+                        mInterstitialAd.show();
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                    }
                 }
             }
         };
@@ -209,5 +237,16 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mProgressDialog.dismiss();
         }
+    }
+
+    /**
+     * Method for loading a new Ad to be displayed
+     */
+    private void requestNewInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("25F3940193EFFA565BAD3A399BC0776D")
+                .build();
+
+        mInterstitialAd.loadAd(adRequest);
     }
 }
