@@ -1,5 +1,7 @@
 package com.example.ronjc.tiptracker;
 
+import android.*;
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
@@ -46,15 +48,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Semaphore;
+
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,6 +78,9 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     TabLayout mTabLayout;
     @BindView(R.id.date_tv)
     TextView mDateTextView;
+
+    public static final int REQUEST_LOCATION = 2;
+
 
     //Start and end date for current period
     private Date startDate, endDate;
@@ -119,6 +122,9 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     private GoogleApiClient mGoogleApiClient;
 
     private Camera mCamera;
+
+    private long longitude, latitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -192,8 +198,10 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Snackbar.make(mViewPager, "Location services turned off.", Snackbar.LENGTH_SHORT).show();
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
             return;
         }
         Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
@@ -490,7 +498,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         mViewPager.setAdapter(null);
 
         //Create new Adapter for ViewPager
-        mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID, mCamera);
+        mBudgetPageAdapter = new BudgetPageAdapter(getSupportFragmentManager(), BudgetManagement.this, period, mFirebaseUser.getUid(), currentPeriodID, mCamera, longitude, latitude);
 
         //Set adapter for ViewPager
         mViewPager.setAdapter(mBudgetPageAdapter);
@@ -649,7 +657,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
 
         //TODO: Find solution for this. Currently, if they add to this from a past or future period, then its date will be out of the bounds of the actual period
-        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid());
+        Income income = new Income(incomeKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid(), longitude, latitude);
         mDatabaseReference.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
 
         //alert user of success
@@ -669,7 +677,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         totalExpense = bigDecimal1.add(bigDecimal2).doubleValue();
 
         String expenseKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
-        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid());
+        final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, mFirebaseUser.getUid(), longitude, latitude);
         mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
         mDatabaseReference.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense);
         Toast.makeText(this, getString(R.string.expense_added), Toast.LENGTH_SHORT).show();
@@ -698,5 +706,29 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
             }
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Snackbar.make(mViewPager, getString(R.string.request_location_accepted), Snackbar.LENGTH_SHORT).show();
+
+                } else {
+                    Snackbar.make(mViewPager, getString(R.string.request_location_declined), Snackbar.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }

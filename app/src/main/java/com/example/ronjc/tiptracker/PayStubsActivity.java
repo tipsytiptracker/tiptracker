@@ -1,9 +1,14 @@
 package com.example.ronjc.tiptracker;
 
+import android.*;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.icu.text.DateFormat;
-import android.icu.text.SimpleDateFormat;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +25,9 @@ import com.example.ronjc.tiptracker.model.PayStub;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,11 +40,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PayStubsActivity extends AppCompatActivity {
+public class PayStubsActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     @BindView(R.id.paystubs_tv)
     TextView mPaystubTextView;
@@ -55,6 +65,8 @@ public class PayStubsActivity extends AppCompatActivity {
     FirebaseUser user;
     String periodID = "";
     boolean check_category = false;
+    private GoogleApiClient mGoogleApiClient;
+    long longitude, latitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +88,14 @@ public class PayStubsActivity extends AppCompatActivity {
 
         Typeface typeface = Typeface.createFromAsset(getAssets(), FontManager.FONTAWESOME);
         mPictureTile.setTypeface(typeface);
+
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         getPeriodId();
 
@@ -169,7 +189,7 @@ public class PayStubsActivity extends AppCompatActivity {
 
                             long get_date = users.getDatePosted();
 
-                            DateFormat df = new SimpleDateFormat("MM/dd/yy");
+                            SimpleDateFormat df = new SimpleDateFormat("MM/dd/yy");
                             String gd = df.format(get_date) + "\n";
 
                             list1.add(get_amount);
@@ -197,6 +217,41 @@ public class PayStubsActivity extends AppCompatActivity {
             }
         }); //end of the view all paystubs buttons
 
+
+    }
+
+    @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION}, BudgetManagement.REQUEST_LOCATION);
+            return;
+        }
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            Snackbar.make(mPaystubButton, "" + mLastLocation.getLatitude() + mLastLocation.getLongitude() , Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 
@@ -274,7 +329,7 @@ public class PayStubsActivity extends AppCompatActivity {
 
        String incomeKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
-       Income income = new Income(incomeKey, name, amount, dateAdded, "Uploaded Paystubs", user.getUid());
+       Income income = new Income(incomeKey, name, amount, dateAdded, "Uploaded Paystubs", user.getUid(), longitude, latitude);
         mDatabase.child(DBHelper.INCOMES).child(incomeKey).setValue(income);
     }
 
@@ -306,5 +361,29 @@ public class PayStubsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case BudgetManagement.REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Snackbar.make(mViewPaystubButton, getString(R.string.request_location_accepted), Snackbar.LENGTH_SHORT).show();
+
+                } else {
+                    Snackbar.make(mPaystubButton, getString(R.string.request_location_declined), Snackbar.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }

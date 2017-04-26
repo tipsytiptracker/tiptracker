@@ -83,8 +83,8 @@ public class BudgetFragment extends Fragment {
     private static final String PERIOD_KEY = "period";
     private static final String TOTAL_KEY = "total";
     private static final String CAMERA_KEY = "camera";
-    private static final String SHOW_KEY = "show";
-    private static final String OCR_KEY = "ocr";
+    private static final String LONGITUDE_KEY = "longitude";
+    private static final String LATITUDE_KEY = "latitude";
 
     private String type = "";
 
@@ -122,13 +122,15 @@ public class BudgetFragment extends Fragment {
 
     private Camera mCamera;
 
+    private long longitude, latitude;
+
     public BudgetFragment() {
         // Required empty public constructor
     }
 
     public static BudgetFragment newInstance(int page, ArrayList<? extends Serializable> list,
                                              Date startDate, String userID, String currentPeriodID,
-                                             double total, Camera camera) {
+                                             double total, Camera camera, long longitude, long latitude) {
         BudgetFragment mBudgetFragment = new BudgetFragment();
         Bundle args = new Bundle();
         args.putInt(PAGE_KEY, page);
@@ -137,6 +139,8 @@ public class BudgetFragment extends Fragment {
         args.putString(PERIOD_KEY, currentPeriodID);
         args.putDouble(TOTAL_KEY, total);
         args.putParcelable(CAMERA_KEY, camera);
+        args.putLong(LONGITUDE_KEY, longitude);
+        args.putLong(LATITUDE_KEY, latitude);
         mBudgetFragment.setArguments(args);
         return mBudgetFragment;
     }
@@ -154,6 +158,8 @@ public class BudgetFragment extends Fragment {
             currentPeriodID = getArguments().getString(PERIOD_KEY);
             total = getArguments().getDouble(TOTAL_KEY, 0);
             mCamera = (Camera) getArguments().getParcelable(CAMERA_KEY);
+            longitude = getArguments().getLong(LONGITUDE_KEY);
+            latitude = getArguments().getLong(LATITUDE_KEY);
         }
     }
 
@@ -176,7 +182,9 @@ public class BudgetFragment extends Fragment {
                     }
                 }
                 prepareListData();
-                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList, idList, userID, type, currentPeriodID, mTotalTextView, mCamera, amountsByCategory);
+                listAdapter = new ExpandableListAdapter(view.getContext(), headerList, childList,
+                                    idList, userID, type, currentPeriodID, mTotalTextView, mCamera,
+                                    amountsByCategory, longitude, latitude);
                 expandableListView.setAdapter(listAdapter);
             }
             @Override

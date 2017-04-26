@@ -21,10 +21,12 @@ public class Income implements Serializable{
     private long date;
     private String category;
     private String userID = "";
+    private long longitude;
+    private long latitude;
 
     public Income() {}
 
-    public Income(String id, String name, double amount, long date, String category, String userID) {
+    public Income(String id, String name, double amount, long date, String category, String userID, long longitude, long latitude) {
         this.id = id;
         this.name = name;
         BigDecimal bigDecimal = new BigDecimal(amount);
@@ -34,6 +36,8 @@ public class Income implements Serializable{
         this.date = date;
         this.category = category;
         this.userID = userID;
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 
     //Accessors
@@ -59,5 +63,13 @@ public class Income implements Serializable{
 
     public String getUserID() {
         return userID;
+    }
+
+    public long getLongitude() {
+        return longitude;
+    }
+
+    public long getLatitude() {
+        return latitude;
     }
 }
