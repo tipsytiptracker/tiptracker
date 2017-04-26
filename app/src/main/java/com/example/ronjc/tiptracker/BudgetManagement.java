@@ -218,7 +218,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if(mLastLocation != null) {
-            Toast.makeText(this, "" + mLastLocation.getLatitude() + mLastLocation.getLongitude(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, "" + mLastLocation.getLatitude() + mLastLocation.getLongitude(), Toast.LENGTH_LONG).show();
             longitude = mLastLocation.getLongitude();
             latitude = mLastLocation.getLatitude();
         }

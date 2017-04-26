@@ -486,6 +486,7 @@ public class BudgetFragment extends Fragment {
     private void displayMap() {
         ArrayList<LatLng> locations = new ArrayList<LatLng>();
         ArrayList<String> names = new ArrayList<String>();
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
        if(type.equals(DBHelper.INCOMES)) {
            if(list.size() > 0) {
@@ -494,7 +495,7 @@ public class BudgetFragment extends Fragment {
                for (Income income : incomes) {
                    if(income.getLongitude() != 0 && income.getLatitude() != 0) {
                        locations.add(new LatLng(income.getLatitude(), income.getLongitude()));
-                       names.add(income.getName());
+                       names.add("Spent $" + decimalFormat.format(income.getAmount()) + " on " + income.getName() + ".");
                    }
                }
            }
@@ -505,7 +506,7 @@ public class BudgetFragment extends Fragment {
                for (Expense expense : expenses) {
                    if(expense.getLongitude() != 0 && expense.getLatitude() != 0) {
                        locations.add(new LatLng(expense.getLatitude(), expense.getLongitude()));
-                       names.add(expense.getName());
+                       names.add("Spent $" + decimalFormat.format(expense.getAmount()) + " on " + expense.getName() + ".");
                    }
                }
            }
@@ -515,12 +516,6 @@ public class BudgetFragment extends Fragment {
         intent.putStringArrayListExtra("names", names);
         intent.putExtra("longitude", longitude);
         intent.putExtra("latitude", latitude);
-//        Bundle bundle = new Bundle();
-//        bundle.putParcelableArrayList("locations", locations);
-//        bundle.putStringArrayList("names", names);
-//        bundle.putDouble("longitude", longitude);
-//        bundle.putDouble("latitude", latitude);
-//        intent.putExtra("bundle", bundle);
         startActivity(intent);
     }
 }
