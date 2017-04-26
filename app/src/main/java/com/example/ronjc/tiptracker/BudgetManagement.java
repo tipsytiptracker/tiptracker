@@ -16,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.example.ronjc.tiptracker.utils.OCR;
 import com.google.firebase.auth.FirebaseAuth;
@@ -65,7 +67,7 @@ import butterknife.ButterKnife;
  * @author Ronald Mangiliman
  */
 
-public class BudgetManagement extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class BudgetManagement extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     //Bind UI views to references
     @BindView(R.id.left_arrow_icon)
@@ -123,7 +125,11 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
     private Camera mCamera;
 
+    private Location mLastLocation;
+
     private double longitude, latitude;
+
+    private LocationRequest mLocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,7 +156,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
                     .addApi(LocationServices.API)
                     .build();
         }
-
 
         ButterKnife.bind(this);
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -198,20 +203,24 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
-            return;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if(ContextCompat.checkSelfPermission(BudgetManagement.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(BudgetManagement.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            } else {
+                ActivityCompat.requestPermissions(BudgetManagement.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+            }
         }
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if(mLastLocation != null) {
+            Toast.makeText(this, "" + mLastLocation.getLatitude() + mLastLocation.getLongitude(), Toast.LENGTH_LONG).show();
             longitude = mLastLocation.getLongitude();
             latitude = mLastLocation.getLatitude();
-            Toast.makeText(this, "" + longitude + latitude, Toast.LENGTH_SHORT).show();
-//            Snackbar.make(mViewPager, "" + longitude + latitude, Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -220,10 +229,17 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode) {
+//            case REQUEST_LOCATION: {
+//                if (grantResults.length > 0 )
+//                return;
+//            }
+//        }
+//    }
 
     /**
      * Calculates the start and end dates for the current period

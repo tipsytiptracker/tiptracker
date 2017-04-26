@@ -44,6 +44,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -194,11 +195,20 @@ public class BudgetFragment extends Fragment {
 
         Button addCategoryButton = (Button)view.findViewById(R.id.add_category_button);
         TextView mPieChart = (TextView)view.findViewById(R.id.pie_chart_icon);
+        TextView mMapMarker = (TextView)view.findViewById(R.id.map_marker_icon);
         final Typeface bitter = FontManager.getTypeface(view.getContext(), BITTER);
         Typeface fontAwesome = FontManager.getTypeface(view.getContext(), FONTAWESOME);
         addCategoryButton.setTypeface(bitter);
         mTotalTextView.setTypeface(bitter);
         mPieChart.setTypeface(fontAwesome);
+        mMapMarker.setTypeface(fontAwesome);
+
+        mMapMarker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayMap();
+            }
+        });
 
         mPieChart.setOnClickListener(new PieChartListener());
         mTotalTextView.setText(getString(R.string.total) + decimalFormat.format(total));
@@ -217,6 +227,7 @@ public class BudgetFragment extends Fragment {
                 final AlertDialog dialog = mBuilder.create();
                 Button mButton = (Button)mView.findViewById(R.id.add_category_dialog_button);
                 mButton.setTypeface(bitter);
+
                 mButton.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View view) {
@@ -469,5 +480,47 @@ public class BudgetFragment extends Fragment {
             String testString = mOCR.getTotal();
             Toast.makeText(getContext(), testString, Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private void displayMap() {
+        ArrayList<LatLng> locations = new ArrayList<LatLng>();
+        ArrayList<String> names = new ArrayList<String>();
+
+       if(type.equals(DBHelper.INCOMES)) {
+           if(list.size() > 0) {
+               ArrayList<Income> incomes = (ArrayList<Income>) list;
+               incomes.removeAll(Collections.singleton(null));
+               for (Income income : incomes) {
+                   if(income.getLongitude() != 0 && income.getLatitude() != 0) {
+                       locations.add(new LatLng(income.getLatitude(), income.getLongitude()));
+                       names.add(income.getName());
+                   }
+               }
+           }
+       } else {
+           if(list.size() > 0) {
+               ArrayList<Expense> expenses = (ArrayList<Expense>) list;
+               expenses.removeAll(Collections.singleton(null));
+               for (Expense expense : expenses) {
+                   if(expense.getLongitude() != 0 && expense.getLatitude() != 0) {
+                       locations.add(new LatLng(expense.getLatitude(), expense.getLongitude()));
+                       names.add(expense.getName());
+                   }
+               }
+           }
+       }
+        Intent intent = new Intent(getContext(), MapsActivity.class);
+        intent.putParcelableArrayListExtra("locations", locations);
+        intent.putStringArrayListExtra("names", names);
+        intent.putExtra("longitude", longitude);
+        intent.putExtra("latitude", latitude);
+//        Bundle bundle = new Bundle();
+//        bundle.putParcelableArrayList("locations", locations);
+//        bundle.putStringArrayList("names", names);
+//        bundle.putDouble("longitude", longitude);
+//        bundle.putDouble("latitude", latitude);
+//        intent.putExtra("bundle", bundle);
+        startActivity(intent);
     }
 }

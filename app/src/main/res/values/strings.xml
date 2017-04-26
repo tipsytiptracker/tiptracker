@@ -96,4 +96,5 @@
     <!--Strings for permissions -->
     <string name="request_location_accepted">You have granted permission to location.</string>
     <string name="request_location_declined">You have declined permission to location.</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
