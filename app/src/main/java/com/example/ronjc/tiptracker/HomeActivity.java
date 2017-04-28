@@ -3,6 +3,9 @@ package com.example.ronjc.tiptracker;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.icu.text.DecimalFormat;
+import android.icu.text.NumberFormat;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -21,6 +24,8 @@ import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.model.PayStub;
 import com.example.ronjc.tiptracker.model.Period;
 import com.example.ronjc.tiptracker.model.User;
+import com.example.ronjc.tiptracker.utils.DBHelper;
+import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.utils.Utils;
 import com.google.android.gms.auth.api.Auth;
@@ -43,6 +48,8 @@ import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,6 +72,10 @@ public class HomeActivity extends AppCompatActivity {
     TextView mTileText4;
     @BindView(R.id.current_budget)
     TextView mCurrentBudget;
+
+    @BindView(R.id.current_budget_val)
+    TextView mCurrentBudgetVal;
+
     @BindView(R.id.home_activity)
     RelativeLayout mRelativeLayout;
 
@@ -77,6 +88,9 @@ public class HomeActivity extends AppCompatActivity {
     private FirebaseUser mFirebaseUser;
     private DatabaseReference mDatabaseReference;
     private GoogleApiClient mGoogleApiClient;
+
+    double totalbudget = 0;
+    String periodID = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +129,9 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         };
+
+        getPeriodId();
+
         //Add logo to ActionBar
         //TODO: this can go in utils most likely. It is used throughout the app
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -129,6 +146,7 @@ public class HomeActivity extends AppCompatActivity {
         mTileText2.setTypeface(typeface);
         mTileText3.setTypeface(typeface);
         mTileText4.setTypeface(typeface);
+        mCurrentBudgetVal.setTypeface(typeface);
         mCurrentBudget.setTypeface(typeface);
 
         ButterKnife.bind(this);
@@ -155,6 +173,26 @@ public class HomeActivity extends AppCompatActivity {
         mBudgetGoalTile.setOnClickListener(mTileListener);
         mManageBudgetTile.setOnClickListener(mTileListener);
         mLogoutTile.setOnClickListener(mTileListener);
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                getTotalIncomes();
+                getTotalExpenses();
+                getBudgetGoal();
+            }
+        },1000); //end handler
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+
+                checkPos();
+            }
+        },1100); //end handler
 
     }
 
@@ -187,6 +225,113 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
         HomeActivity.this.finish();
     }
+
+
+    /**
+     * gets the incomes of user for that week
+     */
+    private void getTotalIncomes(){
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+
+        myRef.child("periods").child(periodID).child("totalIncome").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                totalbudget += Double.parseDouble(dataSnapshot.getValue().toString());
+            }
+
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void checkPos(){ //checks if the budget is positive or negative
+        if(totalbudget >= 0) {
+            NumberFormat f = new DecimalFormat("#0.00");
+            mCurrentBudgetVal.setText("+ $" + f.format(totalbudget) + " :)");
+        }
+
+        else{
+            NumberFormat f = new DecimalFormat("#0.00");
+            mCurrentBudgetVal.setText("- $" + f.format(totalbudget).replace("-","") + " :(");
+        }
+    }
+
+    /**
+     * gets expenses of user for that week
+     */
+    private void getTotalExpenses(){
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+
+        myRef.child("periods").child(periodID).child("totalExpenses").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                totalbudget -= Double.parseDouble(dataSnapshot.getValue().toString());
+            }
+
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * gets budget goal of user for that week
+     */
+    private void getBudgetGoal(){
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+        myRef.child("periods").child(periodID).child("budgetGoal").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                totalbudget -= Double.parseDouble(dataSnapshot.getValue().toString());
+            }
+
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getPeriodId(){
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+
+        myRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get key for period to write
+                Iterable<DataSnapshot> periods = dataSnapshot.getChildren();
+                //Get last Sunday in milliseconds
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                Date startDate = calendar.getTime();
+                final long time = DateManager.trimMilliseconds(startDate.getTime());
+
+                for (DataSnapshot period : periods) {
+                    if ((long) period.getValue() == time) {
+                        periodID = period.getKey();
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
 
     /**
      * Tile listener sub class

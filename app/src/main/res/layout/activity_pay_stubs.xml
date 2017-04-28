@@ -105,18 +105,19 @@
         android:textAllCaps="false"/>
 
     <Button
-        android:id="@+id/view_paystubs"
-        android:layout_marginTop="20dp"
-        android:paddingRight="20dp"
-        android:paddingLeft="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/button_bg"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:text="@string/view_paystub"
-        android:textAllCaps="false"/>
+    android:id="@+id/view_paystubs"
+    android:layout_marginTop="20dp"
+    android:paddingRight="20dp"
+    android:paddingLeft="20dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    android:layout_gravity="center_horizontal"
+    android:background="@drawable/button_bg"
+    android:layout_width="200dp"
+    android:layout_height="50dp"
+    android:text="@string/view_paystub"
+    android:textAllCaps="false"/>
+
 
     <TextView
         android:id="@+id/uploadProgressText"
