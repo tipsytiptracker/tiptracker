@@ -1,14 +1,16 @@
 package com.example.ronjc.tiptracker;
 
-import android.*;
+import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.icu.text.DateFormat;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,9 +24,11 @@ import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.model.PayStub;
+import com.example.ronjc.tiptracker.utils.Camera;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.example.ronjc.tiptracker.utils.OCR;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -46,6 +50,8 @@ import java.text.SimpleDateFormat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.R.attr.bitmap;
+
 public class PayStubsActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     @BindView(R.id.paystubs_tv)
@@ -59,6 +65,7 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
     @BindView(R.id.paystubs_picture_tile)
     TextView mPictureTile;
 
+    Camera mCam;
     DatabaseReference myRef;
     FirebaseAuth firebaseAuth;
     FirebaseAuth.AuthStateListener mAuthListener;
@@ -67,6 +74,8 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
     boolean check_category = false;
     private GoogleApiClient mGoogleApiClient;
     long longitude, latitude;
+    final int REQUEST_TAKE_PHOTO = 1;
+    final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +87,8 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
         firebaseAuth = FirebaseAuth.getInstance();
         myRef = FirebaseDatabase.getInstance().getReference();
         user  = firebaseAuth.getCurrentUser();
+
+        mCam = new Camera(this);
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.tiptrackerlogo3);
@@ -99,6 +110,14 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
 
         getPeriodId();
 
+       mPictureTile.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               startCamIntent();
+           }
+       });
+
+
         mPaystubButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,7 +135,6 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
                 final CheckBox checkAddIncome = (CheckBox) mView.findViewById(R.id.paystub_addtoIncome);
 
                 mBuilder.setView(mView);
-                //mBuilder.show();
                 final AlertDialog dialog = mBuilder.create();
 
                 submit.setOnClickListener(new View.OnClickListener() {
@@ -219,6 +237,88 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
 
 
     }
+
+    private void startCamIntent () {
+
+        if (ContextCompat.checkSelfPermission(PayStubsActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(PayStubsActivity.this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        } else {
+            mCam.takePicture();
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        String netPay = "";
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            try {
+                Bitmap bitmap = mCam.getBitmap();
+                OCR mOCR = new OCR(this, bitmap);
+                netPay = "$" + mOCR.getNetPay();
+                Toast.makeText(this,"Working", Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Toast.makeText(this,"Not Working", Toast.LENGTH_LONG).show();
+                netPay = "$0.00";
+            }
+            final AlertDialog.Builder mBuilder = new AlertDialog.Builder(PayStubsActivity.this);
+            View mView = getLayoutInflater().inflate(R.layout.add_manual_paystub, null);
+
+            Typeface iconFont2 = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
+            FontManager.markAsIconContainer(mView.findViewById(R.id.paystub_amount), iconFont2);
+            FontManager.markAsIconContainer(mView.findViewById(R.id.paystub_desc), iconFont2);
+            FontManager.markAsIconContainer(mView.findViewById(R.id.paystub_title), iconFont2);
+
+            final EditText amount = (EditText)mView.findViewById(R.id.paystub_amount);
+            amount.setText(netPay);
+            final EditText desc = (EditText)mView.findViewById(R.id.paystub_desc);
+            final Button submit = (Button)mView.findViewById(R.id.paystub_submit);
+            final CheckBox checkAddIncome = (CheckBox) mView.findViewById(R.id.paystub_addtoIncome);
+
+            mBuilder.setView(mView);
+            final AlertDialog dialog = mBuilder.create();
+
+            submit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(amount.getText().toString().trim().length() == 0 || desc.getText().toString().trim().length() == 0){
+                        //checks if the 2 fields do not have any white space
+                        amount.setError("You must enter a value!");
+                        desc.setError("This Field must not be empty");
+                    }
+
+                    else{
+                        //excludes the dollar sign from the string
+                        final double value = Double.parseDouble(amount.getText().toString().substring(1).replace(",", ""));
+                        final String descrip = desc.getText().toString();
+                        long dateAdded = System.currentTimeMillis(); //gets the milliseconds of the current time
+                        Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
+
+                        if(checkAddIncome.isChecked()){ // adds the amount from paystub to their income if box is checked
+                            addIncome(value, descrip, dateAdded);
+                        }
+
+//                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
+//                                    .child(user.getUid()).child("Paystubs");
+                        PayStub payStub = new PayStub(value, descrip, user.getUid(),dateAdded);
+                        myRef.child("users").child(user.getUid()).child("paystubs").push().setValue(payStub);
+//                            Toast.makeText(getApplicationContext(), "" + user.getUid(), Toast.LENGTH_LONG).show();
+//                            myRef.setValue(new PayStub(value,descrip));
+
+                        dialog.dismiss();
+                    }//end else
+                }
+            });
+            dialog.show();
+        }
+    }
+
 
     @Override
     protected void onStart() {
@@ -371,19 +471,25 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     Snackbar.make(mViewPaystubButton, getString(R.string.request_location_accepted), Snackbar.LENGTH_SHORT).show();
-
                 } else {
                     Snackbar.make(mPaystubButton, getString(R.string.request_location_declined), Snackbar.LENGTH_SHORT).show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
                 return;
+            }case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Snackbar.make(mViewPaystubButton, R.string.request_storage_accepted, Snackbar.LENGTH_SHORT).show();
+                    startCamIntent();
+                } else {
+                    Snackbar.make(mPaystubButton, R.string.request_storage_denied, Snackbar.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 }
