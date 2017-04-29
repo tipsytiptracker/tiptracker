@@ -2,6 +2,7 @@
 package com.example.ronjc.tiptracker;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -84,6 +85,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
     ArrayList<String> XValues;
     ArrayList<String> YValues;
     ArrayList<String> listOfIDs;
+    ArrayList<String> temp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,9 +101,10 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
         graphIncrementer = 0;
 
-        ArrayList<String> XValues = new ArrayList<>();
-        ArrayList<String> YValues = new ArrayList<>();
-        ArrayList<String> listOfIDs = new ArrayList<>();
+        XValues = new ArrayList<>();
+        YValues = new ArrayList<>();
+        listOfIDs = new ArrayList<>();
+        temp = new ArrayList<String>();
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
@@ -178,6 +181,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Gets coordianates of the graphs
+     */
     private void getXYValues(){
         switch (graphIncrementer) {
             case 1:
@@ -207,34 +213,56 @@ public class BudgetGoalActivity extends AppCompatActivity {
                 break;
             case 2:
                 getIncomeID();
-                Handler handler = new Handler();
+                Handler handle = new Handler();
                 Runnable run = new Runnable() {
                     @Override
                     public void run() {
-                    for(int i = 0; i<listOfIDs.size();i++) {
-                        dbRef.child(DBHelper.INCOMES).child(listOfIDs.get(i)).child("amount")
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    ArrayList<String> incomeID = new ArrayList<String>();
-
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                            incomeID.add(child.getValue().toString());
+                        int i = 0;
+                        while(i<listOfIDs.size()) {
+                            dbRef.child(DBHelper.INCOMES).child(listOfIDs.get(i)).child("amount")
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        ArrayList<String> incomeID = new ArrayList<String>();
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            YValues.add(dataSnapshot.getValue().toString());
                                         }
-                                        YValues = incomeID;
-                                    }
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
+                                        }
+                                    });
+                            i++;
+                         }
+                    }
 
-                                    }
-                                });
-                    }
-                    }
                 };
-                handler.postDelayed(run,3000);
+                handle.postDelayed(run,1000);
+                break;
+            case 3:
+                getExpenseID();
+                Handler handle2 = new Handler();
+                Runnable run2 = new Runnable() {
+                    @Override
+                    public void run() {
+                        int i = 0;
+                        while(i<listOfIDs.size()) {
+                            dbRef.child(DBHelper.EXPENSES).child(listOfIDs.get(i)).child("amount")
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            YValues.add(dataSnapshot.getValue().toString());
+                                        }
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
 
+                                        }
+                                    });
+                            i++;
+                        }
+                    }
+
+                };
+                handle2.postDelayed(run2,1000);
                 break;
 
 
@@ -242,7 +270,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * Methods to find IDs from the database to retrieve for the graphs' respective values
+     */
     private void getPeriodId(){//Gets the key for the user's period session
         dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -274,6 +304,24 @@ public class BudgetGoalActivity extends AppCompatActivity {
     }
     private void getIncomeID(){
         dbRef.child(DBHelper.PERIODS).child(periodID).child(DBHelper.INCOMES)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        final ArrayList<String> incomeKey = new ArrayList<String>();
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            incomeKey.add(child.getKey());
+                        }
+                        listOfIDs = incomeKey;
+
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+    private void getExpenseID(){
+        dbRef.child(DBHelper.PERIODS).child(periodID).child(DBHelper.EXPENSES)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -324,7 +372,6 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
                         List<Entry> entries = new ArrayList<Entry>();
                         //add for loop to add other entries
-                        XValues.get(1);
                         int lengthX = XValues.size();
                         for(int i = 0; i<lengthX;i++){
                             final float time = Float.parseFloat(XValues.get(i));
@@ -345,107 +392,115 @@ public class BudgetGoalActivity extends AppCompatActivity {
                         LineData data = new LineData(dataSets);
                         linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
                         linechart.setData(data);
+
                     }
                 };
                 handler.postDelayed(run,2000);
             }
         };
         handler.postDelayed(run,1000);
+
+
 
 
     }
     private void createIncomeGraph(){//Draws and plots the graph for income progress graph
         getXYValues();
         Handler handler = new Handler();
-        Runnable run = new Runnable() {
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                getIncomeID();
-                final Handler handler = new Handler();
-                final Runnable run = new Runnable() {
-                    @Override
-                    public void run() {
-                        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
-                        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-                        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
+                final AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+                View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
+                view2.setBackgroundColor(Color.parseColor("#bff6bc"));
 
 
-                        mBuilder.setView(view2).show();
+                mBuilder.setView(view2).show();
 
 
-                        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
-                        linechart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-                        linechart.getAxisRight().setEnabled(false);
+                LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+                linechart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+                linechart.getAxisRight().setEnabled(false);
 
-                        Description description = new Description();
-                        description.setText("");
-                        linechart.setDescription(description);
+                Description description = new Description();
+                description.setText("");
+                linechart.setDescription(description);
 
-                        final List<Entry> entries = new ArrayList<Entry>();
-                        //add for loop to add other entries
-                        Handler handler1 = new Handler();
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                for(int i = 0; i<YValues.size();i++){
-                                    entries.add(new Entry(i,Float.parseFloat(YValues.get(i))));
-                                }
+                List<Entry> entries = new ArrayList<Entry>();
+                //add for loop to add other entries
+                for(int i = 0; i<YValues.size();i++){
+                    entries.add(new Entry(i,Float.parseFloat(YValues.get(i))));
+                }
 
-                            }
-                        };
-                        handler1.postDelayed(runnable,3500);
+                LineDataSet dataSet = new LineDataSet(entries, "Income Progress"); // add entries to dataset
+                dataSet.setColor(Color.BLUE);
+                dataSet.setDrawValues(false);
+                List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+                dataSet.setCircleColor(Color.BLUE);
+                dataSets.add(dataSet);
 
-
-
-                        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal Progress"); // add entries to dataset
-                        dataSet.setColor(Color.BLACK);
-                        dataSet.setDrawValues(false);
-                        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-                        dataSet.setCircleColor(Color.BLUE);
-                        dataSets.add(dataSet);
-
-                        XAxis xAxis = linechart.getXAxis();
-                        xAxis.setDrawGridLines(false);
+                XAxis xAxis = linechart.getXAxis();
+                xAxis.setDrawGridLines(false);
 
 
-                        LineData data = new LineData(dataSets);
-                        linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
-                        linechart.setData(data);
-                    }
-                };
-                handler.postDelayed(run,2000);
+                LineData data = new LineData(dataSets);
+                linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
+                linechart.setData(data);
             }
+
         };
-        handler.postDelayed(run,1000);
+        handler.postDelayed(runnable,2000);
+
+
+
     }
     private void createExpenseGraph(){//Draws and plots the graph for expense progress graph
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
-        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
+        getXYValues();
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                final AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+                View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
+                view2.setBackgroundColor(Color.parseColor("#bff6bc"));
 
-        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+
+                mBuilder.setView(view2).show();
 
 
-        mBuilder.setView(view2).show();
-        final AlertDialog dialog = mBuilder.create();
+                LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+                linechart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+                linechart.getAxisRight().setEnabled(false);
 
-        List<Entry> entries = new ArrayList<Entry>();
-        //add for loop to add other entries
+                Description description = new Description();
+                description.setText("");
+                linechart.setDescription(description);
 
-        entries.add(new Entry(3,4));
-        entries.add(new Entry(5,6));
-        entries.add(new Entry(6,8));
-        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
-        dataSet.setColor(Color.RED);
-        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-        dataSet.setCircleColor(Color.RED);
-        dataSets.add(dataSet);
+                List<Entry> entries = new ArrayList<Entry>();
+                //add for loop to add other entries
+                for(int i = 0; i<YValues.size();i++){
+                    entries.add(new Entry(i,Float.parseFloat(YValues.get(i))));
+                }
 
-        XAxis xAxis = linechart.getXAxis();
-        xAxis.setDrawGridLines(false);
+                LineDataSet dataSet = new LineDataSet(entries, "Expense Progress"); // add entries to dataset
+                dataSet.setColor(Color.RED);
+                dataSet.setDrawValues(false);
+                List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+                dataSet.setCircleColor(Color.RED);
+                dataSets.add(dataSet);
 
-        LineData data = new LineData(dataSets);
-        linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
-        linechart.setData(data);
+                XAxis xAxis = linechart.getXAxis();
+                xAxis.setDrawGridLines(false);
+
+
+                LineData data = new LineData(dataSets);
+                linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
+                linechart.setData(data);
+            }
+
+        };
+        handler.postDelayed(runnable,2000);
+
+
     }
 }
