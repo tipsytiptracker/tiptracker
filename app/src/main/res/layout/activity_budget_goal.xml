@@ -1,148 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/budget_goal_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/metroTileColorPressed"
-    android:id="@+id/budget_goal_activity"
-    android:orientation="vertical"
     tools:context="com.example.ronjc.tiptracker.BudgetGoalActivity">
 
-
-    <TextView
-        android:id="@+id/set_goal_tv"
-        android:textAlignment="center"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:paddingTop="30dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorWhite"
-        android:textSize="25dp"
-        android:text="@string/set_budget"/>
+        android:layout_height="wrap_content">
 
-    <com.blackcat.currencyedittext.CurrencyEditText
-        android:id="@+id/set_budget_et"
-        android:paddingTop="30dp"
-        android:layout_marginBottom="25dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/enter_budget_goal"
-        android:textColorHint="@color/colorWhiteTransparent"
-        android:imeOptions="actionUnspecified"
-        android:inputType="textPassword"
-        android:maxLines="1"
-        android:textColor="@color/colorWhite"
-        android:textCursorDrawable="@drawable/edittextfocus"/>
-
-
-
-
-    <Button
-        android:id="@+id/change_budget_btn"
-        android:layout_marginTop="5dp"
-        android:paddingRight="20dp"
-        android:paddingLeft="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/button_bg"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:text="@string/change_budget"
-        android:textAllCaps="false"/>
-
-        <LinearLayout
-            android:layout_marginTop="30dp"
+        <TextView
+            android:id="@+id/set_goal_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="30dp"
+            android:text="@string/set_budget"
+            android:textAlignment="center"
+            android:textColor="@color/colorWhite"
+            android:textSize="25dp" />
+
+        <com.blackcat.currencyedittext.CurrencyEditText
+            android:id="@+id/set_budget_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:hint="@string/enter_budget_goal"
+            android:imeOptions="actionUnspecified"
+            android:inputType="textPassword"
+            android:maxLines="1"
+            android:paddingTop="30dp"
+            android:textColor="@color/colorWhite"
+            android:textColorHint="@color/colorWhiteTransparent"
+            android:textCursorDrawable="@drawable/edittextfocus" />
+
+
+        <Button
+            android:id="@+id/change_budget_btn"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_bg"
+            android:paddingBottom="5dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="5dp"
+            android:text="@string/change_budget"
+            android:textAllCaps="false" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
             android:orientation="horizontal">
+
             <View
                 android:layout_width="0dp"
-                android:layout_weight="80"
                 android:layout_height="2dp"
-                android:background="#ffffff"
-                android:layout_marginTop="10dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginStart="15dp"
-                />
+                android:layout_marginTop="10dp"
+                android:layout_weight="80"
+                android:background="#ffffff" />
+
             <TextView
-                android:paddingBottom="20dp"
-                android:gravity="center_horizontal"
                 android:layout_width="0dp"
-                android:layout_weight="20"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:layout_weight="20"
+                android:gravity="center_horizontal"
+                android:paddingBottom="20dp"
                 android:text="@string/or"
-                android:textSize="18sp"
-                />
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
+
             <View
                 android:layout_width="0dp"
-                android:layout_weight="80"
                 android:layout_height="2dp"
-                android:background="#ffffff"
-                android:layout_marginTop="10dp"
                 android:layout_marginEnd="15dp"
                 android:layout_marginRight="15dp"
-                />
+                android:layout_marginTop="10dp"
+                android:layout_weight="80"
+                android:background="#ffffff" />
 
         </LinearLayout>
 
-    <TextView
-        android:id="@+id/viewGraph_tv"
-        android:textAlignment="center"
-        android:layout_width="match_parent"
-        android:paddingTop="10dp"
-        android:paddingBottom="15dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorWhite"
-        android:textSize="20dp"
-        android:text="@string/view_graph_reports"/>
-    <Button
-        android:id="@+id/budget_goal_graph"
-        android:layout_marginTop="5dp"
-        android:paddingRight="20dp"
-        android:paddingLeft="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/button_bg"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:text="@string/budget_goal_progress"
-        android:textAllCaps="false"/>
+        <TextView
+            android:id="@+id/add_repeated_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="10dp"
+            android:text="@string/add_repeated"
+            android:textAlignment="center"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp" />
 
-    <Button
-        android:id="@+id/income_graph"
-        android:layout_marginTop="5dp"
-        android:paddingRight="20dp"
-        android:paddingLeft="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/button_bg"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:text="@string/income_progress"
-        android:textAllCaps="false"/>
+        <TextView
+            android:id="@+id/viewGraph_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="10dp"
+            android:text="@string/view_graph_reports"
+            android:textAlignment="center"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp" />
 
-    <Button
-        android:id="@+id/expense_graph"
-        android:layout_marginTop="5dp"
-        android:paddingRight="20dp"
-        android:paddingLeft="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/button_bg"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:text="@string/expense_progress"
-        android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/budget_goal_graph"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_bg"
+            android:paddingBottom="5dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="5dp"
+            android:text="@string/budget_goal_progress"
+            android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/income_graph"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_bg"
+            android:paddingBottom="5dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="5dp"
+            android:text="@string/income_progress"
+            android:textAllCaps="false" />
 
-
-
-
-
-
-</LinearLayout>
+        <Button
+            android:id="@+id/expense_graph"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_bg"
+            android:paddingBottom="5dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="5dp"
+            android:text="@string/expense_progress"
+            android:textAllCaps="false" />
+    </LinearLayout>
+</ScrollView>
