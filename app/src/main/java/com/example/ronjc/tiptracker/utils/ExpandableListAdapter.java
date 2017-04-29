@@ -228,6 +228,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //update the total amount
         updateTotal(doubleAmount);
+        notifyDataSetChanged();
     }
 
     /**
@@ -257,6 +258,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         amountsByCategory.set(categoryIndex, bigDecimal1.add(bigDecimal2).doubleValue());
 
         updateTotal(doubleAmount);
+        notifyDataSetChanged();
     }
 
     /**
