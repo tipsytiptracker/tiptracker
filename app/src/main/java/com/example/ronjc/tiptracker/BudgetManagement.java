@@ -61,6 +61,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.os.Build.VERSION_CODES.M;
+
 /**
  * Controller for the BudgetManagement Activity
  *
@@ -82,6 +84,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     TextView mDateTextView;
 
     public static final int REQUEST_LOCATION = 2;
+    final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 3;
 
 
     //Start and end date for current period
@@ -741,6 +744,16 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
                 } else {
                     Snackbar.make(mViewPager, getString(R.string.request_location_declined), Snackbar.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Snackbar.make(mViewPager, R.string.request_storage_accepted, Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(mViewPager, R.string.request_storage_denied, Snackbar.LENGTH_SHORT).show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
