@@ -51,6 +51,11 @@
     <string name="income_progress">View Income Progress</string>
     <string name="expense_progress">View Expense Progress</string>
 
+    <!-- Graph names -->
+    <string name="budget_graph">Budget Goal Progress</string>
+    <string name="income_graph">Income Progress</string>
+    <string name="expense_graph">Expense Progress</string>
+
     <!-- Strings related to Paystubs -->
     <string name="paystubs">Paystubs</string>
     <string name="your_paystubs">Your Paystubs</string>
