@@ -188,8 +188,6 @@ public class HomeActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-
-
                 checkPos();
             }
         },1100); //end handler
@@ -231,12 +229,21 @@ public class HomeActivity extends AppCompatActivity {
      * gets the incomes of user for that week
      */
     private void getTotalIncomes(){
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
 
         myRef.child("periods").child(periodID).child("totalIncome").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                totalbudget += Double.parseDouble(dataSnapshot.getValue().toString());
+
+                if(dataSnapshot.exists()){
+                    totalbudget += Double.parseDouble(dataSnapshot.getValue().toString());
+                }
+
+                else{//creates a totalIncome key if it doesn't exist in db
+                    myRef.child("periods").child(periodID).child("totalIncome").setValue(1);
+                    totalbudget += 1;
+                }
+
             }
 
 
@@ -263,12 +270,19 @@ public class HomeActivity extends AppCompatActivity {
      * gets expenses of user for that week
      */
     private void getTotalExpenses(){
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
 
         myRef.child("periods").child(periodID).child("totalExpenses").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                totalbudget -= Double.parseDouble(dataSnapshot.getValue().toString());
+                if(dataSnapshot.exists()) {
+                    totalbudget -= Double.parseDouble(dataSnapshot.getValue().toString());
+                }
+
+                else{
+                    myRef.child("periods").child(periodID).child("totalExpenses").setValue(1);
+                    totalbudget -= 1;
+                }
             }
 
 
@@ -283,11 +297,22 @@ public class HomeActivity extends AppCompatActivity {
      * gets budget goal of user for that week
      */
     private void getBudgetGoal(){
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
-        myRef.child("periods").child(periodID).child("budgetGoal").addListenerForSingleValueEvent(new ValueEventListener() {
+        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        final FirebaseUser user = auth.getCurrentUser();
+
+        myRef.child("users").child(user.getUid()).child("current_budget").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                totalbudget -= Double.parseDouble(dataSnapshot.getValue().toString());
+                if(dataSnapshot.exists()){
+                    totalbudget -= Double.parseDouble(dataSnapshot.getValue().toString());
+                }
+
+                else{ //if budget goal does not exist
+                    myRef.child("users").child(user.getUid()).child("current_budget").setValue(0);
+                    totalbudget -= 0;
+                }
+
             }
 
 
@@ -297,6 +322,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void getPeriodId(){
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
