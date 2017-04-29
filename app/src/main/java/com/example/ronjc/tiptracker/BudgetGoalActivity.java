@@ -81,8 +81,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
     int graphIncrementer;
 
-    ArrayList<String> XValues = new ArrayList<>();
-    ArrayList<String> YValues = new ArrayList<>();
+    ArrayList<String> XValues;
+    ArrayList<String> YValues;
+    ArrayList<String> listOfIDs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +99,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
         graphIncrementer = 0;
 
-        XValues = new ArrayList<>();
-        YValues = new ArrayList<>();
+        ArrayList<String> XValues = new ArrayList<>();
+        ArrayList<String> YValues = new ArrayList<>();
+        ArrayList<String> listOfIDs = new ArrayList<>();
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
@@ -119,27 +121,33 @@ public class BudgetGoalActivity extends AppCompatActivity {
                 final String currentTimestr = Long.toString(currentTime);
 
                 changedGoal = setBudget.getText().toString();
-                goal.setText("Current Budget: " + changedGoal);
-                changedGoal = changedGoal.replace(",","");
-                dbRef.orderByChild("email").equalTo(user.getEmail()).
-                        addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(changedGoal.trim().length()==0){
+                    setBudget.setError("Please enter in a valid budget");
+                }
+                else {
+                    goal.setText("Current Budget: " + changedGoal);
+                    changedGoal = changedGoal.replace(",", "");
+                    dbRef.orderByChild("email").equalTo(user.getEmail()).
+                            addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                //Updates current budget goal to Firebase
-                                dbRef.child("users").child(user.getUid()).child("current_budget")
-                                        .setValue(Double.parseDouble(changedGoal.substring(1)));
-                                //Pushes thee budget goal value and current time the button was pressed
-                                //Adds the two values as a key,value pair to Period tree in Firebase
-                                dbRef.child("periods").child(periodID).child("budgetGoal")
-                                        .child(currentTimestr)
-                                        .setValue(Double.parseDouble(changedGoal.substring(1)));
-                            }
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                                    //Updates current budget goal to Firebase
+                                    dbRef.child("users").child(user.getUid()).child("current_budget")
+                                            .setValue(Double.parseDouble(changedGoal.substring(1)));
+                                    //Pushes thee budget goal value and current time the button was pressed
+                                    //Adds the two values as a key,value pair to Period tree in Firebase
+                                    dbRef.child("periods").child(periodID).child("budgetGoal")
+                                            .child(currentTimestr)
+                                            .setValue(Double.parseDouble(changedGoal.substring(1)));
+                                }
 
-                            }
-                        });
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                }
 
             }
         });
@@ -198,6 +206,37 @@ public class BudgetGoalActivity extends AppCompatActivity {
                     });
                 break;
             case 2:
+                getIncomeID();
+                Handler handler = new Handler();
+                Runnable run = new Runnable() {
+                    @Override
+                    public void run() {
+                    for(int i = 0; i<listOfIDs.size();i++) {
+                        dbRef.child(DBHelper.INCOMES).child(listOfIDs.get(i)).child("amount")
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    ArrayList<String> incomeID = new ArrayList<String>();
+
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                            incomeID.add(child.getValue().toString());
+                                        }
+                                        YValues = incomeID;
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                    }
+                    }
+                };
+                handler.postDelayed(run,3000);
+
+                break;
+
 
 
         }
@@ -238,16 +277,13 @@ public class BudgetGoalActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        ArrayList<String> incomeKey = new ArrayList<String>();
-
-
-
+                        final ArrayList<String> incomeKey = new ArrayList<String>();
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             incomeKey.add(child.getKey());
-
                         }
-                    }
+                        listOfIDs = incomeKey;
 
+                    }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
 
@@ -311,43 +347,76 @@ public class BudgetGoalActivity extends AppCompatActivity {
                         linechart.setData(data);
                     }
                 };
-                handler.postDelayed(run,500);
+                handler.postDelayed(run,2000);
             }
         };
-        handler.postDelayed(run,500);
+        handler.postDelayed(run,1000);
 
 
     }
     private void createIncomeGraph(){//Draws and plots the graph for income progress graph
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
-        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
-        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
+        getXYValues();
+        Handler handler = new Handler();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                getIncomeID();
+                final Handler handler = new Handler();
+                final Runnable run = new Runnable() {
+                    @Override
+                    public void run() {
+                        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
+                        View view2 = getLayoutInflater().inflate(R.layout.linechart, null);
+                        view2.setBackgroundColor(Color.parseColor("#bff6bc"));
 
 
-        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+                        mBuilder.setView(view2).show();
 
 
-        mBuilder.setView(view2).show();
-        final AlertDialog dialog = mBuilder.create();
+                        LineChart linechart = (LineChart)view2.findViewById(R.id.linegraph);
+                        linechart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+                        linechart.getAxisRight().setEnabled(false);
 
-        List<Entry> entries = new ArrayList<Entry>();
-        //add for loop to add other entries
+                        Description description = new Description();
+                        description.setText("");
+                        linechart.setDescription(description);
 
-        entries.add(new Entry(3,4));
-        entries.add(new Entry(5,6));
-        entries.add(new Entry(6,8));
-        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal"); // add entries to dataset
-        dataSet.setColor(Color.BLUE);
-        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-        dataSet.setCircleColor(Color.BLUE);
-        dataSets.add(dataSet);
+                        final List<Entry> entries = new ArrayList<Entry>();
+                        //add for loop to add other entries
+                        Handler handler1 = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                for(int i = 0; i<YValues.size();i++){
+                                    entries.add(new Entry(i,Float.parseFloat(YValues.get(i))));
+                                }
 
-        XAxis xAxis = linechart.getXAxis();
-        xAxis.setDrawGridLines(false);
+                            }
+                        };
+                        handler1.postDelayed(runnable,3500);
 
-        LineData data = new LineData(dataSets);
-        linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
-        linechart.setData(data);
+
+
+                        LineDataSet dataSet = new LineDataSet(entries, "Budget Goal Progress"); // add entries to dataset
+                        dataSet.setColor(Color.BLACK);
+                        dataSet.setDrawValues(false);
+                        List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+                        dataSet.setCircleColor(Color.BLUE);
+                        dataSets.add(dataSet);
+
+                        XAxis xAxis = linechart.getXAxis();
+                        xAxis.setDrawGridLines(false);
+
+
+                        LineData data = new LineData(dataSets);
+                        linechart.setBackgroundColor(Color.parseColor("#bff6bc"));
+                        linechart.setData(data);
+                    }
+                };
+                handler.postDelayed(run,2000);
+            }
+        };
+        handler.postDelayed(run,1000);
     }
     private void createExpenseGraph(){//Draws and plots the graph for expense progress graph
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(BudgetGoalActivity.this);
