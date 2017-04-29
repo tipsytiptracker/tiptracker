@@ -481,10 +481,10 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
             }case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Snackbar.make(mViewPaystubButton, "You have granted permission to storage", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mViewPaystubButton, R.string.request_storage_accepted, Snackbar.LENGTH_SHORT).show();
                     startCamIntent();
                 } else {
-                    Snackbar.make(mPaystubButton, "You have denied permission to storage", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mPaystubButton, R.string.request_storage_denied, Snackbar.LENGTH_SHORT).show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
