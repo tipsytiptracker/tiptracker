@@ -247,17 +247,22 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     private void calculateStartAndEndDate() {
         //Get current calendar instance
         Calendar calendar = Calendar.getInstance();
+
         //Set the day to Sunday of this week
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+
         //Set hour, seconds, minutes to 0 so that starting range for week is the Sunday of current
         //week at 12:00:00AM
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
+
         //Return as Date object
         startDate = calendar.getTime();
+
         //Add six days to that week's Sunday
         calendar.add(Calendar.DATE, 6);
+
         //Set the time to that Saturday at 11:59:59 PM
         calendar.add(Calendar.HOUR_OF_DAY, 23);
         calendar.add(Calendar.MINUTE, 59);
@@ -277,7 +282,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         calendar.setTime(startDate);
         calendar.add(Calendar.DATE, 7);
         startDate = calendar.getTime();
-        //TODO: I think we can just add 7 days to end date for this but its like 3AM and im too tired.
         calendar.add(Calendar.DATE, 6);
         calendar.add(Calendar.HOUR_OF_DAY, 23);
         calendar.add(Calendar.MINUTE, 59);
@@ -292,7 +296,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     }
 
     /**
-     * Basically method above, but does the opposite. Yeah, Im really tired.
+     * Basically method above, but does the opposite.
      */
     private void goToLastWeek() {
         Calendar calendar = Calendar.getInstance();
@@ -620,7 +624,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     }
 
 
-    //Horrible workaround needed because bad design lol
+    //Horrible workaround needed because bad design haha
     private void displayAddDialog(LayoutInflater mLayoutInflator, Typeface bitter, final String headerTitle, String cameraAmount, final String type) {
 
         //Create dialog
