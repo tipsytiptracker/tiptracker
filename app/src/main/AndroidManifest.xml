@@ -5,8 +5,7 @@
     <!-- To access camera hardware and external storage -->
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />
-
+        android:required="true" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -42,7 +41,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,19 +51,24 @@
         </activity>
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/title_activity_register" />
+            android:label="@string/title_activity_register"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".HomeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity android:name=".LoginActivity" />
         <activity
             android:name=".BudgetManagement"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".PayStubsActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".BudgetGoalActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity android:name=".TestActivity" />
         <!--

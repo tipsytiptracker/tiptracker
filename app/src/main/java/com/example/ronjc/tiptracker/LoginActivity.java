@@ -77,6 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                 requestNewInterstitial();
                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                 startActivity(intent);
+                LoginActivity.this.finish();
             }
         });
 
@@ -95,6 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                         startActivity(intent);
+                        LoginActivity.this.finish();
                     }
                 }
             }

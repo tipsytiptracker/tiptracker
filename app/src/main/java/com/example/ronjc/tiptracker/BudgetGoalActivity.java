@@ -94,11 +94,14 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
         getPeriodId();
 
+        //Toast.makeText(this, "" + periodID, Toast.LENGTH_LONG).show();
+
         Handler handler = new Handler();
         Runnable run = new Runnable() {
             @Override
             public void run() {
-                getXYValues();
+                //getXYValues();
+                Toast.makeText(getApplicationContext(), "" + periodID, Toast.LENGTH_LONG).show();
             }
         };
         handler.postDelayed(run,500);

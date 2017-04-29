@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 requestNewInterstitial();
                 Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                 startActivity(intent);
+                MainActivity.this.finish();
             }
         });
 
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                         startActivity(intent);
+                        MainActivity.this.finish();
                     }
                 }
             }

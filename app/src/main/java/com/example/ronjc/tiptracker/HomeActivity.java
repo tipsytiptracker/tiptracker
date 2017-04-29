@@ -1,5 +1,6 @@
 package com.example.ronjc.tiptracker;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
@@ -92,6 +93,7 @@ public class HomeActivity extends AppCompatActivity {
                     //If user is not logged in, then redirect to MainActivity
                     Intent intent = new Intent(HomeActivity.this, MainActivity.class);
                     startActivity(intent);
+                    HomeActivity.this.finish();
                 } else {
                     //If user does not exist in database, create element for that user
                     mDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -183,6 +185,7 @@ public class HomeActivity extends AppCompatActivity {
                 });
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);
         startActivity(intent);
+        HomeActivity.this.finish();
     }
 
     /**
