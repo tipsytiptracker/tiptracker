@@ -31,7 +31,9 @@
         android:imeOptions="actionUnspecified"
         android:inputType="textPassword"
         android:maxLines="1"
-        android:textColor="@color/colorWhite" />
+        android:textColor="@color/colorWhite"
+        android:textCursorDrawable="@drawable/edittextfocus"/>
+
 
 
 
