@@ -5,39 +5,58 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.example.ronjc.tiptracker.GoalGraphFragment;
+import com.example.ronjc.tiptracker.RepeatedFragment;
+import com.example.ronjc.tiptracker.SetBudgetGoalFragment;
 import com.example.ronjc.tiptracker.model.Period;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by geneh on 4/20/2017.
+ *
+ * @author Gene Hernandez, Ronald Mangiliman
+ * Created by Gene Hernandez on 4/20/2017.
  */
 
 public class BudgetGoalTabAdapter extends FragmentPagerAdapter{
-    private final List<Fragment> mFragmentList = new ArrayList<>();
-    private final List<String> mFragmentTitleList = new ArrayList<>();
 
-    public void addFragment(Fragment fragment, String title) {
-        mFragmentList.add(fragment);
-        mFragmentTitleList.add(title);
-    }
-    public BudgetGoalTabAdapter(FragmentManager fragmentManager) {super(fragmentManager);}
+    private static int NUM_PAGES = 3;
+    private String periodID;
+    private String[] headers = {"Budget Goal", "Repeated Items", "Graphs"};
 
-    @Override
-    public CharSequence getPageTitle(int position) {
-        return mFragmentTitleList.get(position);
-    }
-
-    @Override
-    public Fragment getItem(int position) {
-        return mFragmentList.get(position);
-
+    public BudgetGoalTabAdapter(FragmentManager fragmentManager, String periodID) {
+        super(fragmentManager);
+        this.periodID = periodID;
     }
 
     @Override
     public int getCount() {
-        return mFragmentList.size();
-
+        return NUM_PAGES;
     }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return headers[position];
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        switch (position) {
+            case 0: {
+                return SetBudgetGoalFragment.newInstance(periodID);
+            }
+            case 1: {
+                return RepeatedFragment.newInstance();
+            }
+            case 2: {
+                return GoalGraphFragment.newInstance(periodID);
+            }
+            default: {
+                return null;
+            }
+        }
+    }
+
 }

@@ -132,8 +132,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
     private double longitude, latitude;
 
-    private LocationRequest mLocationRequest;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -231,18 +229,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     public void onConnectionSuspended(int i) {
 
     }
-
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        switch (requestCode) {
-//            case REQUEST_LOCATION: {
-//                if (grantResults.length > 0 )
-//                return;
-//            }
-//        }
-//    }
 
     /**
      * Calculates the start and end dates for the current period
@@ -479,7 +465,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     /**
      * Iterates through arraylist of income or expenses keys and retrieves each matching income/expense
      * from the database
-     * @param type
+     * @param type expenses or incomes
      */
     private void iterateKeys(String type) {
 
@@ -633,7 +619,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         //Create dialog
         AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(this);
         final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
-        ((TextView) pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
         TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
         pencilHeader.setTypeface(bitter);
         pencilHeader.setText(getString(R.string.add) + " " + headerTitle);
@@ -732,7 +717,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
                 }
             }
         }
-
     }
 
     @Override
@@ -752,7 +736,8 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
                     // functionality that depends on this permission.
                 }
                 return;
-            }case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+            }
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Snackbar.make(mViewPager, R.string.request_storage_accepted, Snackbar.LENGTH_SHORT).show();
