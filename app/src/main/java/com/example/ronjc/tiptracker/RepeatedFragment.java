@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -18,9 +19,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.utils.BudgetGoalTabAdapter;
+import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
@@ -41,6 +57,12 @@ public class RepeatedFragment extends Fragment {
     private Typeface bitter;
     private String[] typeArray, frequencyArray;
     private String periodID,selectedType;
+
+    private DatabaseReference dbRef;
+    private FirebaseUser user;
+    private FirebaseAuth mAuth;
+
+    private String key="";
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,6 +86,10 @@ public class RepeatedFragment extends Fragment {
         }
         typeArray = new String[]{"Income", "Expense"};
         frequencyArray = new String[] {"Weekly", "Monthly", "Annually"};
+
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
     }
 
     @Override
@@ -73,12 +99,13 @@ public class RepeatedFragment extends Fragment {
         View mView = inflater.inflate(R.layout.fragment_repeated, container, false);
         bitter = FontManager.getTypeface(mView.getContext(), BITTER);
 
-        TextView addRepeatedHeader = (TextView) mView.findViewById(R.id.add_repeated_tv);
-        Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
+        final TextView addRepeatedHeader = (TextView) mView.findViewById(R.id.add_repeated_tv);
+        final Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
 
         addRepeatedHeader.setTypeface(bitter);
         addRepeatedButton.setTypeface(bitter);
         addRepeatedButton.setOnClickListener(new RepeatedButtonListener());
+
 
         return mView;
 
@@ -118,11 +145,11 @@ public class RepeatedFragment extends Fragment {
 
         TextInputLayout itemNameTextInput = (TextInputLayout)mView.findViewById(R.id.add_repeated_name_text_input);
         TextInputLayout itemAmountTextInput = (TextInputLayout)mView.findViewById(R.id.add_repeated_amount_text_input);
-        EditText itemNameEditText = (EditText)mView.findViewById(R.id.add_repeated_name);
-        EditText itemAmountEditText = (EditText)mView.findViewById(R.id.repeated_amount);
-        Spinner repeatedSpinner = (Spinner)mView.findViewById(R.id.repeated_type_spinner);
-        Spinner frequencySpinner = (Spinner)mView.findViewById(R.id.repeated_frequency_spinner);
-        Button repeatedDialogButton = (Button) mView.findViewById(R.id.add_repeated_dialog_button);
+        final EditText itemNameEditText = (EditText)mView.findViewById(R.id.add_repeated_name);
+        final EditText itemAmountEditText = (EditText)mView.findViewById(R.id.repeated_amount);
+        final Spinner repeatedSpinner = (Spinner)mView.findViewById(R.id.repeated_type_spinner);
+        final Spinner frequencySpinner = (Spinner)mView.findViewById(R.id.repeated_frequency_spinner);
+        final Button repeatedDialogButton = (Button) mView.findViewById(R.id.add_repeated_dialog_button);
 
         //Create array adapter for spinner
         ArrayAdapter<String> mArrayAdapter = new ArrayAdapter<String>(getContext(), R.layout.custom_spinner_item, typeArray) {
@@ -186,7 +213,61 @@ public class RepeatedFragment extends Fragment {
         repeatedDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Add repeated to user
+                String itemName = itemNameEditText.getText().toString();
+                String itemAmount = itemAmountEditText.getText().toString()
+                        .replace("$","").replace(".","").replace(",","");
+                BigDecimal amount = new BigDecimal(itemAmount);
+                amount = amount.setScale(2,BigDecimal.ROUND_HALF_UP);
+                if(repeatedSpinner.getSelectedItem().toString().equals("Income")) {
+                    if(frequencySpinner.getSelectedItem().equals("Monthly")){
+                        BigDecimal divisor = new BigDecimal(4);
+                        amount = amount.divide(divisor);
+                    }
+                    if(frequencySpinner.getSelectedItem().equals("Annually")){
+                        BigDecimal divisor = new BigDecimal(12);
+                        amount = amount.divide(divisor);
+                    }
+                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                    Double amountFormated = amount.doubleValue();
+                    amountFormated = Double.valueOf(decimalFormat.format(amountFormated))/100;
+
+
+                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
+                            .child("RepeatedIncome").push().getKey();
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
+                            .child("RepeatedIncome").child(key).child("name").setValue(itemName);
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
+                            .child("RepeatedIncome").child(key).child("amount").setValue(amountFormated);
+
+                    Snackbar.make(view,"Income was added!",Snackbar.LENGTH_SHORT).show();
+
+                }
+                if(repeatedSpinner.getSelectedItem().toString().equals("Expense")) {
+                    if(frequencySpinner.getSelectedItem().equals("Monthly")){
+                        BigDecimal divisor = new BigDecimal(4);
+                        amount = amount.divide(divisor);
+                    }
+                    if(frequencySpinner.getSelectedItem().equals("Annually")){
+                        BigDecimal divisor = new BigDecimal(12);
+                        amount = amount.divide(divisor);
+                    }
+                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                    Double amountFormated = amount.doubleValue();
+                    amountFormated = Double.valueOf(decimalFormat.format(amountFormated))/100;
+
+
+                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
+                            .child("RepeatedExpense").push().getKey();
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
+                            .child("RepeatedExpense").child(key).child("name").setValue(itemName);
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
+                            .child("RepeatedExpense").child(key).child("amount").setValue(amountFormated);
+
+                    Snackbar.make(view,"Expense was added!",Snackbar.LENGTH_SHORT).show();
+
+                }
+
+
             }
         });
 
