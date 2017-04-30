@@ -14,6 +14,8 @@ import java.util.List;
 
 /**
  * Created by Alex on 4/15/2017.
+ * Optical Character Recognizer Class
+ * Uses Google Vision OCR to read text from an image
  */
 
 public class OCR {
@@ -22,6 +24,7 @@ public class OCR {
     private Bitmap bitmap;
     private SparseArray<TextBlock> textBlocks;
 
+    //Constructor needs context and a bitmap of the image to detect
     public OCR(Context context, Bitmap bitmap) {
         textRecognizer = new TextRecognizer.Builder(context).build();
         Frame imageFrame = new Frame.Builder()
@@ -29,7 +32,6 @@ public class OCR {
                 .build();
         textBlocks = textRecognizer.detect(imageFrame);
     }
-
 
     public String getTotal() {
         String total = "";
@@ -39,7 +41,6 @@ public class OCR {
         Rect lineRect = new Rect(0, 0, 0, 0);
         Rect wordRect = new Rect(0, 0, 0, 0);
 
-        firstloop:
         for (int i = 0; i < textBlocks.size(); i++) {
             paragraph = textBlocks.get(textBlocks.keyAt(i));
             lineList = paragraph.getComponents();
