@@ -238,6 +238,4 @@ public class HomeActivity extends AppCompatActivity {
             Snackbar.make(mRelativeLayout, getString(R.string.connection_failed), Snackbar.LENGTH_LONG);
         }
     }
-
-
 }
