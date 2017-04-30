@@ -208,6 +208,32 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        getPeriodId();
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                getTotalIncomes();
+                getTotalExpenses();
+                getBudgetGoal();
+            }
+        },1000); //end handler
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkPos();
+            }
+        },1100); //end handler
+
+    }
+
     /**
      * Logs user out of account
      */
@@ -240,8 +266,8 @@ public class HomeActivity extends AppCompatActivity {
                 }
 
                 else{//creates a totalIncome key if it doesn't exist in db
-                    myRef.child("periods").child(periodID).child("totalIncome").setValue(1);
-                    totalbudget += 1;
+                    myRef.child("periods").child(periodID).child("totalIncome").setValue(0);
+                    totalbudget += 0;
                 }
 
             }
@@ -280,8 +306,8 @@ public class HomeActivity extends AppCompatActivity {
                 }
 
                 else{
-                    myRef.child("periods").child(periodID).child("totalExpenses").setValue(1);
-                    totalbudget -= 1;
+                    myRef.child("periods").child(periodID).child("totalExpenses").setValue(0);
+                    totalbudget -= 0;
                 }
             }
 
