@@ -84,11 +84,14 @@
     <string name="add_item_enter_fields">Please fill out all the fields.</string>
     <string name="category">Category</string>
     <string name="category_added">Category was successfully added</string>
+    <string name="category_exists">Category already exists.</string>
     <string name="income_added">Income was successfully added</string>
+    <string name="no_blank">No fields can be left blank.</string>
     <string name="expense_added">Expense was successfully added</string>
     <string name="total">Total: $</string>
     <string name="pie_chart_label">Amounts by category</string>
     <string name="retrieving">Retrieving...</string>
+
 
     <!-- Strings for manually adding item dialog-->
     <string name="item_name">Name</string>

@@ -377,26 +377,32 @@ public class BudgetFragment extends Fragment {
      * @param category new category
      */
     private void writeNewCategory(final String category) {
-        //Database reference
-        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        //Get new key of category item being pushed
-        String categoryKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).push().getKey();
+        if(headerList.contains(category)) {
+            Toast.makeText(getContext(), getString(R.string.category_exists), Toast.LENGTH_SHORT).show();
+//            Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), getString(R.string.category_exists), Snackbar.LENGTH_SHORT).show();
+        } else {
+            //Database reference
+            final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        //Actually push and set value for new child
-        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).child(categoryKey).setValue(category);
+            //Get new key of category item being pushed
+            String categoryKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).push().getKey();
 
-        //Alert user
-        Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
+            //Actually push and set value for new child
+            mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(type).child(categoryKey).setValue(category);
 
-        //Update local data
-        headerList.add(category);
-        childList.put(category, new ArrayList<String>());
-        idList.put(category, new ArrayList<String>());
-        amountsByCategory.add(0.00);
+            //Alert user
+            Snackbar.make(getActivity().findViewById(R.id.activity_budget_management), getString(R.string.category_added), Snackbar.LENGTH_SHORT).show();
 
-        //Update view
-        listAdapter.notifyDataSetChanged();
+            //Update local data
+            headerList.add(category);
+            childList.put(category, new ArrayList<String>());
+            idList.put(category, new ArrayList<String>());
+            amountsByCategory.add(0.00);
+
+            //Update view
+            listAdapter.notifyDataSetChanged();
+        }
     }
 
     private class PieChartListener implements View.OnClickListener{

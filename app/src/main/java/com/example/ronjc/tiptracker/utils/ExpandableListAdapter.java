@@ -245,7 +245,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
      * @param category category of expense
      */
     private void writeNewExpense(String name, String amount, String category) {
-        double doubleAmount = Double.parseDouble(amount.substring(1));
+        double doubleAmount = Double.parseDouble(amount.substring(1).replace(",", ""));
         String expenseKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
         final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, userID, longitude, latitude);
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
@@ -441,10 +441,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         itemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String name = itemNameEditText.getText().toString();
+                String amount = itemAmountEditText.getText().toString();
+
+                if(name.replace(" ", "").equals("") || amount.equals("") || amount.equals("$0.00")) {
+                    Toast.makeText(context, context.getString(R.string.no_blank), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (type.equals(DBHelper.INCOMES)) {
-                    writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                    writeNewIncome(name, amount, headerTitle);
                 } else {
-                    writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                    writeNewExpense(name,amount, headerTitle);
                 }
                 pencilDialog.dismiss();
             }
