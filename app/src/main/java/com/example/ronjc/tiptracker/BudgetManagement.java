@@ -61,6 +61,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.os.Build.VERSION_CODES.M;
+
 /**
  * Controller for the BudgetManagement Activity
  *
@@ -82,6 +84,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     TextView mDateTextView;
 
     public static final int REQUEST_LOCATION = 2;
+    final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 3;
 
 
     //Start and end date for current period
@@ -128,8 +131,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     private Location mLastLocation;
 
     private double longitude, latitude;
-
-    private LocationRequest mLocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -229,35 +230,28 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
     }
 
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        switch (requestCode) {
-//            case REQUEST_LOCATION: {
-//                if (grantResults.length > 0 )
-//                return;
-//            }
-//        }
-//    }
-
     /**
      * Calculates the start and end dates for the current period
      */
     private void calculateStartAndEndDate() {
         //Get current calendar instance
         Calendar calendar = Calendar.getInstance();
+
         //Set the day to Sunday of this week
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+
         //Set hour, seconds, minutes to 0 so that starting range for week is the Sunday of current
         //week at 12:00:00AM
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
+
         //Return as Date object
         startDate = calendar.getTime();
+
         //Add six days to that week's Sunday
         calendar.add(Calendar.DATE, 6);
+
         //Set the time to that Saturday at 11:59:59 PM
         calendar.add(Calendar.HOUR_OF_DAY, 23);
         calendar.add(Calendar.MINUTE, 59);
@@ -277,7 +271,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         calendar.setTime(startDate);
         calendar.add(Calendar.DATE, 7);
         startDate = calendar.getTime();
-        //TODO: I think we can just add 7 days to end date for this but its like 3AM and im too tired.
         calendar.add(Calendar.DATE, 6);
         calendar.add(Calendar.HOUR_OF_DAY, 23);
         calendar.add(Calendar.MINUTE, 59);
@@ -292,7 +285,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     }
 
     /**
-     * Basically method above, but does the opposite. Yeah, Im really tired.
+     * Basically method above, but does the opposite.
      */
     private void goToLastWeek() {
         Calendar calendar = Calendar.getInstance();
@@ -472,7 +465,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     /**
      * Iterates through arraylist of income or expenses keys and retrieves each matching income/expense
      * from the database
-     * @param type
+     * @param type expenses or incomes
      */
     private void iterateKeys(String type) {
 
@@ -620,13 +613,12 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     }
 
 
-    //Horrible workaround needed because bad design lol
+    //Horrible workaround needed because bad design haha
     private void displayAddDialog(LayoutInflater mLayoutInflator, Typeface bitter, final String headerTitle, String cameraAmount, final String type) {
 
         //Create dialog
         AlertDialog.Builder pencilBuilder = new AlertDialog.Builder(this);
         final View pencilView = mLayoutInflator.inflate(R.layout.add_budget_manually, null);
-        ((TextView) pencilView.findViewById(R.id.budget_manually_header)).setTypeface(bitter);
         TextView pencilHeader = (TextView) pencilView.findViewById(R.id.budget_manually_header);
         pencilHeader.setTypeface(bitter);
         pencilHeader.setText(getString(R.string.add) + " " + headerTitle);
@@ -725,7 +717,6 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
                 }
             }
         }
-
     }
 
     @Override
@@ -741,6 +732,17 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
                 } else {
                     Snackbar.make(mViewPager, getString(R.string.request_location_declined), Snackbar.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Snackbar.make(mViewPager, R.string.request_storage_accepted, Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(mViewPager, R.string.request_storage_denied, Snackbar.LENGTH_SHORT).show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }

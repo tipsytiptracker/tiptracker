@@ -1,13 +1,17 @@
 package com.example.ronjc.tiptracker.utils;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.ronjc.tiptracker.PayStubsActivity;
 import com.example.ronjc.tiptracker.model.Expense;
 import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.R;
@@ -75,6 +80,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Camera mCamera;
     private ArrayList<Double> amountsByCategory;
     private double longitude, latitude;
+    private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 3;
 
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -228,6 +234,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //update the total amount
         updateTotal(doubleAmount);
+        notifyDataSetChanged();
     }
 
     /**
@@ -257,6 +264,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         amountsByCategory.set(categoryIndex, bigDecimal1.add(bigDecimal2).doubleValue());
 
         updateTotal(doubleAmount);
+        notifyDataSetChanged();
     }
 
     /**
@@ -520,7 +528,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
-                createFromPicture(headerTitle);
+                if (ContextCompat.checkSelfPermission(context,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions((Activity)context,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                } else {
+                    createFromPicture(headerTitle);
+                }
             }
         });
 

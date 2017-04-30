@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/metroTileColorPressed"
+    android:orientation="vertical"
+    android:layout_centerVertical="true"
+    tools:context="com.example.ronjc.tiptracker.SetBudgetGoalFragment">
+
+    <TextView
+        android:layout_marginTop="30dp"
+        android:id="@+id/set_goal_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/set_budget"
+        android:textAlignment="center"
+        android:textColor="@color/colorWhite"
+        android:textSize="25sp" />
+
+    <com.blackcat.currencyedittext.CurrencyEditText
+        android:id="@+id/set_budget_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="25dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:hint="@string/enter_budget_goal"
+        android:imeOptions="actionUnspecified"
+        android:inputType="textPassword"
+        android:maxLines="1"
+        android:paddingTop="30dp"
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorWhiteTransparent"
+        android:textCursorDrawable="@drawable/edittextfocus" />
+
+
+    <Button
+        android:id="@+id/change_budget_btn"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/button_bg"
+        android:paddingBottom="5dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="5dp"
+        android:text="@string/change_budget"
+        android:textAllCaps="false" />
+
+</LinearLayout>
