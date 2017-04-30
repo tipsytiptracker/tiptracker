@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +35,7 @@ import com.example.ronjc.tiptracker.utils.OCR;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,6 +43,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -65,10 +72,16 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
     TextView mTileText;
     @BindView(R.id.paystubs_picture_tile)
     TextView mPictureTile;
+    @BindView(R.id.uploadProgressBar)
+    ProgressBar uploadProgressBar;
+    @BindView(R.id.uploadProgressText)
+    TextView progressText;
 
     Camera mCam;
     DatabaseReference myRef;
     FirebaseAuth firebaseAuth;
+    FirebaseStorage storage;
+    StorageReference storageRef;
     FirebaseAuth.AuthStateListener mAuthListener;
     FirebaseUser user;
     String periodID = "";
@@ -88,6 +101,10 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
         firebaseAuth = FirebaseAuth.getInstance();
         myRef = FirebaseDatabase.getInstance().getReference();
         user  = firebaseAuth.getCurrentUser();
+
+        //Firebase Storage references
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference().child(user.getUid()).child("paystub_images");
 
         mCam = new Camera(this);
 
@@ -298,8 +315,7 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
                         //excludes the dollar sign from the string
                         final double value = Double.parseDouble(amount.getText().toString().substring(1).replace(",", ""));
                         final String descrip = desc.getText().toString();
-                        long dateAdded = System.currentTimeMillis(); //gets the milliseconds of the current time
-                        Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
+                        final long dateAdded = System.currentTimeMillis(); //gets the milliseconds of the current time
 
                         if(checkAddIncome.isChecked()){ // adds the amount from paystub to their income if box is checked
                             addIncome(value, descrip, dateAdded);
@@ -307,19 +323,43 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
 
 //                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
 //                                    .child(user.getUid()).child("Paystubs");
-                        PayStub payStub = new PayStub(value, descrip, user.getUid(),dateAdded);
-                        myRef.child("users").child(user.getUid()).child("paystubs").push().setValue(payStub);
-//                            Toast.makeText(getApplicationContext(), "" + user.getUid(), Toast.LENGTH_LONG).show();
-//                            myRef.setValue(new PayStub(value,descrip));
 
+                        UploadTask uploadTask = storageRef.child(mCam.getImageFileName()).putFile(mCam.getUri());
+                        uploadProgressBar.setVisibility(View.VISIBLE);
+                        progressText.setVisibility(View.VISIBLE);
                         dialog.dismiss();
+
+                        //Progress Updater
+                        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                //noinspection VisibleForTests
+                                double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                                uploadProgressBar.setProgress((int)progress);
+                            }
+                        });
+
+                        //Success listener for upload
+                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                //noinspection VisibleForTests
+                                String downloadURL = taskSnapshot.getDownloadUrl().toString();
+                                PayStub payStub = new PayStub(value, descrip, user.getUid(),dateAdded, downloadURL);
+                                myRef.child("users").child(user.getUid()).child("paystubs").push().setValue(payStub);
+                                uploadProgressBar.setVisibility(View.INVISIBLE);
+                                progressText.setVisibility(View.INVISIBLE);
+                                Toast.makeText(getApplicationContext(), "Your Paystub was added!", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(), "" + user.getUid(), Toast.LENGTH_LONG).show();
+                                // myRef.setValue(new PayStub(value,descrip));
+                            }
+                        });
                     }//end else
                 }
             });
             dialog.show();
         }
     }
-
 
     @Override
     protected void onStart() {

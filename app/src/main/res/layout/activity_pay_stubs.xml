@@ -118,5 +118,24 @@
         android:text="@string/view_paystub"
         android:textAllCaps="false"/>
 
+    <TextView
+        android:id="@+id/uploadProgressText"
+        android:text="@string/upload_progress_text"
+        android:paddingTop="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@drawable/tiletext"
+        android:visibility="invisible"/>
+
+    <ProgressBar
+        android:id="@+id/uploadProgressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="invisible"
+        />
+
 
 </LinearLayout>

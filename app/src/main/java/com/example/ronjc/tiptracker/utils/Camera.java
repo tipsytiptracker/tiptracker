@@ -56,6 +56,7 @@ public class Camera implements Parcelable{
     public static final int REQUEST_TAKE_PHOTO = 1;
     private String header;
     private String type;
+    String imageFileName;
 
     //Constructor, pass activity context
     public Camera (Context context){
@@ -71,7 +72,7 @@ public class Camera implements Parcelable{
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -82,6 +83,15 @@ public class Camera implements Parcelable{
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+
+    /**
+     * Name: getImageFilename
+     * Purpose: return the filename for the image
+     * @return imageFilename
+     */
+    public String getImageFileName() {
+        return imageFileName;
     }
 
     /**
