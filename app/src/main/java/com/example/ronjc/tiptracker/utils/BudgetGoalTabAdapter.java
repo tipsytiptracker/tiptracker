@@ -48,7 +48,7 @@ public class BudgetGoalTabAdapter extends FragmentPagerAdapter{
                 return SetBudgetGoalFragment.newInstance(periodID);
             }
             case 1: {
-                return RepeatedFragment.newInstance();
+                return RepeatedFragment.newInstance(periodID);
             }
             case 2: {
                 return GoalGraphFragment.newInstance(periodID);

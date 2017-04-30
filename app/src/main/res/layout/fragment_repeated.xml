@@ -1,13 +1,49 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/metroTileColorPressed"
     tools:context="com.example.ronjc.tiptracker.RepeatedFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
+        android:id="@+id/add_repeated_tv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="TODO: REPEATED STUFF" />
+        android:layout_height="wrap_content"
+        android:paddingBottom="15dp"
+        android:paddingTop="10dp"
+        android:text="@string/repeated_items"
+        android:textAlignment="center"
+        android:textColor="@color/colorWhite"
+        android:layout_marginTop="20dp"
+        android:textSize="25sp" />
 
-</FrameLayout>
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:orientation="vertical">
+        <ExpandableListView
+            android:id="@+id/repeated_list"
+            android:layout_marginTop="50dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/add_repeated_button"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/button_bg"
+        android:paddingBottom="5dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="5dp"
+        android:text="@string/add_repeated"
+        android:textAllCaps="false" />
+
+</LinearLayout>

@@ -5,33 +5,6 @@
     android:orientation="vertical"
     tools:context="com.example.ronjc.tiptracker.GoalGraphFragment">
 
-
-    <!--DONT DELETE I NEED THIS FOR LATER!! - RON -->
-    <!--<TextView-->
-        <!--android:id="@+id/add_repeated_tv"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:paddingBottom="15dp"-->
-        <!--android:paddingTop="10dp"-->
-        <!--android:text="@string/add_repeated"-->
-        <!--android:textAlignment="center"-->
-        <!--android:textColor="@color/colorWhite"-->
-        <!--android:textSize="20sp" />-->
-
-    <!--<Button-->
-        <!--android:id="@+id/add_repeated_button"-->
-        <!--android:layout_width="200dp"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:layout_gravity="center_horizontal"-->
-        <!--android:layout_marginTop="5dp"-->
-        <!--android:background="@drawable/button_bg"-->
-        <!--android:paddingBottom="5dp"-->
-        <!--android:paddingLeft="20dp"-->
-        <!--android:paddingRight="20dp"-->
-        <!--android:paddingTop="5dp"-->
-        <!--android:text="@string/add_repeated"-->
-        <!--android:textAllCaps="false" />-->
-
     <TextView
         android:id="@+id/viewGraph_tv"
         android:layout_width="match_parent"
@@ -41,7 +14,7 @@
         android:text="@string/view_graph_reports"
         android:textAlignment="center"
         android:textColor="@color/colorWhite"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:textSize="25sp" />
 
     <Button
