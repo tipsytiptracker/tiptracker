@@ -16,7 +16,7 @@ Tip Tracker provides a number of features to help you manage your budget:
   * Geolocation lets you tag expenses to a specific location
 * Set a budget goal to alert you as to how much money you can spend before going under budget
 * Save all your paystubs securely in cloud storage
-* Use Optical Character Recgonition to take a picture of a reciept or paystub and have the amounts automatically added to your expenses or incomes
+* Use Optical Character Recgonition to take a picture of a receipt or paystub and have the amounts automatically added to your expenses or incomes
 
 
 ## Usage
