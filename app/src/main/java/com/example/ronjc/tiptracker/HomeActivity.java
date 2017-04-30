@@ -3,7 +3,6 @@ package com.example.ronjc.tiptracker;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -47,6 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -89,8 +89,8 @@ public class HomeActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseReference;
     private GoogleApiClient mGoogleApiClient;
 
-    double totalbudget = 0;
-    String periodID = "";
+    private double totalbudget = 0.00;
+    private String periodID = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,8 +129,6 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         };
-
-        getPeriodId();
 
         //Add logo to ActionBar
         //TODO: this can go in utils most likely. It is used throughout the app
@@ -174,24 +172,6 @@ public class HomeActivity extends AppCompatActivity {
         mManageBudgetTile.setOnClickListener(mTileListener);
         mLogoutTile.setOnClickListener(mTileListener);
 
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                getTotalIncomes();
-                getTotalExpenses();
-                getBudgetGoal();
-            }
-        },1000); //end handler
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                checkPos();
-            }
-        },1100); //end handler
-
     }
 
     @Override
@@ -211,27 +191,8 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
+        totalbudget = 0.00;
         getPeriodId();
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                getTotalIncomes();
-                getTotalExpenses();
-                getBudgetGoal();
-            }
-        },1000); //end handler
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                checkPos();
-            }
-        },1100); //end handler
-
     }
 
     /**
@@ -269,6 +230,8 @@ public class HomeActivity extends AppCompatActivity {
                     myRef.child("periods").child(periodID).child("totalIncome").setValue(0);
                     totalbudget += 0;
                 }
+                getTotalExpenses();
+
 
             }
 
@@ -282,12 +245,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private void checkPos(){ //checks if the budget is positive or negative
         if(totalbudget >= 0) {
-            NumberFormat f = new DecimalFormat("#0.00");
+            DecimalFormat f = new DecimalFormat("0.00");
             mCurrentBudgetVal.setText("+ $" + f.format(totalbudget) + " :)");
         }
 
         else{
-            NumberFormat f = new DecimalFormat("#0.00");
+            DecimalFormat f = new DecimalFormat("0.00");
             mCurrentBudgetVal.setText("- $" + f.format(totalbudget).replace("-","") + " :(");
         }
     }
@@ -309,6 +272,8 @@ public class HomeActivity extends AppCompatActivity {
                     myRef.child("periods").child(periodID).child("totalExpenses").setValue(0);
                     totalbudget -= 0;
                 }
+                getBudgetGoal();
+
             }
 
 
@@ -338,10 +303,8 @@ public class HomeActivity extends AppCompatActivity {
                     myRef.child("users").child(user.getUid()).child("current_budget").setValue(0);
                     totalbudget -= 0;
                 }
-
+                checkPos();
             }
-
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -375,6 +338,7 @@ public class HomeActivity extends AppCompatActivity {
                         break;
                     }
                 }
+                getTotalIncomes();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
