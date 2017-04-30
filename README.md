@@ -21,11 +21,15 @@ Tip Tracker provides a number of features to help you manage your budget:
 
 ## Usage
 
-### Login
+Login with your Gmail account or create a new account to get started.  Add sources of income and expenses in the Budget Management activity, store paystubs in the Manage Paystubs activity, or set and view budget goals in the Budget Goal activity.
 
-Login using your Gmail account or use a more traditional username and password.
+Check out our wiki for more details on how to use Tip Tracker.
 
+## Authors
 
-
+* Ronald Mangiliman - ronjcanlas
+* Gene Hernandez - geneh96
+* Arthur Rozenberg - rozenarthur
+* Alex Pomponio - apomponio
 
 
