@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.model.Income;
 import com.example.ronjc.tiptracker.model.PayStub;
+import com.example.ronjc.tiptracker.model.Period;
 import com.example.ronjc.tiptracker.utils.Camera;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.DateManager;
@@ -447,13 +448,32 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
                 Date startDate = calendar.getTime();
+                boolean exist = true;
+
                 final long time = DateManager.trimMilliseconds(startDate.getTime());
 
                 for (DataSnapshot period : periods) {
                     if ((long) period.getValue() == time) {
                         periodID = period.getKey();
+                        exist = false;
                         break;
                     }
+                }
+
+                if(exist){ //create a period if it doesn't exist
+                    String k = myRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).push().getKey();
+                    myRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).child(k).setValue(time);
+                    periodID = k;
+
+                    calendar.add(Calendar.DATE, 6);
+                    calendar.add(Calendar.HOUR_OF_DAY, 23);
+                    calendar.add(Calendar.MINUTE, 59);
+                    calendar.add(Calendar.SECOND, 59);
+                    Date endDate = calendar.getTime();
+                    long end = DateManager.trimMilliseconds(endDate.getTime());
+
+                    Period mPeriod = new Period(time, end, null, null, 0.00, 0.00, 0.00);
+                    myRef.child("periods").child(periodID).setValue(mPeriod);
                 }
             }
             @Override
