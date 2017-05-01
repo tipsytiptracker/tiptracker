@@ -114,8 +114,6 @@ public class RepeatedFragment extends Fragment {
         Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
         mExpandableListView = (ExpandableListView) mView.findViewById(R.id.repeated_list);
         mRepeatedListAdapter = new RepeatedListAdapter(getContext(), headerList, childList, idList);
-        final TextView addRepeatedHeader = (TextView) mView.findViewById(R.id.add_repeated_tv);
-        final Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
 
         addRepeatedHeader.setTypeface(bitter);
         addRepeatedButton.setTypeface(bitter);
