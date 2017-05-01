@@ -90,6 +90,7 @@
     <string name="expense_added">Expense was successfully added</string>
     <string name="total">Total: $</string>
     <string name="pie_chart_label">Amounts by category</string>
+    <string name="pie_chart_select_slice">Select a Pie Chart Slice</string>
     <string name="retrieving">Retrieving...</string>
 
 

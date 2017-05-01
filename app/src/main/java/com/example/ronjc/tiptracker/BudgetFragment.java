@@ -406,13 +406,25 @@ public class BudgetFragment extends Fragment {
     }
 
     private class PieChartListener implements View.OnClickListener{
+        LayoutInflater layoutInflater;
+        View pieView;
+        TextView mTextView;
+
         @Override
         public void onClick(View view) {
-            LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View pieView = layoutInflater.inflate(R.layout.piechart, viewGroup, false);
+            layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            pieView = layoutInflater.inflate(R.layout.piechart, viewGroup, false);
+            mTextView = (TextView) pieView.findViewById(R.id.pie_slice_tv);
+            final Typeface bitter = FontManager.getTypeface(pieView.getContext(), BITTER);
+            TextView pieChartHeader = (TextView) pieView.findViewById(R.id.pie_chart_header);
             mPieLayout = (LinearLayout) pieView.findViewById(R.id.pie_chart_outer_layout);
             AlertDialog.Builder pieChartBuilder = new AlertDialog.Builder(getContext());
             mPieChart = (PieChart) pieView.findViewById(R.id.actual_pie_chart);
+
+            mTextView.setText(getString(R.string.pie_chart_select_slice));
+
+            mTextView.setTypeface(bitter);
+            pieChartHeader.setTypeface(bitter);
 
             mPieChart.setUsePercentValues(true);
             mPieChart.setDrawHoleEnabled(true);
@@ -437,7 +449,7 @@ public class BudgetFragment extends Fragment {
             mDataSet.setSliceSpace(3);
             mDataSet.setSelectionShift(5);
 
-            ArrayList<Integer> colors = new ArrayList<Integer>();
+            final ArrayList<Integer> colors = new ArrayList<Integer>();
 
             for (int c : ColorTemplate.VORDIPLOM_COLORS) {
                 colors.add(c);
@@ -469,9 +481,24 @@ public class BudgetFragment extends Fragment {
             data.setValueTextSize(11f);
             data.setValueTextColor(Color.BLACK);
 
+            Description description = new Description();
+            description.setText("");
+            mPieChart.setDescription(description);
             mPieChart.setData(data);
 
             mPieChart.highlightValues(null);
+            mPieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+                @Override
+                public void onValueSelected(Entry e, Highlight h) {
+                    mTextView.setText(headerList.get(Integer.parseInt(e.getData().toString())) + ": $" + e.getY());
+//                    Toast.makeText(getContext(), "" + headerList.get(Integer.parseInt(e.getData().toString())) + ": $" + e.getY(), Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onNothingSelected() {
+
+                }
+            });
 
             mPieChart.invalidate();
         }
