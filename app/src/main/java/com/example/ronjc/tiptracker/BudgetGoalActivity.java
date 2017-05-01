@@ -117,8 +117,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
      * Methods to find IDs from the database to retrieve for the graphs' respective values
      */
     private void getPeriodId(){//Gets the key for the user's period session
-        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Get key for period to write
@@ -130,16 +129,34 @@ public class BudgetGoalActivity extends AppCompatActivity {
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
                 Date startDate = calendar.getTime();
+                boolean exist = true;
+
                 final long time = DateManager.trimMilliseconds(startDate.getTime());
 
                 for (DataSnapshot period : periods) {
                     if ((long) period.getValue() == time) {
                         periodID = period.getKey();
+                        exist = false;
                         break;
                     }
                 }
-
                 setBudgetGoalAdapter();
+
+                if(exist){ //create a period if it doesn't exist
+                    String k = dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).push().getKey();
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS).child(k).setValue(time);
+                    periodID = k;
+
+                    calendar.add(Calendar.DATE, 6);
+                    calendar.add(Calendar.HOUR_OF_DAY, 23);
+                    calendar.add(Calendar.MINUTE, 59);
+                    calendar.add(Calendar.SECOND, 59);
+                    Date endDate = calendar.getTime();
+                    long end = DateManager.trimMilliseconds(endDate.getTime());
+
+                    Period mPeriod = new Period(time, end, null, null, 0.00, 0.00, 0.00);
+                    dbRef.child("periods").child(periodID).setValue(mPeriod);
+                }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
