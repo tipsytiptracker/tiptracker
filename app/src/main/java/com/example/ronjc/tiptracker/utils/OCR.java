@@ -36,7 +36,6 @@ public class OCR {
      * Name: getTotal
      * Purpose:  Reads an image and looks for the word total, then finds
      * the value that corresponds to total and returns it.
-     *
      * @return total: string containing total for the receipt
      */
     public String getTotal() {
@@ -122,7 +121,6 @@ public class OCR {
     /**
      * Name: getNetPay
      * Purpose:  Finds the Net Pay for a pay stub and returns the value.
-     *
      * @return total: string containing the net pay value for the paystub
      */
     public String getNetPay() {
