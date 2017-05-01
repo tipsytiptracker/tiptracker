@@ -6,6 +6,7 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -52,7 +53,7 @@
         <activity
             android:name=".RegisterActivity"
             android:label="@string/title_activity_register"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".HomeActivity"
             android:screenOrientation="portrait"
@@ -85,7 +86,8 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".PaystubGallery"></activity>
     </application>
 
 </manifest>

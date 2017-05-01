@@ -42,6 +42,24 @@
                 android:textColor="@color/colorWhite"
                 android:background="@color/metroTileColorPressed"/>
             </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/gallery_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/metrotile"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_alignParentRight="true"
+                android:id="@+id/gallery_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_photo"
+                android:textColor="@drawable/tiletext"
+                android:textSize="45sp"/>
+        </RelativeLayout>
         </LinearLayout>
 
 </ScrollView>

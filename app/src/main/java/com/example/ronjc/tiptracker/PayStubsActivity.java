@@ -204,6 +204,18 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
                 FontManager.markAsIconContainer(mView2.findViewById(R.id.paystubs_title), iconFont3);
                 FontManager.markAsIconContainer(mView2.findViewById(R.id.paystubs_date), iconFont3);
 
+                Typeface fontAwesome = FontManager.getTypeface(getApplicationContext(), FontManager.FONTAWESOME);
+                FontManager.markAsIconContainer(mView2.findViewById(R.id.gallery_button),fontAwesome);
+
+                TextView paystubGallery = (TextView)mView2.findViewById(R.id.gallery_button);
+                paystubGallery.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(PayStubsActivity.this,PaystubGallery.class);
+                        startActivity(intent);
+                    }
+                });
+
                 mBuilder2.setView(mView2);
                 final AlertDialog dialog = mBuilder2.create();
 
