@@ -258,7 +258,7 @@ public class RepeatedListAdapter extends BaseExpandableListAdapter {
                         amount = amount.divide(divisor);
                     }
                     if(frequencySpinner.getSelectedItem().equals("Annually")){
-                        BigDecimal divisor = new BigDecimal(12);
+                        BigDecimal divisor = new BigDecimal(52);
                         amount = amount.divide(divisor);
                     }
 
