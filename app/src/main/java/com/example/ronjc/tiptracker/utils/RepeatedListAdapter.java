@@ -35,6 +35,7 @@ import butterknife.ButterKnife;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 import static com.example.ronjc.tiptracker.utils.FontManager.FONTAWESOME;
+import static com.example.ronjc.tiptracker.utils.FontManager.getTypeface;
 
 /**
  *
@@ -85,6 +86,12 @@ public class RepeatedListAdapter extends BaseExpandableListAdapter {
         textListChild.setTypeface(bitter);
         removeIcon.setTypeface(fontAwesome);
         textListChild.setText(childText);
+        removeIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                confirmRemoval(groupPosition, childPosition);
+            }
+        });
         return convertView;
     }
     @Override
@@ -301,5 +308,78 @@ public class RepeatedListAdapter extends BaseExpandableListAdapter {
         });
 
         mAlertDialog.show();
+    }
+
+    private void confirmRemoval(final int groupPosition, final int childPosition) {
+
+        //Build Dialog
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
+        LayoutInflater mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View mView = mLayoutInflater.inflate(R.layout.confirm_removal, null);
+        Typeface bitter = getTypeface(context, FontManager.BITTER);
+        TextView confirmRemovalHeader = (TextView)mView.findViewById(R.id.confirm_removal_header);
+        TextView areYouSure = (TextView)mView.findViewById(R.id.confirm_text_view);
+        Button confirmRemovalButton = (Button)mView.findViewById(R.id.confirm_removal_button);
+        Button cancelRemovalButton = (Button)mView.findViewById(R.id.cancel_removal_button);
+
+        //Set font styling
+        areYouSure.setTypeface(bitter);
+        confirmRemovalHeader.setTypeface(bitter);
+        confirmRemovalButton.setTypeface(bitter);
+        cancelRemovalButton.setTypeface(bitter);
+        mBuilder.setView(mView);
+
+        //Show Dialog
+        final AlertDialog alertDialog = mBuilder.create();
+        alertDialog.show();
+
+        //Remove item and dismiss dialog
+        confirmRemovalButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                removeItem(groupPosition, childPosition);
+                alertDialog.dismiss();
+            }
+        });
+
+        //Dismiss dialog without removing item
+        cancelRemovalButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+            }
+        });
+    }
+
+    /**
+     * Removes item from user view and in the database
+     *
+     * @param groupPosition position of the group of item being clicked.
+     * @param childPosition position of the child within the group
+     */
+    private void removeItem(int groupPosition, int childPosition) {
+        //Formatting
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+        //Retrieve the entry being clicked
+        String item = childList.get(headerList.get(groupPosition)).get(childPosition);
+
+        String typeToDelete = headerList.get(groupPosition).equals("Repeated Incomes") ? DBHelper.REPEATED_INCOME : DBHelper.REPEATED_EXPENSE;
+
+        //Remove child entry from HashMap
+        childList.get(headerList.get(groupPosition)).remove(childPosition);
+
+        //Store the ID of removed item for later use
+        String itemID = idList.get(headerList.get(groupPosition)).get(childPosition);
+
+        //Remove ID from HashMap locally
+        idList.get(headerList.get(groupPosition)).remove(childPosition);
+
+
+        //Remove the item from database.
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child(typeToDelete).child(itemID).setValue(null);
+
+        //Notify adapter of data change and update view
+        notifyDataSetChanged();
     }
 }

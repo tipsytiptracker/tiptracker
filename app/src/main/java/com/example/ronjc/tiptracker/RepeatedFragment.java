@@ -150,6 +150,8 @@ public class RepeatedFragment extends Fragment {
 
         childList.put(headerList.get(0), new ArrayList<String>());
         childList.put(headerList.get(1), new ArrayList<String>());
+        idList.put(headerList.get(0), new ArrayList<String>());
+        idList.put(headerList.get(1), new ArrayList<String>());
         dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.REPEATED_INCOME).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -158,6 +160,7 @@ public class RepeatedFragment extends Fragment {
                     for (DataSnapshot income : incomes) {
                         String incomeString = income.child("name").getValue().toString() + ": $" + decimalFormat.format(income.child("amount").getValue());
                         childList.get(headerList.get(0)).add(incomeString);
+                        idList.get(headerList.get(0)).add(income.getKey());
                     }
                 }
 
@@ -176,6 +179,7 @@ public class RepeatedFragment extends Fragment {
                     for (DataSnapshot expense : expenses) {
                         String expenseString = expense.child("name").getValue().toString() + ": $" + decimalFormat.format(expense.child("amount").getValue());
                         childList.get(headerList.get(1)).add(expenseString);
+                        idList.get(headerList.get(1)).add(expense.getKey());
                     }
                 }
             }
