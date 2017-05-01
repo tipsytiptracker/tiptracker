@@ -210,6 +210,8 @@ public class RepeatedFragment extends Fragment {
             }
         });
 
+
+        //Button to set repeated income and expenses in the Firebase Database
         repeatedDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -217,7 +219,7 @@ public class RepeatedFragment extends Fragment {
                 String itemAmount = itemAmountEditText.getText().toString()
                         .replace("$","").replace(".","").replace(",","");
                 BigDecimal amount = new BigDecimal(itemAmount);
-                amount = amount.setScale(2,BigDecimal.ROUND_HALF_UP);
+                DecimalFormat decimalFormat = new DecimalFormat("#.##");
                 if(repeatedSpinner.getSelectedItem().toString().equals("Income")) {
                     if(frequencySpinner.getSelectedItem().equals("Monthly")){
                         BigDecimal divisor = new BigDecimal(4);
@@ -227,17 +229,15 @@ public class RepeatedFragment extends Fragment {
                         BigDecimal divisor = new BigDecimal(12);
                         amount = amount.divide(divisor);
                     }
-                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                    Double amountFormated = amount.doubleValue();
-                    amountFormated = Double.valueOf(decimalFormat.format(amountFormated))/100;
+
+                    amount = amount.setScale(2,BigDecimal.ROUND_HALF_UP);
 
 
-                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
-                            .child("RepeatedIncome").push().getKey();
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
-                            .child("RepeatedIncome").child(key).child("name").setValue(itemName);
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
-                            .child("RepeatedIncome").child(key).child("amount").setValue(amountFormated);
+                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedIncome").push().getKey();
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedIncome")
+                            .child(key).child("name").setValue(itemName);
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedIncome").child(key)
+                            .child("amount").setValue(amount.doubleValue()/100);
 
                     Snackbar.make(view,"Income was added!",Snackbar.LENGTH_SHORT).show();
 
@@ -251,17 +251,15 @@ public class RepeatedFragment extends Fragment {
                         BigDecimal divisor = new BigDecimal(12);
                         amount = amount.divide(divisor);
                     }
-                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                    Double amountFormated = amount.doubleValue();
-                    amountFormated = Double.valueOf(decimalFormat.format(amountFormated))/100;
+
+                    amount = amount.setScale(2,BigDecimal.ROUND_HALF_UP);
 
 
-                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
-                            .child("RepeatedExpense").push().getKey();
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
-                            .child("RepeatedExpense").child(key).child("name").setValue(itemName);
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.PERIODS)
-                            .child("RepeatedExpense").child(key).child("amount").setValue(amountFormated);
+                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedExpense").push().getKey();
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedExpense")
+                            .child(key).child("name").setValue(itemName);
+                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedExpense")
+                            .child(key).child("amount").setValue(amount.doubleValue()/100);
 
                     Snackbar.make(view,"Expense was added!",Snackbar.LENGTH_SHORT).show();
 
