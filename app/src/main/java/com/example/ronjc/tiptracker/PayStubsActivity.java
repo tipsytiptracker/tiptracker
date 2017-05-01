@@ -50,6 +50,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -230,12 +231,13 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
 
                         ArrayList<String> list1 = new ArrayList<String>();
                         ArrayList<String> list3 = new ArrayList<String>();
+                        DecimalFormat f = new DecimalFormat("0.00");
 
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
 
                             PayStub users = child.getValue(PayStub.class);
 
-                            String get_amount = "$" + users.getAmount() + "\n";
+                            String get_amount = "$" + f.format(users.getAmount()) + "\n";
 
                             long get_date = users.getDatePosted();
 
