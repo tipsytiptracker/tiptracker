@@ -17,13 +17,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ronjc.tiptracker.utils.BudgetGoalTabAdapter;
+import com.example.ronjc.tiptracker.utils.ExpandableListAdapter;
 import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.FontManager;
+import com.example.ronjc.tiptracker.utils.RepeatedListAdapter;
+
+import java.util.HashMap;
+import java.util.List;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -57,6 +63,11 @@ public class RepeatedFragment extends Fragment {
     private Typeface bitter;
     private String[] typeArray, frequencyArray;
     private String periodID,selectedType;
+    private ExpandableListView mExpandableListView;
+    private RepeatedListAdapter mRepeatedListAdapter;
+    private List<String> headerList;
+    private HashMap<String, List<String>> idList;
+    private HashMap<String, List<String>> childList;
 
     private DatabaseReference dbRef;
     private FirebaseUser user;
@@ -99,8 +110,10 @@ public class RepeatedFragment extends Fragment {
         View mView = inflater.inflate(R.layout.fragment_repeated, container, false);
         bitter = FontManager.getTypeface(mView.getContext(), BITTER);
 
-        final TextView addRepeatedHeader = (TextView) mView.findViewById(R.id.add_repeated_tv);
-        final Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
+        TextView addRepeatedHeader = (TextView) mView.findViewById(R.id.add_repeated_tv);
+        Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
+        mExpandableListView = (ExpandableListView) mView.findViewById(R.id.repeated_list);
+        mRepeatedListAdapter = new RepeatedListAdapter(getContext(), headerList, childList, idList);
 
         addRepeatedHeader.setTypeface(bitter);
         addRepeatedButton.setTypeface(bitter);

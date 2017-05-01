@@ -1,8 +1,12 @@
 package com.example.ronjc.tiptracker.utils;
 
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -11,6 +15,19 @@ import android.widget.BaseExpandableListAdapter;
  */
 
 public class RepeatedListAdapter extends BaseExpandableListAdapter {
+
+    private Context context;
+    private List<String> headerList;
+    private HashMap<String, List<String>> childList;
+    private HashMap<String, List<String>> idList;
+
+    public RepeatedListAdapter(Context context, List<String> headerList, HashMap<String, List<String>> childList,
+                                HashMap<String, List<String>> idList) {
+        this.context = context;
+        this.headerList = headerList;
+        this.childList = childList;
+        this.idList = idList;
+    }
 
     @Override
     public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
