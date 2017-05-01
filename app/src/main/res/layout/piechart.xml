@@ -6,11 +6,35 @@
     android:layout_height="match_parent"
     android:id="@+id/pie_chart_outer_layout"
     android:background="@color/metroTileColorPressed">
+
+    <TextView
+        android:id="@+id/pie_chart_header"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@color/colorWhite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/pie_chart_label"
+        android:textSize="20sp"/>
+
     <com.github.mikephil.charting.charts.PieChart
         android:layout_marginTop="30dp"
         android:layout_gravity="center"
         android:id="@+id/actual_pie_chart"
         android:layout_width="300dp"
         android:layout_height="300dp"></com.github.mikephil.charting.charts.PieChart>
+
+    <TextView
+        android:id="@+id/pie_slice_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:text="@string/pie_chart_select_slice"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@color/colorWhite"
+        android:textSize="20sp"/>
+
 
 </LinearLayout>

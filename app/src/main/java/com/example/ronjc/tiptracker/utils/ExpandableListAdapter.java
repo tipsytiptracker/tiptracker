@@ -245,7 +245,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
      * @param category category of expense
      */
     private void writeNewExpense(String name, String amount, String category) {
-        double doubleAmount = Double.parseDouble(amount.substring(1));
+        double doubleAmount = Double.parseDouble(amount.substring(1).replace(",", ""));
         String expenseKey = mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
         final Expense expense = new Expense(expenseKey, name, doubleAmount, System.currentTimeMillis(), category, userID, longitude, latitude);
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
@@ -273,6 +273,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
      * @param doubleAmount amount to add
      */
     private void updateTotal(double doubleAmount) {
+        String itemType = type.equals(DBHelper.INCOMES) ? DBHelper.TOTAL_INCOMES : DBHelper.TOTAL_EXPENSES;
+
         //Decimal Format for displaying double in correct currency format. Avoids possibility
         //of losing last decimal when it is 0. ex. $5.50 will show as $5.5 without it.
         DecimalFormat decimalFormat = new DecimalFormat("0.00");
@@ -287,6 +289,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         BigDecimal bigDecimal2 = new BigDecimal(parsedTotal);
         bigDecimal2 = bigDecimal2.setScale(2, BigDecimal.ROUND_HALF_UP);
         parsedTotal = bigDecimal1.add(bigDecimal2).doubleValue();
+
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(itemType).setValue(parsedTotal);
+
         total = context.getString(R.string.total) + decimalFormat.format(parsedTotal);
         totalTextView.setText(total);
     }
@@ -341,10 +346,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Get the type of item being removed (incomes or expenses)
         String typeToDelete = type.equals(DBHelper.INCOMES) ? DBHelper.INCOMES : DBHelper.EXPENSES;
+        String totalToUpdate = type.equals(DBHelper.INCOMES) ? DBHelper.TOTAL_INCOMES : DBHelper.TOTAL_EXPENSES;
 
         //Remove the income from database. Both in incomes tree and reference to it in periods tree
         mDatabase.child(typeToDelete).child(itemID).setValue(null);
         mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(typeToDelete).child(itemID).setValue(null);
+        mDatabase.child(DBHelper.PERIODS).child(currentPeriodID).child(totalToUpdate).setValue(parsedTotal);
     }
 
     /**
@@ -441,10 +448,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         itemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String name = itemNameEditText.getText().toString();
+                String amount = itemAmountEditText.getText().toString();
+
+                if(name.replace(" ", "").equals("") || amount.equals("") || amount.equals("$0.00")) {
+                    Toast.makeText(context, context.getString(R.string.no_blank), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (type.equals(DBHelper.INCOMES)) {
-                    writeNewIncome(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                    writeNewIncome(name, amount, headerTitle);
                 } else {
-                    writeNewExpense(itemNameEditText.getText().toString(), itemAmountEditText.getText().toString(), headerTitle);
+                    writeNewExpense(name,amount, headerTitle);
                 }
                 pencilDialog.dismiss();
             }
