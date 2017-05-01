@@ -79,18 +79,18 @@
 
         </android.support.design.widget.TextInputLayout>
 
-        <Spinner
-            android:layout_below="@+id/add_repeated_amount_text_input"
-            android:id="@+id/repeated_type_spinner"
-            android:listSelector="#CCCCCC"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginBottom="20dp"></Spinner>
+        <!--<Spinner-->
+            <!--android:layout_below="@+id/add_repeated_amount_text_input"-->
+            <!--android:id="@+id/repeated_type_spinner"-->
+            <!--android:listSelector="#CCCCCC"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginBottom="20dp"></Spinner>-->
 
         <Spinner
-            android:layout_below="@+id/repeated_type_spinner"
+            android:layout_below="@+id/add_repeated_amount_text_input"
             android:id="@+id/repeated_frequency_spinner"
             android:listSelector="#CCCCCC"
             android:layout_width="match_parent"

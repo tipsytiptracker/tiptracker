@@ -28,6 +28,7 @@ import com.example.ronjc.tiptracker.utils.DBHelper;
 import com.example.ronjc.tiptracker.utils.FontManager;
 import com.example.ronjc.tiptracker.utils.RepeatedListAdapter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,12 +50,7 @@ import static com.example.ronjc.tiptracker.utils.FontManager.BITTER;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link RepeatedFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link RepeatedFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * @author Ronald Mangiliman, Gene Hernandez
  */
 public class RepeatedFragment extends Fragment {
 
@@ -72,6 +68,8 @@ public class RepeatedFragment extends Fragment {
     private DatabaseReference dbRef;
     private FirebaseUser user;
     private FirebaseAuth mAuth;
+
+    private DecimalFormat decimalFormat;
 
     private String key="";
 
@@ -97,10 +95,14 @@ public class RepeatedFragment extends Fragment {
         }
         typeArray = new String[]{"Income", "Expense"};
         frequencyArray = new String[] {"Weekly", "Monthly", "Annually"};
-
+        headerList = new ArrayList<String>();
+        headerList.add("Repeated Incomes");
+        headerList.add("Repeated Expenses");
         dbRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        decimalFormat = new DecimalFormat("0.00");
+        retrieveRepeated();
     }
 
     @Override
@@ -111,17 +113,17 @@ public class RepeatedFragment extends Fragment {
         bitter = FontManager.getTypeface(mView.getContext(), BITTER);
 
         TextView addRepeatedHeader = (TextView) mView.findViewById(R.id.add_repeated_tv);
-        Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
+//        Button addRepeatedButton = (Button) mView.findViewById(R.id.add_repeated_button);
         mExpandableListView = (ExpandableListView) mView.findViewById(R.id.repeated_list);
-        mRepeatedListAdapter = new RepeatedListAdapter(getContext(), headerList, childList, idList);
+        mRepeatedListAdapter = new RepeatedListAdapter(getContext(), headerList, childList, idList, typeArray, frequencyArray);
+        mExpandableListView.setAdapter(mRepeatedListAdapter);
 
         addRepeatedHeader.setTypeface(bitter);
-        addRepeatedButton.setTypeface(bitter);
-        addRepeatedButton.setOnClickListener(new RepeatedButtonListener());
 
+//        addRepeatedButton.setTypeface(bitter);
+//        addRepeatedButton.setOnClickListener(new RepeatedButtonListener());
 
         return mView;
-
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -136,155 +138,52 @@ public class RepeatedFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    /**
-     * Listener sub class that shows add repeated dialog on click
-     */
-    private class RepeatedButtonListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            displayAddRepeatedDialog();
-        }
-    }
 
-    /**
-     *
-     */
-    public void displayAddRepeatedDialog() {
 
-        LayoutInflater mLayoutInflator = (LayoutInflater)getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
-        View mView = mLayoutInflator.inflate(R.layout.add_repeated_dialog, null);
-        ((TextView)mView.findViewById(R.id.add_repeated_header)).setTypeface(bitter);
+    private void retrieveRepeated() {
 
-        TextInputLayout itemNameTextInput = (TextInputLayout)mView.findViewById(R.id.add_repeated_name_text_input);
-        TextInputLayout itemAmountTextInput = (TextInputLayout)mView.findViewById(R.id.add_repeated_amount_text_input);
-        final EditText itemNameEditText = (EditText)mView.findViewById(R.id.add_repeated_name);
-        final EditText itemAmountEditText = (EditText)mView.findViewById(R.id.repeated_amount);
-        final Spinner repeatedSpinner = (Spinner)mView.findViewById(R.id.repeated_type_spinner);
-        final Spinner frequencySpinner = (Spinner)mView.findViewById(R.id.repeated_frequency_spinner);
-        final Button repeatedDialogButton = (Button) mView.findViewById(R.id.add_repeated_dialog_button);
+        //HashMap of Categories with LIst String representing incomes
+        childList = new HashMap<String, List<String>>();
 
-        //Create array adapter for spinner
-        ArrayAdapter<String> mArrayAdapter = new ArrayAdapter<String>(getContext(), R.layout.custom_spinner_item, typeArray) {
-            @NonNull
+        //HashMap of Categories and List of Income IDs belinging to that income
+        idList = new HashMap<String, List<String>>();
+
+        childList.put(headerList.get(0), new ArrayList<String>());
+        childList.put(headerList.get(1), new ArrayList<String>());
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.REPEATED_INCOME).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View mView = super.getView(position, convertView, parent);
-                ((TextView)mView).setTypeface(bitter);
-                return mView;
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    Iterable<DataSnapshot> incomes = dataSnapshot.getChildren();
+                    for (DataSnapshot income : incomes) {
+                        String incomeString = income.child("name").getValue().toString() + ": $" + decimalFormat.format(income.child("amount").getValue());
+                        childList.get(headerList.get(0)).add(incomeString);
+                    }
+                }
+
             }
 
             @Override
-            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View mView = super.getDropDownView(position, convertView, parent);
-                ((TextView)mView).setTypeface(bitter);
-                return mView;
-            }
-        };
-        mArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        repeatedSpinner.setAdapter(mArrayAdapter);
-
-        ArrayAdapter<String> mFrequencyAdapter = new ArrayAdapter<String>(getContext(), R.layout.custom_spinner_item, frequencyArray) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View mView = super.getView(position, convertView, parent);
-                ((TextView)mView).setTypeface(bitter);
-                return mView;
-            }
-
-            @Override
-            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View mView  = super.getDropDownView(position, convertView, parent);
-                ((TextView)mView).setTypeface(bitter);
-                return mView;
-            }
-        };
-        mFrequencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        frequencySpinner.setAdapter(mFrequencyAdapter);
-
-        //Set font styling to Bitter
-        itemNameTextInput.setTypeface(bitter);
-        itemAmountTextInput.setTypeface(bitter);
-        itemNameEditText.setTypeface(bitter);
-        itemAmountEditText.setTypeface(bitter);
-        repeatedDialogButton.setTypeface(bitter);
-
-        //set on item selected listener for spinner
-        repeatedSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                selectedType = adapterView.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
-
-
-        //Button to set repeated income and expenses in the Firebase Database
-        repeatedDialogButton.setOnClickListener(new View.OnClickListener() {
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child(DBHelper.REPEATED_EXPENSE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View view) {
-                String itemName = itemNameEditText.getText().toString();
-                String itemAmount = itemAmountEditText.getText().toString()
-                        .replace("$","").replace(".","").replace(",","");
-                BigDecimal amount = new BigDecimal(itemAmount);
-                DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                if(repeatedSpinner.getSelectedItem().toString().equals("Income")) {
-                    if(frequencySpinner.getSelectedItem().equals("Monthly")){
-                        BigDecimal divisor = new BigDecimal(4);
-                        amount = amount.divide(divisor);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    Iterable<DataSnapshot> expenses = dataSnapshot.getChildren();
+                    for (DataSnapshot expense : expenses) {
+                        String expenseString = expense.child("name").getValue().toString() + ": $" + decimalFormat.format(expense.child("amount").getValue());
+                        childList.get(headerList.get(1)).add(expenseString);
                     }
-                    if(frequencySpinner.getSelectedItem().equals("Annually")){
-                        BigDecimal divisor = new BigDecimal(12);
-                        amount = amount.divide(divisor);
-                    }
-
-                    amount = amount.setScale(2,BigDecimal.ROUND_HALF_UP);
-
-
-                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedIncome").push().getKey();
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedIncome")
-                            .child(key).child("name").setValue(itemName);
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedIncome").child(key)
-                            .child("amount").setValue(amount.doubleValue()/100);
-
-                    Snackbar.make(view,"Income was added!",Snackbar.LENGTH_SHORT).show();
-
                 }
-                if(repeatedSpinner.getSelectedItem().toString().equals("Expense")) {
-                    if(frequencySpinner.getSelectedItem().equals("Monthly")){
-                        BigDecimal divisor = new BigDecimal(4);
-                        amount = amount.divide(divisor);
-                    }
-                    if(frequencySpinner.getSelectedItem().equals("Annually")){
-                        BigDecimal divisor = new BigDecimal(12);
-                        amount = amount.divide(divisor);
-                    }
+            }
 
-                    amount = amount.setScale(2,BigDecimal.ROUND_HALF_UP);
-
-
-                    key = dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedExpense").push().getKey();
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedExpense")
-                            .child(key).child("name").setValue(itemName);
-                    dbRef.child(DBHelper.USERS).child(user.getUid()).child("RepeatedExpense")
-                            .child(key).child("amount").setValue(amount.doubleValue()/100);
-
-                    Snackbar.make(view,"Expense was added!",Snackbar.LENGTH_SHORT).show();
-
-                }
-
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
-
-        //Create and show dialog
-        mBuilder.setView(mView);
-        AlertDialog mAlertDialog = mBuilder.create();
-        mAlertDialog.show();
     }
 }
