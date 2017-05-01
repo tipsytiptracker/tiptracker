@@ -72,4 +72,8 @@ public class Income implements Serializable{
     public double getLatitude() {
         return latitude;
     }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

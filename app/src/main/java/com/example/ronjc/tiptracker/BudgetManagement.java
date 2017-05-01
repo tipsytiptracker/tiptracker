@@ -51,6 +51,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -109,6 +110,10 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     private ArrayList<String> incomeKeys;
     private ArrayList<String> expenseKeys;
 
+    //List of repeated items
+    private ArrayList<Income> repeatedIncomeList;
+    private ArrayList<Expense> repeatedExpenseList;
+
     //Total amount that income and expenses add up to
     private double totalIncome;
     private double totalExpense;
@@ -166,6 +171,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         retrieveBudgetGoal();
+        retrieveRepeated();
         retrieveCurrentPeriod();
 
         //Font styling
@@ -322,6 +328,28 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         Period mPeriod = new Period(start, end, income, expense, currentBudget, allIncome, allExpense);
         mDatabaseReference.child(DBHelper.PERIODS).child(key).setValue(mPeriod);
         currentPeriodID = key;
+
+        if(repeatedIncomeList.size() > 0) {
+            String categoryKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(DBHelper.INCOMES).push().getKey();
+            mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(DBHelper.INCOMES).child(categoryKey).setValue("Repeated Incomes");
+            for(Income income1 : repeatedIncomeList) {
+                String incomeKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).push().getKey();
+                mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.INCOMES).child(incomeKey).setValue(true);
+                income1.setId(incomeKey);
+                mDatabaseReference.child(DBHelper.INCOMES).child(incomeKey).setValue(income1);
+            }
+        }
+
+        if (repeatedExpenseList.size() > 0) {
+            String categoryKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(DBHelper.EXPENSES).push().getKey();
+            mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.CATEGORIES).child(DBHelper.EXPENSES).child(categoryKey).setValue("Repeated Expenses");
+            for(Expense expense1 : repeatedExpenseList) {
+                String expenseKey = mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).push().getKey();
+                mDatabaseReference.child(DBHelper.PERIODS).child(currentPeriodID).child(DBHelper.EXPENSES).child(expenseKey).setValue(true);
+                expense1.setId(expenseKey);
+                mDatabaseReference.child(DBHelper.EXPENSES).child(expenseKey).setValue(expense1);
+            }
+        }
     }
 
     /**
@@ -760,6 +788,47 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 currentBudgetGoal = Double.parseDouble(dataSnapshot.getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void retrieveRepeated() {
+        repeatedIncomeList = new ArrayList<Income>();
+        repeatedExpenseList = new ArrayList<Expense>();
+        final DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+        mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.REPEATED_INCOME).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> repeatedIncomes = dataSnapshot.getChildren();
+                for(DataSnapshot income : repeatedIncomes) {
+                    Income incomeToAdd = new Income("", income.child("name").getValue().toString(), Double.parseDouble(decimalFormat.format(income.child("amount").getValue())),  System.currentTimeMillis(),
+                                            "Repeated Incomes", mFirebaseUser.getUid(), 0, 0);
+                    repeatedIncomeList.add(incomeToAdd);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.REPEATED_EXPENSE).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> repeatedExpenses = dataSnapshot.getChildren();
+                for(DataSnapshot income : repeatedExpenses) {
+                    Expense expenseToAdd = new Expense("", income.child("name").getValue().toString(), Double.parseDouble(decimalFormat.format(income.child("amount").getValue())), System.currentTimeMillis(),
+                            "Repeated Expenses", mFirebaseUser.getUid(), 0, 0);
+                    repeatedExpenseList.add(expenseToAdd);
+                }
+
             }
 
             @Override
