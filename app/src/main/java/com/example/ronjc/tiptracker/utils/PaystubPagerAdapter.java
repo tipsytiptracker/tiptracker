@@ -5,12 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.ronjc.tiptracker.PayStubsActivity;
 import com.example.ronjc.tiptracker.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,20 +37,23 @@ import java.util.ArrayList;
 public class PaystubPagerAdapter extends BaseAdapter {
 
     private Context context;
+    ArrayList<String> uri = new ArrayList<>();
+
     DatabaseReference dbRef;
     FirebaseAuth mAuth;
     FirebaseUser user;
-    ArrayList<String> uri = new ArrayList<>();
+
 
     public ArrayList<String> getImages(){
-        dbRef = FirebaseDatabase.getInstance().getReference();
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
-        dbRef.child(DBHelper.USERS).child(user.getUid()).child("paystubs").child("url").addListenerForSingleValueEvent(new ValueEventListener() {
+
+        dbRef.child(DBHelper.USERS).child(user.getUid()).child("paystubs").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(DataSnapshot dataSnapshot) {int x=0;
                 for(DataSnapshot child: dataSnapshot.getChildren()){
-                    uri.add(child.getValue().toString());
+                    if(!child.child("url").getValue().toString().equals("")){
+                        uri.add(child.child("url").getValue().toString());
+
+                    }
                 }
 
             }
@@ -59,8 +65,11 @@ public class PaystubPagerAdapter extends BaseAdapter {
         });
         return uri;
     }
-    public PaystubPagerAdapter(Context context){
+    public PaystubPagerAdapter(Context context, DatabaseReference dbRef1, FirebaseAuth mAuth1, FirebaseUser user1){
         this.context=context;
+        this.dbRef = dbRef1;
+        this.mAuth = mAuth1;
+        this.user = user1;
     }
 
     @Override
@@ -82,18 +91,13 @@ public class PaystubPagerAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         getImages();
-        final ImageView image = new ImageView(context);
-        Handler handler = new Handler();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                for(int x = 0; x<uri.size();x++){
-                    image.setImageURI(Uri.parse(uri.get(x)));
-                }
+        ImageView image = (ImageView)view.findViewById(R.id.gallery_items);
 
-            }
-        };
-        handler.postDelayed(runnable,1000);
+        for(int x = 0; x<uri.size();x++){
+            Picasso.with(context).load("http://www.thekrausemouse.com/wp-content/uploads/2016/03/Sample.jpg").into(image);
+        }
+
+
         return image;
     }
 }
