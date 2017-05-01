@@ -186,9 +186,11 @@ public class SetBudgetGoalFragment extends Fragment {
                                             .setValue(Double.parseDouble(changedGoal.substring(1)));
                                     //Pushes thee budget goal value and current time the button was pressed
                                     //Adds the two values as a key,value pair to Period tree in Firebase
-                                    dbRef.child("periods").child(periodID).child("budgetGoal")
-                                            .child(currentTimestr)
-                                            .setValue(Double.parseDouble(changedGoal.substring(1)));
+                                    if(periodID != null) {
+                                        dbRef.child("periods").child(periodID).child("budgetGoal")
+                                                .child(currentTimestr)
+                                                .setValue(Double.parseDouble(changedGoal.substring(1)));
+                                    }
                                 }
 
                                 @Override
@@ -221,9 +223,11 @@ public class SetBudgetGoalFragment extends Fragment {
                                                 .setValue(i);
                                         //Pushes thee budget goal value and current time the button was pressed
                                         //Adds the two values as a key,value pair to Period tree in Firebase
-                                        dbRef.child("periods").child(periodID).child("budgetGoal")
-                                                .child(currentTimestr)
-                                                .setValue(i);
+                                        if(periodID != null) {
+                                            dbRef.child("periods").child(periodID).child("budgetGoal")
+                                                    .child(currentTimestr)
+                                                    .setValue(i);
+                                        }
                                     }
 
                                     @Override
@@ -256,9 +260,11 @@ public class SetBudgetGoalFragment extends Fragment {
                                                 .setValue(cg);
                                         //Pushes thee budget goal value and current time the button was pressed
                                         //Adds the two values as a key,value pair to Period tree in Firebase
-                                        dbRef.child("periods").child(periodID).child("budgetGoal")
-                                                .child(currentTimestr)
-                                                .setValue(cg);
+                                        if(periodID != null) {
+                                            dbRef.child("periods").child(periodID).child("budgetGoal")
+                                                    .child(currentTimestr)
+                                                    .setValue(cg);
+                                        }
                                     }
 
                                     @Override
