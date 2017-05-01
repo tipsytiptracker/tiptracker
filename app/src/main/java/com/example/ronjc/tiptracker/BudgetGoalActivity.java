@@ -82,6 +82,7 @@ public class BudgetGoalActivity extends AppCompatActivity {
     private BudgetGoalTabAdapter budgetGoalTabAdapter;
 
     private DatabaseReference dbRef;
+    String[] typeArray;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
@@ -90,6 +91,8 @@ public class BudgetGoalActivity extends AppCompatActivity {
     private ArrayList<String> temp;
 
     private Typeface bitter;
+
+    Spinner goal_period;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +104,9 @@ public class BudgetGoalActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         bitter = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
-        FontManager.markAsIconContainer(findViewById(R.id.budget_goal_activity), bitter);
 
+        FontManager.markAsIconContainer(findViewById(R.id.budget_goal_activity), bitter);
+        View mView = getLayoutInflater().inflate(R.layout.fragment_set_budget_goal, null);
 
         temp = new ArrayList<String>();
 

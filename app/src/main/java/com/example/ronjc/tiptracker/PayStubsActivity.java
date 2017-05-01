@@ -88,6 +88,7 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
     FirebaseAuth.AuthStateListener mAuthListener;
     FirebaseUser user;
     String periodID = "";
+    double totalIncome = 0;
     boolean check_category = false;
     private GoogleApiClient mGoogleApiClient;
     long longitude, latitude;
@@ -176,6 +177,7 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
 
                             if(checkAddIncome.isChecked()){ // adds the amount from paystub to their income if box is checked
                                 addIncome(value, descrip, dateAdded);
+                                updateTotal(value);
                             }
 
 //                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
@@ -335,6 +337,7 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
 
                         if(checkAddIncome.isChecked()){ // adds the amount from paystub to their income if box is checked
                             addIncome(value, descrip, dateAdded);
+                            updateTotal(value);
                         }
 
 //                            myRef = FirebaseDatabase.getInstance().getReference().child("users")
@@ -440,6 +443,28 @@ public class PayStubsActivity extends AppCompatActivity implements GoogleApiClie
             }
             @Override
             public void onCancelled(DatabaseError firebaseError) {
+
+            }
+        });
+    }
+
+    private void updateTotal(double amount) {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        final String currentPeriodID = periodID;
+        final double am = amount;
+
+        mDatabase.child("periods").child(currentPeriodID).child("totalIncome").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot != null){
+                    totalIncome = Double.parseDouble(dataSnapshot.getValue().toString());
+                    totalIncome += am;
+                    mDatabase.child("periods").child(currentPeriodID).child("totalIncome").setValue(totalIncome);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
