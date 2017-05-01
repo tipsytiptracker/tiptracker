@@ -159,8 +159,8 @@ public class BudgetFragment extends Fragment {
             currentPeriodID = getArguments().getString(PERIOD_KEY);
             total = getArguments().getDouble(TOTAL_KEY, 0);
             mCamera = (Camera) getArguments().getParcelable(CAMERA_KEY);
-            longitude = getArguments().getLong(LONGITUDE_KEY);
-            latitude = getArguments().getLong(LATITUDE_KEY);
+            longitude = getArguments().getDouble(LONGITUDE_KEY);
+            latitude = getArguments().getDouble(LATITUDE_KEY);
         }
     }
 

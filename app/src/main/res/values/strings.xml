@@ -52,6 +52,7 @@
     <string name="expense_progress">View Expense Progress</string>
     <string name="add_repeated">Add Repeated Income/Expense</string>
     <string name="add_repeated_dialog">Add Repeated Item</string>
+    <string name="repeated_items">Repeated Items</string>
 
     <!-- Graph names -->
     <string name="budget_graph">Budget Goal Progress</string>

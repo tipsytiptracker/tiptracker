@@ -89,8 +89,18 @@
             android:layout_marginLeft="10dp"
             android:layout_marginBottom="20dp"></Spinner>
 
-        <Button
+        <Spinner
             android:layout_below="@+id/repeated_type_spinner"
+            android:id="@+id/repeated_frequency_spinner"
+            android:listSelector="#CCCCCC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="20dp"></Spinner>
+
+        <Button
+            android:layout_below="@+id/repeated_frequency_spinner"
             android:id="@+id/add_repeated_dialog_button"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="20dp"

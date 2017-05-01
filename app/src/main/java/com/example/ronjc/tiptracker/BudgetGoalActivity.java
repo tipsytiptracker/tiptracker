@@ -85,10 +85,10 @@ public class BudgetGoalActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
-    private String periodID, selectedType;
+    private String periodID;
 
     private ArrayList<String> temp;
-    private String[] typeArray;
+
     private Typeface bitter;
 
     @Override
@@ -103,7 +103,6 @@ public class BudgetGoalActivity extends AppCompatActivity {
         bitter = FontManager.getTypeface(getApplicationContext(), FontManager.BITTER);
         FontManager.markAsIconContainer(findViewById(R.id.budget_goal_activity), bitter);
 
-        typeArray = new String[]{"Income", "Expense"};
 
         temp = new ArrayList<String>();
 
@@ -113,8 +112,6 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
         getPeriodId();
     }
-
-
 
     /**
      * Methods to find IDs from the database to retrieve for the graphs' respective values
@@ -149,87 +146,6 @@ public class BudgetGoalActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    /**
-     * Listener sub class that shows add repeated dialog on click
-     */
-    private class RepeatedButtonListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            displayAddRepeatedDialog();
-        }
-    }
-
-    /**
-     *
-     */
-    public void displayAddRepeatedDialog() {
-
-        LayoutInflater mLayoutInflator = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
-        View mView = mLayoutInflator.inflate(R.layout.add_repeated_dialog, null);
-        ((TextView)mView.findViewById(R.id.add_repeated_header)).setTypeface(bitter);
-
-        TextInputLayout itemNameTextInput = (TextInputLayout)mView.findViewById(R.id.add_repeated_name_text_input);
-        TextInputLayout itemAmountTextInput = (TextInputLayout)mView.findViewById(R.id.add_repeated_amount_text_input);
-        EditText itemNameEditText = (EditText)mView.findViewById(R.id.add_repeated_name);
-        EditText itemAmountEditText = (EditText)mView.findViewById(R.id.repeated_amount);
-        Spinner repeatedSpinner = (Spinner)mView.findViewById(R.id.repeated_type_spinner);
-        Button repeatedDialogButton = (Button) mView.findViewById(R.id.add_repeated_dialog_button);
-
-        //Create array adapter for spinner
-        ArrayAdapter<String> mArrayAdapter = new ArrayAdapter<String>(this, R.layout.custom_spinner_item, typeArray) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View mView = super.getView(position, convertView, parent);
-                ((TextView)mView).setTypeface(bitter);
-                return mView;
-            }
-
-            @Override
-            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View mView = super.getDropDownView(position, convertView, parent);
-                ((TextView)mView).setTypeface(bitter);
-                return mView;
-            }
-        };
-        mArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        repeatedSpinner.setAdapter(mArrayAdapter);
-
-        //Set font styling to Bitter
-        itemNameTextInput.setTypeface(bitter);
-        itemAmountTextInput.setTypeface(bitter);
-        itemNameEditText.setTypeface(bitter);
-        itemAmountEditText.setTypeface(bitter);
-        repeatedDialogButton.setTypeface(bitter);
-
-
-        //set on item selected listener for spinner
-        repeatedSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                selectedType = adapterView.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        repeatedDialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Add repeated to user
-            }
-        });
-
-        //Create and show dialog
-        mBuilder.setView(mView);
-        AlertDialog mAlertDialog = mBuilder.create();
-        mAlertDialog.show();
     }
 
     /**
