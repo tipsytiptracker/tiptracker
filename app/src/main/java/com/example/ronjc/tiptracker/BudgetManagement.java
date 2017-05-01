@@ -112,6 +112,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
     //Total amount that income and expenses add up to
     private double totalIncome;
     private double totalExpense;
+    private double currentBudgetGoal;
 
     //ID of the current period
     private String currentPeriodID;
@@ -164,7 +165,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
         calculateStartAndEndDate();
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-
+        retrieveBudgetGoal();
         retrieveCurrentPeriod();
 
         //Font styling
@@ -568,7 +569,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
                         writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
                                 DateManager.trimMilliseconds(endDate.getTime()),
                                 new ArrayList<Income>(), new ArrayList<Expense>(),
-                                500.00, 600.00, 400.00);
+                                currentBudgetGoal, 0.00, 0.00);
                     }
                     readBudget();
 
@@ -577,7 +578,7 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
                     writeNewPeriod(DateManager.trimMilliseconds(startDate.getTime()),
                             DateManager.trimMilliseconds(endDate.getTime()),
                             new ArrayList<Income>(), new ArrayList<Expense>(),
-                            500.00, 600.00, 400.00);
+                            currentBudgetGoal, 0.00, 0.00);
                     readBudget();
                 }
             }
@@ -752,5 +753,19 @@ public class BudgetManagement extends AppCompatActivity implements GoogleApiClie
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    private void retrieveBudgetGoal() {
+        mDatabaseReference.child(DBHelper.USERS).child(mFirebaseUser.getUid()).child(DBHelper.CURRENT_BUDGET_GOAL).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                currentBudgetGoal = Double.parseDouble(dataSnapshot.getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }
